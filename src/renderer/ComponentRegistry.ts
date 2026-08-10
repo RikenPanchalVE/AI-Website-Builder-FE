@@ -7,6 +7,22 @@ import {
   NewArrivals,
   FlashSale,
   FeaturedProducts,
+  ShopHero,
+  ProductFilters,
+  ProductGrid,
+  ProductDetails,
+  ProductReviews,
+  RelatedProducts,
+  RecentlyViewed,
+  CategoryGrid,
+  OrderTracking,
+  WishlistGrid,
+  CartItems,
+  CartSummary,
+  CheckoutForm,
+} from "@/component-library/Ecommerce";
+
+import {
   WhyChooseUs,
   Testimonials,
   BrandShowcase,
@@ -15,16 +31,8 @@ import {
   FAQPreview,
   ContactPreview,
   StoreLocator,
-  ShopHero,
-  ProductFilters,
-  ProductGrid,
-  Breadcrumbs,
-  ProductDetails,
-  ProductReviews,
-  RelatedProducts,
-  RecentlyViewed,
   PageHero,
-  CategoryGrid,
+  Breadcrumbs,
   AboutStory,
   AboutValues,
   TeamSection,
@@ -34,13 +42,60 @@ import {
   MapEmbed,
   BlogGrid,
   FAQAccordion,
-  OrderTracking,
-  WishlistGrid,
-  CartItems,
-  CartSummary,
-  CheckoutForm,
   LegalContent,
-} from "@/component-library/Ecommerce";
+  BlogPreview,
+} from "@/component-library/Common";
+
+import {
+  MenuHighlights,
+  DailySpecials,
+  ChefTable,
+  ReservationForm,
+} from "@/component-library/Restaurant";
+
+import {
+  Services,
+  AppointmentBooking,
+  DoctorProfiles,
+  HealthResources,
+} from "@/component-library/Healthcare";
+
+import {
+  CourseGrid,
+  LearningPaths,
+  StudentSuccess,
+  InstructorProfiles,
+} from "@/component-library/Education";
+
+import {
+  PropertyGrid,
+  PropertySearch,
+  NeighborhoodGuide,
+  AgentProfiles,
+} from "@/component-library/RealEstate";
+
+import {
+  DestinationGrid,
+  TravelDeals,
+  PackageGrid,
+  TravelGuides,
+} from "@/component-library/Travel";
+
+import {
+  PetCareTips,
+  PetGroomingBooking,
+} from "@/component-library/PetStore";
+
+import {
+  VehicleCard,
+  VehicleGrid,
+  ServicePackages as AutomotiveServicePackages,
+} from "@/component-library/Automotive";
+
+import {
+  ServicePackages as HomeServicePackages,
+  BeforeAfterGallery,
+} from "@/component-library/HomeServices";
 
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   Navbar1: lazy(() => import("@/component-library/Navbar/Navbar1")),
@@ -76,6 +131,19 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   NewArrivals,
   FlashSale,
   FeaturedProducts,
+  ShopHero,
+  ProductFilters,
+  ProductGrid,
+  ProductDetails,
+  ProductReviews,
+  RelatedProducts,
+  RecentlyViewed,
+  CategoryGrid,
+  OrderTracking,
+  WishlistGrid,
+  CartItems,
+  CartSummary,
+  CheckoutForm,
   WhyChooseUs,
   Testimonials,
   BrandShowcase,
@@ -84,16 +152,8 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   FAQPreview,
   ContactPreview,
   StoreLocator,
-  ShopHero,
-  ProductFilters,
-  ProductGrid,
-  Breadcrumbs,
-  ProductDetails,
-  ProductReviews,
-  RelatedProducts,
-  RecentlyViewed,
   PageHero,
-  CategoryGrid,
+  Breadcrumbs,
   AboutStory,
   AboutValues,
   TeamSection,
@@ -102,13 +162,36 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   ContactForm,
   MapEmbed,
   BlogGrid,
+  BlogPreview,
   FAQAccordion,
-  OrderTracking,
-  WishlistGrid,
-  CartItems,
-  CartSummary,
-  CheckoutForm,
   LegalContent,
+  MenuHighlights,
+  DailySpecials,
+  ChefTable,
+  ReservationForm,
+  Services,
+  AppointmentBooking,
+  DoctorProfiles,
+  HealthResources,
+  CourseGrid,
+  LearningPaths,
+  StudentSuccess,
+  InstructorProfiles,
+  PropertyGrid,
+  PropertySearch,
+  NeighborhoodGuide,
+  AgentProfiles,
+  DestinationGrid,
+  TravelDeals,
+  PackageGrid,
+  TravelGuides,
+  PetCareTips,
+  PetGroomingBooking,
+  VehicleCard,
+  VehicleGrid,
+  AutomotiveServicePackages,
+  HomeServicePackages,
+  BeforeAfterGallery,
 };
 
 export default ComponentRegistry;

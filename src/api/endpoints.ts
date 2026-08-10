@@ -1,44 +1,44 @@
 export const ENDPOINTS = {
   PROJECTS: {
     CREATE: "/projects",
-    GET: (id) => `/projects/${id}`,
-    UPDATE_STATUS: (id) => `/projects/${id}/status`,
+    GET: (id: string) => `/projects/${id}`,
+    UPDATE_STATUS: (id: string) => `/projects/${id}/status`,
   },
   QUESTIONNAIRE: {
-    SAVE: (projectId) => `/projects/${projectId}/questionnaire`,
-    GET: (projectId) => `/projects/${projectId}/questionnaire`,
+    SAVE: (projectId: string) => `/projects/${projectId}/questionnaire`,
+    GET: (projectId: string) => `/projects/${projectId}/questionnaire`,
   },
   ASSETS: {
-    UPLOAD: (projectId) => `/projects/${projectId}/assets/upload`,
-    LIST: (projectId) => `/projects/${projectId}/assets`,
-    DELETE: (projectId, assetId) =>
+    UPLOAD: (projectId: string) => `/projects/${projectId}/assets/upload`,
+    LIST: (projectId: string) => `/projects/${projectId}/assets`,
+    DELETE: (projectId: string, assetId: string) =>
       `/projects/${projectId}/assets/${assetId}`,
   },
   AI: {
-    GENERATE: (projectId) => `/projects/${projectId}/generate`,
+    GENERATE: (projectId: string) => `/projects/${projectId}/generate`,
   },
   WEBSITE_SPEC: {
-    GET: (projectId) => `/projects/${projectId}/website-spec`,
-    GET_VERSION: (projectId, version) =>
+    GET: (projectId: string) => `/projects/${projectId}/website-spec`,
+    GET_VERSION: (projectId: string, version: number) =>
       `/projects/${projectId}/website-spec/${version}`,
   },
   REVISIONS: {
-    CREATE: (projectId) => `/projects/${projectId}/revisions`,
-    LIST: (projectId) => `/projects/${projectId}/revisions`,
-    UPDATE: (projectId, id) => `/projects/${projectId}/revisions/${id}`,
+    CREATE: (projectId: string) => `/projects/${projectId}/revisions`,
+    LIST: (projectId: string) => `/projects/${projectId}/revisions`,
+    UPDATE: (projectId: string, id: string) => `/projects/${projectId}/revisions/${id}`,
   },
   APPROVAL: {
-    APPROVE: (projectId) => `/projects/${projectId}/approve`,
+    APPROVE: (projectId: string) => `/projects/${projectId}/approve`,
   },
   PRICING: {
-    CALCULATE: (projectId) => `/projects/${projectId}/pricing/calculate`,
-    GET: (projectId) => `/projects/${projectId}/pricing`,
+    CALCULATE: (projectId: string) => `/projects/${projectId}/pricing/calculate`,
+    GET: (projectId: string) => `/projects/${projectId}/pricing`,
   },
   PAYMENT: {
-    PROCESS: (projectId) => `/projects/${projectId}/payment/process`,
-    GET: (projectId) => `/projects/${projectId}/payment`,
+    PROCESS: (projectId: string) => `/projects/${projectId}/payment/process`,
+    GET: (projectId: string) => `/projects/${projectId}/payment`,
   },
   PUBLISH: {
-    PUBLISH: (projectId) => `/projects/${projectId}/publish`,
+    PUBLISH: (projectId: string) => `/projects/${projectId}/publish`,
   },
 };

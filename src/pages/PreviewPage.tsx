@@ -98,7 +98,7 @@ const PreviewPage = () => {
       </header>
 
       <main>
-        <WebsiteRenderer data={spec} currentPage={activePage} />
+        <WebsiteRenderer data={spec} currentPage={activePage} onNavigatePage={setActivePage} />
       </main>
     </div>
   );

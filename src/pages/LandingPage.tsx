@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCurrentProject } from "@/store/slices/projectSlice";
 import api from "@/api/axios";
+import { BUSINESS_TYPE_OPTIONS, normalizeBusinessType } from "@/config/businessTypes";
 
 interface EnquiryForm {
   fullName: string;
@@ -49,7 +50,11 @@ const LandingPage = () => {
 
     setSubmitting(true);
     try {
-      const res = await api.post("/projects", form);
+      const normalizedBusinessType = normalizeBusinessType(form.businessType);
+      const res = await api.post("/projects", {
+        ...form,
+        businessType: normalizedBusinessType,
+      });
       dispatch(setCurrentProject(res.data));
       navigate("/start");
     } catch (err: any) {
@@ -58,23 +63,6 @@ const LandingPage = () => {
       setSubmitting(false);
     }
   };
-
-  const businessTypes = [
-    "Technology / Software",
-    "E-Commerce / Retail",
-    "Healthcare / Medical",
-    "Finance / Banking",
-    "Education / E-Learning",
-    "Restaurant / Food",
-    "Real Estate",
-    "Marketing / Agency",
-    "Consulting / Professional",
-    "Creative / Design",
-    "Travel / Hospitality",
-    "Fitness / Wellness",
-    "Non-Profit",
-    "Other",
-  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -181,9 +169,9 @@ const LandingPage = () => {
                   } ${!form.businessType ? "text-muted-foreground" : ""}`}
               >
                 <option value="">Select your business type</option>
-                {businessTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
+                {BUSINESS_TYPE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
                   </option>
                 ))}
               </select>

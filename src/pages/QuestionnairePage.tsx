@@ -587,13 +587,14 @@ const QuestionnairePage = () => {
       delete raw.bannerImages;
 
       const answers: Record<string, any> = { ...raw };
+      // Keep categories as display names so they match product.category in the
+      // AI provider (e.g. "Fiction", "Non-Fiction"). Slugify only the keys that
+      // are used as URL/navigation slugs.
       const slugArrays = [
         "pages",
-        "categories",
         "features",
         "paymentMethods",
         "shippingOptions",
-        "homepageSections",
       ];
       slugArrays.forEach((key) => {
         if (Array.isArray(answers[key])) {

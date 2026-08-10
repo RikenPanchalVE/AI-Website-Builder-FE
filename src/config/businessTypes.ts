@@ -24,6 +24,7 @@ export interface BusinessTypeConfig {
   colorSchemes: Array<{ primary: string; secondary: string; label: string }>;
   designStyle: {
     themeStyle: string;
+    font?: string;
     fontStyle: string;
     buttonStyle: string;
     borderRadius: string;
@@ -934,4 +935,47 @@ export const BUSINESS_TYPES: Record<string, BusinessTypeConfig> = {
       descriptionTemplate: 'Shop the best products at {brandName}. {category} with free shipping over $50. Easy returns & secure checkout.',
     },
   },
+};
+
+export const BUSINESS_TYPE_OPTIONS = Object.entries(BUSINESS_TYPES).map(([value, config]) => ({
+  value,
+  label: config.label,
+}));
+
+export const normalizeBusinessType = (value?: string): string => {
+  if (!value) return "Other";
+
+  const normalized = value.trim().toLowerCase();
+  const directMatch = Object.keys(BUSINESS_TYPES).find((key) => key.toLowerCase() === normalized);
+  if (directMatch) return directMatch;
+
+  const synonyms: Record<string, string> = {
+    "technology / software": "Electronics",
+    "software": "Electronics",
+    "e-commerce / retail": "Other",
+    "retail": "Other",
+    "healthcare / medical": "Healthcare",
+    "finance / banking": "Other",
+    "education / e-learning": "Education",
+    "restaurant / food": "Restaurant",
+    "marketing / agency": "Other",
+    "consulting / professional": "Other",
+    "creative / design": "Other",
+    "travel / hospitality": "Travel",
+    "fitness / wellness": "Sports",
+    "non-profit": "Other",
+    "fashion / apparel": "Fashion",
+    "grocery / supermarket": "Grocery",
+    "furniture / home": "Furniture",
+    "beauty / personal care": "Beauty",
+    "sports & fitness": "Sports",
+    "jewelry & watches": "Jewelry",
+    "books & publishing": "Books",
+    "real estate": "Real Estate",
+    "pet store & supplies": "Pet Store",
+    "automotive & vehicles": "Automotive",
+    "home services": "Home Services",
+  };
+
+  return synonyms[normalized] || "Other";
 };

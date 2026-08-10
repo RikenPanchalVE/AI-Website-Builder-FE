@@ -3,16 +3,16 @@ import api from "@/api/axios";
 
 export const useApi = () => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const execute = useCallback(async (apiCall) => {
+  const execute = useCallback(async <T,>(apiCall: () => Promise<T>): Promise<T> => {
     setLoading(true);
     setError(null);
     try {
       const result = await apiCall();
       return result;
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Something went wrong");
       throw err;
     } finally {
       setLoading(false);

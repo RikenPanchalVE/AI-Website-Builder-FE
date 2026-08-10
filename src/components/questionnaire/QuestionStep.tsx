@@ -1,5 +1,30 @@
 import { useState } from "react";
 
+interface QuestionOption {
+  value: string;
+  label: string;
+  desc?: string;
+}
+
+interface Question {
+  type: string;
+  placeholder?: string;
+  options?: QuestionOption[];
+  default?: string;
+}
+
+interface QuestionStepProps {
+  question: Question;
+  value: any;
+  onTextSubmit: (value: string) => void;
+  onMultiSelect: (selected: string[]) => void;
+  onSingleSelect: (value: string) => void;
+  onColorSelect: (color: string) => void;
+  onBoolean: (value: boolean) => void;
+  inputValue: string;
+  setInputValue: (value: string) => void;
+}
+
 const QuestionStep = ({
   question,
   value,
@@ -10,10 +35,10 @@ const QuestionStep = ({
   onBoolean,
   inputValue,
   setInputValue,
-}) => {
-  const [selected, setSelected] = useState(value || (question.type === "multiSelect" ? [] : null));
+}: QuestionStepProps) => {
+  const [selected, setSelected] = useState<string[]>(value || (question.type === "multiSelect" ? [] : []));
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       onTextSubmit(inputValue);
@@ -81,7 +106,7 @@ const QuestionStep = ({
   }
 
   if (question.type === "multiSelect") {
-    const toggle = (val) => {
+    const toggle = (val: string) => {
       setSelected((prev) =>
         prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
       );
@@ -90,15 +115,14 @@ const QuestionStep = ({
     return (
       <div className="space-y-3">
         <div className="flex flex-wrap gap-2">
-          {question.options.map((opt) => (
+          {(question.options || []).map((opt) => (
             <button
               key={opt.value}
               onClick={() => toggle(opt.value)}
-              className={`px-3 py-1.5 rounded-full text-sm border transition-colors cursor-pointer ${
-                selected.includes(opt.value)
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}
+              className={`px-3 py-1.5 rounded-full text-sm border transition-colors cursor-pointer ${selected.includes(opt.value)
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background text-foreground border-border hover:border-primary/50"
+                }`}
             >
               {opt.label}
             </button>
@@ -110,7 +134,7 @@ const QuestionStep = ({
               onClick={() => onMultiSelect(selected)}
               className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 cursor-pointer"
             >
-              Continue ({selected} selected)
+              Continue ({selected.length} selected)
             </button>
           </div>
         )}
@@ -121,15 +145,14 @@ const QuestionStep = ({
   if (question.type === "singleSelect") {
     return (
       <div className="space-y-2">
-        {question.options.map((opt) => (
+        {(question.options || []).map((opt) => (
           <button
             key={opt.value}
             onClick={() => onSingleSelect(opt.value)}
-            className={`w-full text-left px-4 py-3 rounded-lg border transition-colors cursor-pointer ${
-              selected === opt.value
+            className={`w-full text-left px-4 py-3 rounded-lg border transition-colors cursor-pointer ${selected[0] === opt.value
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50 bg-background"
-            }`}
+              }`}
           >
             <div className="font-medium text-sm text-foreground">{opt.label}</div>
             {opt.desc && (
