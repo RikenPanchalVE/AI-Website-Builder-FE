@@ -10,6 +10,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: "./",
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        "generated-site": path.resolve(__dirname, "src/generated-site.tsx"),
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {
