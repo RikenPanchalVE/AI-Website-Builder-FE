@@ -100,6 +100,28 @@ const PreviewPage = () => {
       <main>
         <WebsiteRenderer data={spec} currentPage={activePage} onNavigatePage={setActivePage} />
       </main>
+
+      <div className="sticky bottom-0 z-50 bg-background/90 backdrop-blur-sm border-t border-border">
+        <div className="container mx-auto px-6 py-3 flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            Review your website below. Request changes or approve when ready.
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleRevision}
+              className="px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-muted cursor-pointer"
+            >
+              Request Revisions
+            </button>
+            <button
+              onClick={handleApprove}
+              className="px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 cursor-pointer"
+            >
+              Approve Website
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

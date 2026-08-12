@@ -1,6 +1,12 @@
+/*
+ * TODO: Uncomment all eCommerce components when eCommerce is implemented.
+ * This entire file is commented out because eCommerce functionality
+ * is being deferred to a future phase.
+ */
+
 import { useState, useEffect } from "react";
 
-// ── HeroEcommerce ──────────────────────────────────────────────
+// // ── HeroEcommerce ──────────────────────────────────────────────
 export const HeroEcommerce = (props: any) => (
   <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/80 to-secondary">
     {props.backgroundImage && (

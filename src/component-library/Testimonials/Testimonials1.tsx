@@ -1,34 +1,56 @@
-interface Testimonial {
-  name: string;
-  role: string;
-  content: string;
-  avatar?: string | null;
-}
+interface Testimonial { name: string; role: string; content: string; rating?: number; avatar?: string | null; }
+interface TestimonialsProps { title: string; subtitle?: string; testimonials: Testimonial[]; }
 
-interface TestimonialsProps {
-  title: string;
-  testimonials: Testimonial[];
-}
-
+/* Testimonials1 — Large quote wall with varied sizes */
 const Testimonials1 = ({ title, testimonials }: TestimonialsProps) => (
-  <section className="py-16 bg-background" id="testimonials">
-    <div className="container mx-auto px-6">
-      <h2 className="text-3xl font-bold text-foreground text-center mb-12">{title}</h2>
-      <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        {testimonials.map((t, i) => (
-          <div key={i} className="p-6 rounded-xl border border-border bg-card">
-            <p className="text-muted-foreground mb-4 italic">"{t.content}"</p>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                {t.name.charAt(0)}
+  <section className="bg-background overflow-hidden">
+    <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
+      <div className="mb-16">
+        <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-muted-foreground mb-6">Testimonials</p>
+        <h2 className="text-4xl lg:text-6xl font-bold tracking-tight leading-[0.95]" style={{ letterSpacing: "-0.04em" }}>
+          {title || "Client Reviews"}
+        </h2>
+      </div>
+
+      <div className="grid gap-1 lg:grid-cols-12">
+        {testimonials.map((t, i) => {
+          const isLarge = i === 0;
+          return (
+            <div
+              key={i}
+              className={`group border border-border p-8 lg:p-10 transition-all duration-500 hover:bg-muted/30 ${
+                isLarge ? "lg:col-span-8" : i === 1 ? "lg:col-span-4" : "lg:col-span-4"
+              }`}
+              style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}
+            >
+              <p className={`font-bold tracking-tight leading-tight mb-6 ${isLarge ? "text-2xl lg:text-3xl" : "text-lg"}`} style={{ letterSpacing: "-0.02em" }}>
+                &ldquo;{t.content}&rdquo;
+              </p>
+              <div className="flex items-center gap-4">
+                {t.avatar ? (
+                  <img src={t.avatar} alt={t.name} className="h-10 w-10 object-cover" />
+                ) : (
+                  <div className="h-10 w-10 bg-foreground text-background flex items-center justify-center text-xs font-bold">
+                    {t.name?.charAt(0)}
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-bold tracking-tight">{t.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{t.role}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.role}</p>
-              </div>
+              {t.rating && (
+                <div className="flex gap-0.5 mt-4">
+                  {Array.from({ length: t.rating }).map((_, j) => (
+                    <svg key={j} className="h-3 w-3 text-foreground" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   </section>

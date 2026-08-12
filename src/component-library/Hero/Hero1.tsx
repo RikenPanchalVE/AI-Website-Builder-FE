@@ -7,25 +7,51 @@ interface HeroProps {
   logo?: string | null;
 }
 
+/* Hero1 — Full-bleed dark cinematic hero */
 const Hero1 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: HeroProps) => (
-  <section
-    className="relative min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-secondary/10"
-    style={backgroundImage ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-  >
-    <div className="absolute inset-0 bg-background/80" />
-    <div className="relative container mx-auto px-6 py-20 text-center">
-      <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 max-w-4xl mx-auto">
+  <section className="relative min-h-screen flex items-end bg-foreground overflow-hidden">
+    {backgroundImage && (
+      <div className="absolute inset-0">
+        <img src={backgroundImage} alt="" className="h-full w-full object-cover opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/80 to-transparent" />
+      </div>
+    )}
+    {!backgroundImage && (
+      <div className="absolute inset-0 bg-gradient-to-br from-foreground via-foreground/95 to-primary/20" />
+    )}
+
+    <div className="relative z-10 w-full mx-auto max-w-7xl px-6 lg:px-12 pb-16 lg:pb-24">
+      <div className="mb-8">
+        <span className="inline-block text-[11px] font-medium tracking-[0.2em] uppercase text-background/40 mb-6">
+          {subheadline ? subheadline.substring(0, 50) : "Welcome"}
+        </span>
+      </div>
+
+      <h1
+        className="text-5xl sm:text-7xl lg:text-[6rem] xl:text-[7.5rem] font-bold tracking-tight leading-[0.88] text-background mb-8 max-w-5xl"
+        style={{ letterSpacing: "-0.05em", animation: "pReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both" }}
+      >
         {headline}
       </h1>
-      <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-        {subheadline}
-      </p>
-      <a
-        href={ctaLink}
-        className="inline-flex items-center justify-center px-8 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity"
-      >
-        {ctaText}
-      </a>
+
+      <div className="flex flex-col sm:flex-row items-start gap-6 mt-12" style={{ animation: "pReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both" }}>
+        <a
+          href={ctaLink}
+          className="group inline-flex items-center gap-3 bg-background text-foreground px-8 py-4 text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-500 hover:tracking-[0.2em]"
+        >
+          {ctaText}
+          <svg className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+
+      <div className="mt-20 border-t border-background/10 pt-6 flex items-center gap-8">
+        <div className="flex items-center gap-3">
+          <div className="h-2 w-2 rounded-full bg-background/40" />
+          <span className="text-[11px] font-medium tracking-[0.15em] uppercase text-background/40">Scroll</span>
+        </div>
+      </div>
     </div>
   </section>
 );
