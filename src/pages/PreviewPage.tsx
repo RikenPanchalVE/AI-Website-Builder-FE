@@ -3,6 +3,36 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import api from "@/api/axios";
 import WebsiteRenderer from "@/renderer/WebsiteRenderer";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const DEVICES = [
+  { id: "desktop", label: "Desktop", width: "100%" },
+  { id: "tablet", label: "Tablet", width: "768px" },
+  { id: "mobile", label: "Mobile", width: "390px" },
+] as const;
+
+const DeviceIcon = ({ id }: { id: string }) => {
+  if (id === "mobile") {
+    return (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+        <rect x="7" y="2" width="10" height="20" rx="2" /><path strokeLinecap="round" d="M11 18h2" />
+      </svg>
+    );
+  }
+  if (id === "tablet") {
+    return (
+      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+        <rect x="4" y="2" width="16" height="20" rx="2" /><path strokeLinecap="round" d="M11 18h2" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <rect x="3" y="4" width="18" height="12" rx="1.5" /><path strokeLinecap="round" d="M8 20h8M12 16v4" />
+    </svg>
+  );
+};
 
 const PreviewPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -11,6 +41,7 @@ const PreviewPage = () => {
   const [spec, setSpec] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState("home");
+  const [device, setDevice] = useState<(typeof DEVICES)[number]["id"]>("desktop");
 
   useEffect(() => {
     loadSpec();
@@ -42,86 +73,86 @@ const PreviewPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
 
   if (!spec) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <p className="text-muted-foreground">No website spec found</p>
       </div>
     );
   }
 
+  const activeDevice = DEVICES.find((d) => d.id === device) || DEVICES[0];
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-sm border-b border-border">
-        <div className="container mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="flex min-h-screen flex-col bg-muted/30">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
+        <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-6 py-3">
+          <div className="flex items-center gap-3">
             <h1 className="text-sm font-semibold text-foreground">Preview</h1>
             <span className="text-xs text-muted-foreground">v{spec.version}</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 overflow-x-auto">
             {spec.pages?.map((p: any) => (
               <button
                 key={p.slug}
                 onClick={() => setActivePage(p.slug)}
-                className={`px-3 py-1 rounded-full text-xs cursor-pointer ${activePage === p.slug
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted"
-                  }`}
+                className={cn(
+                  "shrink-0 cursor-pointer rounded-full px-3 py-1 text-xs transition-colors",
+                  activePage === p.slug
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
               >
                 {p.title}
               </button>
             ))}
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRevision}
-              className="px-4 py-1.5 rounded-lg border border-border text-xs text-foreground hover:bg-muted cursor-pointer"
-            >
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
+              {DEVICES.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setDevice(d.id)}
+                  title={d.label}
+                  className={cn(
+                    "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
+                    device === d.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
+                  )}
+                >
+                  <DeviceIcon id={d.id} />
+                </button>
+              ))}
+            </div>
+            <Button type="button" variant="outline" size="sm" onClick={handleRevision}>
               Request Revision
-            </button>
-            <button
-              onClick={handleApprove}
-              className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:opacity-90 cursor-pointer"
-            >
+            </Button>
+            <Button type="button" size="sm" onClick={handleApprove}>
               Approve
-            </button>
+            </Button>
           </div>
         </div>
       </header>
 
-      <main>
-        <WebsiteRenderer data={spec} currentPage={activePage} onNavigatePage={setActivePage} />
-      </main>
-
-      <div className="sticky bottom-0 z-50 bg-background/90 backdrop-blur-sm border-t border-border">
-        <div className="container mx-auto px-6 py-3 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Review your website below. Request changes or approve when ready.
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRevision}
-              className="px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-muted cursor-pointer"
-            >
-              Request Revisions
-            </button>
-            <button
-              onClick={handleApprove}
-              className="px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 cursor-pointer"
-            >
-              Approve Website
-            </button>
-          </div>
+      <main className="flex-1 py-6">
+        <div
+          className={cn(
+            "mx-auto overflow-hidden bg-background shadow-sm transition-all duration-300",
+            device !== "desktop" && "rounded-xl border border-border"
+          )}
+          style={{ maxWidth: activeDevice.width }}
+        >
+          <WebsiteRenderer data={spec} currentPage={activePage} onNavigatePage={setActivePage} />
         </div>
-      </div>
+      </main>
     </div>
   );
 };

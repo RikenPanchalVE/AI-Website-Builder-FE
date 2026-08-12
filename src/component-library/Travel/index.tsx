@@ -8,7 +8,7 @@ export const DestinationGrid = (props: any) => (
       {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {(props.destinations || []).map((dest: any, i: number) => (
-          <a key={i} href={dest.link || "#"} className="group overflow-hidden rounded-2xl bg-card shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+          <div key={i} className="group overflow-hidden rounded-2xl bg-card shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
             <div className="relative aspect-[4/3] overflow-hidden bg-muted">
               {dest.image ? <img src={dest.image} alt={dest.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" /> : (
                 <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10"><span className="text-5xl text-primary/20">✈️</span></div>
@@ -18,7 +18,7 @@ export const DestinationGrid = (props: any) => (
                 {dest.price && <p className="mt-1 text-sm text-white/80">From {dest.price}</p>}
               </div>
             </div>
-          </a>
+          </div>
         ))}
       </div>
     </div>

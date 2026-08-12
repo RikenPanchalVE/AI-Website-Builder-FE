@@ -41,4 +41,7 @@ export const ENDPOINTS = {
   PUBLISH: {
     PUBLISH: (projectId: string) => `/projects/${projectId}/publish`,
   },
+  DOWNLOAD: {
+    SOURCE: (projectId: string) => `/projects/${projectId}/download`,
+  },
 };

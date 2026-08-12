@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { setCurrentProject } from "@/store/slices/projectSlice";
 import { setSpec } from "@/store/slices/websiteSpecSlice";
 import api from "@/api/axios";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const STEPS = [
   "Analyzing your answers...",
@@ -49,48 +51,53 @@ const GeneratePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border">
         <div className="container mx-auto px-6 py-4">
-          <h1 className="text-lg font-semibold text-foreground">
-            Generating Website
-          </h1>
+          <h1 className="text-lg font-semibold text-foreground">Generating Website</h1>
         </div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center px-6">
-        <div className="max-w-md w-full text-center space-y-8">
+      <main className="flex flex-1 items-center justify-center px-6">
+        <div className="w-full max-w-md space-y-8 text-center">
           {!error ? (
             <>
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-primary border-t-transparent" />
 
-              <div className="space-y-2">
-                <p className="text-lg font-medium text-foreground">
-                  {STEPS[currentStep]}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Step {currentStep + 1} of {STEPS.length}
-                </p>
+              <div className="space-y-4">
+                <p className="text-lg font-medium text-foreground">{STEPS[currentStep]}</p>
+                <div className="space-y-1.5 text-left">
+                  {STEPS.map((s, i) => (
+                    <div key={s} className="flex items-center gap-2.5 text-sm">
+                      <span className={cn(
+                        "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-medium transition-colors",
+                        i < currentStep ? "bg-primary/15 text-primary"
+                        : i === currentStep ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                      )}>
+                        {i < currentStep ? "✓" : i + 1}
+                      </span>
+                      <span className={cn(
+                        i <= currentStep ? "text-foreground" : "text-muted-foreground"
+                      )}>
+                        {s}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="w-full bg-muted rounded-full h-2">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="bg-primary h-2 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${((currentStep + 1) / STEPS.length) * 100}%`,
-                  }}
+                  className="h-2 rounded-full bg-primary transition-all duration-500"
+                  style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
                 />
               </div>
             </>
           ) : (
             <div className="space-y-4">
-              <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
-                <svg
-                  className="w-8 h-8 text-destructive"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+                <svg className="h-8 w-8 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -100,16 +107,16 @@ const GeneratePage = () => {
                 </svg>
               </div>
               <p className="text-foreground">{error}</p>
-              <button
+              <Button
+                type="button"
                 onClick={() => {
                   setError(null);
                   setCurrentStep(0);
                   generate();
                 }}
-                className="px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 cursor-pointer"
               >
                 Try Again
-              </button>
+              </Button>
             </div>
           )}
         </div>

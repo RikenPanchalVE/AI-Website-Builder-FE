@@ -45,13 +45,6 @@ const Hero1 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: Her
           </svg>
         </a>
       </div>
-
-      <div className="mt-20 border-t border-background/10 pt-6 flex items-center gap-8">
-        <div className="flex items-center gap-3">
-          <div className="h-2 w-2 rounded-full bg-background/40" />
-          <span className="text-[11px] font-medium tracking-[0.15em] uppercase text-background/40">Scroll</span>
-        </div>
-      </div>
     </div>
   </section>
 );

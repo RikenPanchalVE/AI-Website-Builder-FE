@@ -404,6 +404,104 @@ export const AboutValues = (props: any) => (
   </section>
 );
 
+export const Stats = (props: any) => (
+  <section className="bg-background overflow-hidden">
+    <div className="mx-auto max-w-7xl px-6 lg:px-12 py-16 lg:py-24">
+      {(props.title || props.subtitle) && (
+        <div className="mb-12 text-center">
+          {props.title && (
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>
+              {props.title}
+            </h2>
+          )}
+          {props.subtitle && <p className="mt-3 text-muted-foreground">{props.subtitle}</p>}
+        </div>
+      )}
+      <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4 border border-border">
+        {(props.stats || []).map((s: any, i: number) => (
+          <div key={i} className="p-8 text-center border-b sm:border-b-0 sm:border-r border-border last:border-r-0" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+            <div className="text-4xl font-extrabold tracking-tight text-primary sm:text-5xl" style={{ letterSpacing: "-0.03em" }}>{s.value}</div>
+            <p className="mt-2 text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const Timeline = (props: any) => (
+  <section className="bg-muted/30 overflow-hidden">
+    <div className="mx-auto max-w-4xl px-6 lg:px-12 py-16 lg:py-24">
+      {(props.title || props.subtitle) && (
+        <div className="mb-14 text-center">
+          {props.title && (
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>
+              {props.title}
+            </h2>
+          )}
+          {props.subtitle && <p className="mt-3 text-muted-foreground">{props.subtitle}</p>}
+        </div>
+      )}
+      <div className="border-l border-border pl-8">
+        {(props.milestones || []).map((m: any, i: number) => (
+          <div key={i} className="relative pb-10 last:pb-0" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+            <span className="absolute -left-[calc(2rem+5px)] top-1.5 h-2.5 w-2.5 rounded-full bg-primary" />
+            <p className="text-xs font-bold uppercase tracking-[0.15em] text-primary">{m.year}</p>
+            <h3 className="mt-1 font-bold text-foreground">{m.title}</h3>
+            {m.description && <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{m.description}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const BusinessHours = (props: any) => (
+  <section className="bg-background overflow-hidden">
+    <div className="mx-auto max-w-2xl px-6 lg:px-12 py-12">
+      {props.title && (
+        <h2 className="mb-6 text-center text-2xl font-bold tracking-tight text-foreground">{props.title}</h2>
+      )}
+      <div className="border border-border">
+        {(props.hours || []).map((h: any, i: number) => (
+          <div key={i} className="flex items-center justify-between border-b border-border px-6 py-3 text-sm last:border-b-0">
+            <span className="font-medium text-foreground">{h.day}</span>
+            <span className="text-muted-foreground">{h.hours}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const ClassSchedule = (props: any) => (
+  <section className="bg-muted/30 overflow-hidden">
+    <div className="mx-auto max-w-4xl px-6 lg:px-12 py-16 lg:py-24">
+      {(props.title || props.subtitle) && (
+        <div className="mb-10 text-center">
+          {props.title && (
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>
+              {props.title}
+            </h2>
+          )}
+          {props.subtitle && <p className="mt-3 text-muted-foreground">{props.subtitle}</p>}
+        </div>
+      )}
+      <div className="border border-border bg-background">
+        {(props.schedule || []).map((s: any, i: number) => (
+          <div key={i} className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-6 py-4 text-sm last:border-b-0">
+            <span className="font-bold text-foreground">{s.className}</span>
+            <div className="flex items-center gap-4 text-muted-foreground">
+              <span>{s.day}</span>
+              <span className="font-medium text-primary">{s.time}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 export const TeamSection = (props: any) => (
   <section className="bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">

@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setCurrentProject } from "@/store/slices/projectSlice";
 import { setAssets, addAsset, removeAsset, setUploading } from "@/store/slices/assetSlice";
 import api from "@/api/axios";
 import FileUploader from "@/components/asset-upload/FileUploader";
 import FilePreview from "@/components/asset-upload/FilePreview";
+import { Button } from "@/components/ui/button";
 
 const AssetUploadPage = () => {
   const navigate = useNavigate();
@@ -66,9 +66,9 @@ const AssetUploadPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+    <div className="flex min-h-screen flex-col bg-muted/30">
+      <header className="border-b border-border bg-background/95 backdrop-blur">
+        <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <h1 className="text-lg font-semibold text-foreground">Upload Assets</h1>
           <span className="text-sm text-muted-foreground">
             {assets.length} file{assets.length !== 1 ? "s" : ""} uploaded
@@ -76,36 +76,28 @@ const AssetUploadPage = () => {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-6 py-8 max-w-2xl">
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Add your files
-            </h2>
+      <main className="container mx-auto max-w-2xl flex-1 px-6 py-8">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+          <div className="mb-6">
+            <h2 className="mb-1 text-xl font-semibold text-foreground">Add your files</h2>
             <p className="text-sm text-muted-foreground">
-              Upload your logo, images, and documents. These will be used to
-              personalize your website.
+              Upload your logo, images, and documents. These will be used to personalize your website. This step is optional — you can skip straight to generation.
             </p>
           </div>
 
-          <FileUploader onUpload={handleUpload} uploading={uploading} />
-
-          <FilePreview assets={assets} onDelete={handleDelete} />
-
-          <div className="flex justify-between pt-4">
-            <button
-              onClick={() => navigate("/start")}
-              className="px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-muted cursor-pointer"
-            >
-              Back
-            </button>
-            <button
-              onClick={handleContinue}
-              className="px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 cursor-pointer"
-            >
-              Generate Website
-            </button>
+          <div className="space-y-8">
+            <FileUploader onUpload={handleUpload} uploading={uploading} />
+            <FilePreview assets={assets} onDelete={handleDelete} />
           </div>
+        </div>
+
+        <div className="mt-6 flex justify-between">
+          <Button type="button" variant="outline" onClick={() => navigate("/start")}>
+            Back
+          </Button>
+          <Button type="button" onClick={handleContinue}>
+            {assets.length > 0 ? "Continue" : "Skip & Continue"}
+          </Button>
         </div>
       </main>
     </div>

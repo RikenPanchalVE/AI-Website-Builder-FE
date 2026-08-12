@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "@/api/axios";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const PaymentPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -35,10 +38,10 @@ const PaymentPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-            <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="space-y-4 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10">
+            <svg className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -50,80 +53,72 @@ const PaymentPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border">
+    <div className="flex min-h-screen flex-col bg-muted/30">
+      <header className="border-b border-border bg-background/95 backdrop-blur">
         <div className="container mx-auto px-6 py-4">
           <h1 className="text-lg font-semibold text-foreground">Payment</h1>
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-6 py-8 max-w-lg">
+      <main className="container mx-auto max-w-lg flex-1 px-6 py-8">
         <div className="space-y-6">
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">
-              Mock Payment
-            </h2>
+            <h2 className="mb-2 text-2xl font-bold text-foreground">Mock Payment</h2>
             <p className="text-sm text-muted-foreground">
-              This is a simulated payment. No real charges will be made.
+              This is a simulated payment for the MVP — no real charges will be made, and no card data is sent anywhere.
             </p>
           </div>
 
-          <form onSubmit={handlePayment} className="space-y-4 rounded-xl border border-border bg-card p-6">
+          <form onSubmit={handlePayment} className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-2 rounded-lg bg-muted/60 px-3 py-2 text-xs text-muted-foreground">
+              <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+                <rect x="2" y="5" width="20" height="14" rx="2" /><path strokeLinecap="round" d="M2 10h20" />
+              </svg>
+              Test mode — any values work, nothing is charged.
+            </div>
+
             <div>
-              <label className="text-sm font-medium text-foreground block mb-1">
-                Card Number
-              </label>
-              <input
+              <Label htmlFor="cardNumber" className="mb-1.5">Card Number</Label>
+              <Input
+                id="cardNumber"
                 type="text"
                 value={cardNumber}
                 onChange={(e) => setCardNumber(e.target.value)}
                 placeholder="4242 4242 4242 4242"
-                className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-foreground block mb-1">
-                  Expiry
-                </label>
-                <input
+                <Label htmlFor="expiry" className="mb-1.5">Expiry</Label>
+                <Input
+                  id="expiry"
                   type="text"
                   value={expiry}
                   onChange={(e) => setExpiry(e.target.value)}
                   placeholder="12/28"
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-foreground block mb-1">
-                  CVV
-                </label>
-                <input
+                <Label htmlFor="cvv" className="mb-1.5">CVV</Label>
+                <Input
+                  id="cvv"
                   type="text"
                   value={cvv}
                   onChange={(e) => setCvv(e.target.value)}
                   placeholder="123"
-                  className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={processing}
-              className="w-full py-3 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 cursor-pointer"
-            >
+            <Button type="submit" disabled={processing} className="w-full" size="lg">
               {processing ? "Processing..." : "Pay Now"}
-            </button>
+            </Button>
           </form>
 
-          <button
-            onClick={() => navigate(`/pricing/${projectId}`)}
-            className="px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-muted cursor-pointer"
-          >
+          <Button type="button" variant="outline" onClick={() => navigate(`/pricing/${projectId}`)}>
             Back to Pricing
-          </button>
+          </Button>
         </div>
       </main>
     </div>

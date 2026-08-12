@@ -148,60 +148,12 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   const gradientTo = (theme as any)?.gradientTo || secondaryColor;
   const ringGlow = (theme as any)?.ringGlow || hexWithAlpha(primaryColor, 0.2);
 
-  const darkMode = (theme as any)?.darkMode || false;
   const spacing = (theme as any)?.spacing || "normal";
   const shadow = (theme as any)?.shadow || "0 4px 6px -1px rgba(0,0,0,0.1)";
   const letterSpacing = (theme as any)?.letterSpacing || "normal";
   const borderWidth = (theme as any)?.borderWidth || "1px";
-  const backgroundTreatment = (theme as any)?.backgroundTreatment || "plain";
   const borderRadius = (theme as any)?.borderRadius || "8px";
   const buttonStyle = (theme as any)?.buttonStyle || "rounded";
-  const siteName = data.name || "Studio";
-
-  const AVAILABLE_SLUGS = data.pages.map((p) => p.slug);
-
-  const slugAliases: Record<string, string[]> = {
-    about: ["about", "about_us", "about-us", "our_story", "our-story", "aboutus"],
-    contact: ["contact", "contact_us", "contact-us", "get_in_touch", "contactus"],
-    "book-appointment": ["book_appointment", "book-appointment", "book_now", "book-now", "bookappointment"],
-    "track-order": ["track_order", "track-order", "trackorder"],
-    "product-details": ["product_details", "product-details", "details"],
-    "privacy-policy": ["privacy_policy", "privacy-policy"],
-    "terms-conditions": ["terms_conditions", "terms-conditions"],
-    "refund-policy": ["refund_policy", "refund-policy"],
-  };
-
-  const resolveSlug = (value?: string): string | undefined => {
-    const raw = (value || "")
-      .replace(/^\/+/, "")
-      .replace(/\.html$/, "")
-      .toLowerCase();
-    if (!raw) return undefined;
-    if (AVAILABLE_SLUGS.includes(raw)) return raw;
-    const normalized = raw.replace(/-/g, "_");
-    if (AVAILABLE_SLUGS.includes(normalized)) return normalized;
-    for (const aliases of Object.values(slugAliases)) {
-      if (aliases.includes(raw) || aliases.includes(normalized)) {
-        const match = AVAILABLE_SLUGS.find((s) => aliases.includes(s));
-        if (match) return match;
-      }
-    }
-    return undefined;
-  };
-
-  const rawNavItems: Array<{ label?: string; href?: string; page?: string; slug?: string }> =
-    data.navigation?.items?.length
-      ? data.navigation.items
-      : data.pages.map((p) => ({ label: p.title, page: p.slug }));
-  const navItems = rawNavItems.map((item) => {
-    const explicit = item.page || item.slug;
-    const page = resolveSlug(explicit) || resolveSlug(item.href) || "";
-    return {
-      label: item.label || "Page",
-      href: item.href || `#${page}`,
-      page,
-    };
-  });
 
   const themeStyle = {
     "--color-primary": primaryColor,
@@ -386,19 +338,13 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     }
 
     /* ── Navigation ─────────────────────────────────────────── */
-    .theme-preview header {
+    .theme-preview nav {
       backdrop-filter: blur(20px) !important;
       -webkit-backdrop-filter: blur(20px) !important;
-      border-bottom: var(--ds-border-width) solid var(--theme-border) !important;
     }
-    .theme-preview header nav a,
-    .theme-preview header nav button {
-      font-size: 0.75rem !important;
-      letter-spacing: 0.1em !important;
-      text-transform: uppercase !important;
-      font-weight: 500 !important;
-      padding: 0.5rem 1rem !important;
-      border-radius: var(--ds-btn-radius) !important;
+    .theme-preview nav a,
+    .theme-preview nav button {
+      font-size: 0.8rem !important;
     }
 
     /* ── Footer ─────────────────────────────────────────────── */
@@ -536,77 +482,15 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     );
   }
 
+  // Navbar and footer are generated as ordinary sections (see MockAIProvider)
+  // driven by the client's own component selection, so they render through
+  // the same dynamic PageRenderer as everything else below — no hardcoded
+  // chrome duplicating (and overriding) what the client actually chose.
   return (
     <div className="theme-preview" style={themeStyle}>
       <style>{previewOverrides}</style>
 
-      {/* ── Navigation ──────────────────────────────────────── */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex items-center justify-between px-6 py-5 lg:px-12">
-          <button
-            type="button"
-            onClick={() => onNavigatePage?.(page.slug)}
-            className="flex items-center gap-3 text-left"
-          >
-            {data.logo ? (
-              <img src={data.logo} alt={siteName} className="h-6 w-auto" />
-            ) : (
-              <span
-                className="text-sm font-bold tracking-[0.2em] uppercase"
-                style={{ color: foregroundColor }}
-              >
-                {siteName}
-              </span>
-            )}
-          </button>
-
-          <nav className="hidden items-center gap-8 lg:flex">
-            {navItems.map((item) => {
-              const isActive = item.page === currentPage;
-              if (onNavigatePage && item.page) {
-                return (
-                  <button
-                    key={item.href || item.page}
-                    type="button"
-                    onClick={() => onNavigatePage(item.page!)}
-                    className={`text-[11px] font-medium tracking-[0.15em] uppercase transition-all duration-300 ${
-                      isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              }
-              return (
-                <a
-                  key={item.href || item.page}
-                  href={item.href}
-                  className="text-[11px] font-medium tracking-[0.15em] uppercase text-muted-foreground transition-colors duration-300 hover:text-foreground"
-                >
-                  {item.label}
-                </a>
-              );
-            })}
-          </nav>
-
-          <div className="flex items-center gap-4">
-            {onNavigatePage && (
-              <button
-                type="button"
-                onClick={() => onNavigatePage("contact")}
-                className="hidden lg:inline-flex items-center gap-2 border border-foreground/20 px-5 py-2.5 text-[11px] font-medium tracking-[0.15em] uppercase text-foreground transition-all duration-500 hover:bg-foreground hover:text-background hover:border-foreground"
-              >
-                Get in Touch
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* ── Main Content ────────────────────────────────────── */}
-      <main className="pt-20" onClick={(e) => {
+      <main onClick={(e) => {
         const link = (e.target as HTMLElement).closest('a[href^="/"]');
         if (link && onNavigatePage) {
           e.preventDefault();
@@ -616,74 +500,6 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       }}>
         <PageRenderer page={page} />
       </main>
-
-      {/* ── Footer ──────────────────────────────────────────── */}
-      {!page.sections.some((s) => s.component.startsWith("Footer")) && (
-        <footer className="relative border-t border-border bg-foreground text-background">
-          <div className="mx-auto max-w-7xl px-6 lg:px-12">
-            {/* Top */}
-            <div className="grid gap-12 py-16 lg:grid-cols-12 lg:py-24">
-              <div className="lg:col-span-5">
-                <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-background/40 mb-6">
-                  {siteName}
-                </p>
-                <p className="text-2xl font-bold tracking-tight leading-tight text-background max-w-sm">
-                  {data.description || "Creating digital experiences that make an impact."}
-                </p>
-              </div>
-              <div className="lg:col-span-3 lg:col-start-7">
-                <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-background/40 mb-6">
-                  Navigation
-                </p>
-                <div className="flex flex-col gap-3">
-                  {navItems.map((item) => {
-                    const footerPage = resolveSlug(item.page) || "";
-                    if (onNavigatePage && footerPage && data.pages.some((p) => p.slug === footerPage)) {
-                      return (
-                        <button
-                          key={item.href || item.label}
-                          type="button"
-                          onClick={() => onNavigatePage(footerPage)}
-                          className="text-left text-sm text-background/60 transition-colors duration-300 hover:text-background"
-                        >
-                          {item.label}
-                        </button>
-                      );
-                    }
-                    return (
-                      <a
-                        key={item.href || item.label}
-                        href={item.href}
-                        className="text-sm text-background/60 transition-colors duration-300 hover:text-background"
-                      >
-                        {item.label}
-                      </a>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom */}
-            <div className="flex flex-col gap-4 border-t border-background/10 py-6 text-[11px] text-background/40 sm:flex-row sm:items-center sm:justify-between">
-              <p>{data.footer?.copyright || `\u00A9 ${new Date().getFullYear()} ${siteName}. All rights reserved.`}</p>
-              <div className="flex gap-6">
-                {(data.footer?.links || []).filter((l) => {
-                  const li = l as { label?: string; href?: string; page?: string; slug?: string };
-                  return li.label && li.label.toLowerCase().includes("privacy");
-                }).map((item, i) => {
-                  const fi = item as { label?: string; href?: string };
-                  return (
-                    <a key={i} href={fi.href} className="transition-colors hover:text-background">
-                      {fi.label}
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </footer>
-      )}
     </div>
   );
 };

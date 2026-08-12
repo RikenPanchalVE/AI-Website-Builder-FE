@@ -82,35 +82,3 @@ export const ChefTable = (props: any) => (
     </div>
   </section>
 );
-
-// ── ReservationForm ────────────────────────────────────────────
-export const ReservationForm = (props: any) => (
-  <section className="py-16 sm:py-20 bg-muted/30">
-    <div className="mx-auto max-w-2xl px-6">
-      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
-      {props.subtitle && <p className="mb-10 text-center text-muted-foreground">{props.subtitle}</p>}
-      <form className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-sm" onSubmit={(e) => e.preventDefault()}>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div><label className="mb-1.5 block text-sm font-semibold text-foreground">Date</label><input type="date" className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
-          <div><label className="mb-1.5 block text-sm font-semibold text-foreground">Time</label>
-            <select className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-              <option value="">Select time</option>
-              {["5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM", "8:30 PM", "9:00 PM"].map((t) => <option key={t}>{t}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div><label className="mb-1.5 block text-sm font-semibold text-foreground">Party Size</label>
-            <select className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20">
-              <option value="">Select size</option>
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => <option key={n} value={n}>{n} {n === 1 ? "Person" : "People"}</option>)}
-            </select>
-          </div>
-          <div><label className="mb-1.5 block text-sm font-semibold text-foreground">Phone</label><input type="tel" className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
-        </div>
-        <div><label className="mb-1.5 block text-sm font-semibold text-foreground">Special Requests</label><textarea className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground transition-colors placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20" rows={3} placeholder="Allergies, celebrations, seating preferences..." /></div>
-        <button type="submit" className="w-full rounded-xl bg-primary py-3.5 text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:shadow-xl hover:scale-[1.02]">{props.submitText || "Reserve Table"}</button>
-      </form>
-    </div>
-  </section>
-);

@@ -5,6 +5,7 @@ import { setRevisions, addRevision } from "@/store/slices/revisionSlice";
 import api from "@/api/axios";
 import RevisionForm from "@/components/revision/RevisionForm";
 import RevisionHistory from "@/components/revision/RevisionHistory";
+import { Button } from "@/components/ui/button";
 
 const RevisionPage = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -54,9 +55,9 @@ const RevisionPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="border-b border-border">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+    <div className="flex min-h-screen flex-col bg-muted/30">
+      <header className="border-b border-border bg-background/95 backdrop-blur">
+        <div className="container mx-auto flex items-center justify-between px-6 py-4">
           <h1 className="text-lg font-semibold text-foreground">Revision</h1>
           <span className="text-sm text-muted-foreground">
             {revisions.length} revision{revisions.length !== 1 ? "s" : ""}
@@ -64,40 +65,30 @@ const RevisionPage = () => {
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-6 py-8 max-w-2xl">
-        <div className="space-y-8">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Request Changes
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Describe what you'd like to change. AI will interpret your request
-              and update the website.
-            </p>
+      <main className="container mx-auto max-w-2xl flex-1 px-6 py-8">
+        <div className="space-y-6">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+            <div className="mb-5">
+              <h2 className="mb-1 text-xl font-semibold text-foreground">Request Changes</h2>
+              <p className="text-sm text-muted-foreground">
+                Describe what you'd like to change. AI will interpret your request and update the website.
+              </p>
+            </div>
+            <RevisionForm onSubmit={handleSubmit} loading={loading} />
           </div>
 
-          <RevisionForm onSubmit={handleSubmit} loading={loading} />
-
           <div>
-            <h3 className="text-sm font-medium text-foreground mb-3">
-              Revision History
-            </h3>
+            <h3 className="mb-3 text-sm font-medium text-foreground">Revision History</h3>
             <RevisionHistory revisions={revisions} />
           </div>
 
-          <div className="flex justify-between pt-4">
-            <button
-              onClick={handleBackToPreview}
-              className="px-4 py-2 rounded-lg border border-border text-sm text-foreground hover:bg-muted cursor-pointer"
-            >
+          <div className="flex justify-between pt-2">
+            <Button type="button" variant="outline" onClick={handleBackToPreview}>
               Back to Preview
-            </button>
-            <button
-              onClick={handleApprove}
-              className="px-6 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 cursor-pointer"
-            >
+            </Button>
+            <Button type="button" onClick={handleApprove}>
               Approve Website
-            </button>
+            </Button>
           </div>
         </div>
       </main>

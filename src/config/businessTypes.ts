@@ -21,7 +21,7 @@ export const BUSINESS_TYPES: Record<string, BusinessTypeConfig> = {
   restaurant: {
     label: "Restaurant & Food",
     icon: "\uD83C\uDF7D\uFE0F",
-    suggestedPages: ["home", "menu", "about", "gallery", "reservations", "contact"],
+    suggestedPages: ["home", "menu", "about", "gallery", "contact"],
     suggestedSections: ["hero", "menu-highlights", "gallery", "testimonials", "contact"],
     suggestedFeatures: ["Online Ordering", "Reservation System", "Loyalty Program", "Gift Cards", "Catering Inquiry"],
     suggestedComponents: { hero: "hero4", services: "services3", gallery: "gallery1", testimonials: "testimonials2", footer: "footer1" },
@@ -78,7 +78,7 @@ export const BUSINESS_TYPES: Record<string, BusinessTypeConfig> = {
   "real-estate": {
     label: "Real Estate",
     icon: "\uD83C\uDFE0",
-    suggestedPages: ["home", "properties", "about", "agents", "contact"],
+    suggestedPages: ["home", "properties", "about", "contact"],
     suggestedSections: ["hero", "featured-properties", "search", "agents", "testimonials"],
     suggestedFeatures: ["Property Search", "Virtual Tours", "Mortgage Calculator", "Saved Searches", "Agent Matching"],
     suggestedComponents: { hero: "hero4", services: "services2", testimonials: "testimonials2", contact: "contact2", footer: "footer1" },
@@ -211,7 +211,7 @@ export const BUSINESS_TYPES: Record<string, BusinessTypeConfig> = {
   beauty: {
     label: "Beauty & Salon",
     icon: "\uD83D\uDC84",
-    suggestedPages: ["home", "services", "about", "gallery", "booking", "contact"],
+    suggestedPages: ["home", "services", "about", "gallery", "contact"],
     suggestedSections: ["hero", "services", "gallery", "testimonials", "contact"],
     suggestedFeatures: ["Online Booking", "Service Menu", "Before & After Gallery", "Product Recommendations", "Loyalty Program"],
     suggestedComponents: { hero: "hero4", services: "services3", gallery: "gallery1", testimonials: "testimonials2", footer: "footer2" },

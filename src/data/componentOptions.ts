@@ -20,6 +20,35 @@ export interface ComponentCategory {
 
 export const COMPONENT_CATEGORIES: ComponentCategory[] = [
   {
+    category: "navbar",
+    label: "Navigation Bar",
+    description: "The top of every page. Choose how visitors navigate your site.",
+    required: true,
+    options: [
+      {
+        id: "navbar1",
+        name: "Classic",
+        description: "Logo, links, and a mobile menu. Clean and familiar.",
+        preview: { layout: "logo-left-links-right", style: "clean", elements: ["logo", "nav-links", "mobile-menu"] },
+        bestFor: ["agency", "consulting", "local-business", "portfolio"],
+      },
+      {
+        id: "navbar2",
+        name: "With CTA Button",
+        description: "Adds a prominent call-to-action button beside the links.",
+        preview: { layout: "logo-left-links-cta", style: "vibrant", elements: ["logo", "nav-links", "cta-button", "mobile-menu"] },
+        bestFor: ["technology", "restaurant", "fitness", "beauty", "real-estate"],
+      },
+      {
+        id: "navbar3",
+        name: "Minimal",
+        description: "Understated links with subtle hover states. No CTA button.",
+        preview: { layout: "logo-left-links-right", style: "minimal", elements: ["logo", "nav-links", "mobile-menu"] },
+        bestFor: ["luxury", "portfolio", "creative", "editorial"],
+      },
+    ],
+  },
+  {
     category: "hero",
     label: "Hero Section",
     description: "The first thing visitors see. Choose how you want to make an impression.",
@@ -342,6 +371,7 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
 ];
 
 export const COMPONENT_MAP: Record<string, Record<string, string>> = {
+  navbar: { navbar1: "Navbar1", navbar2: "Navbar2", navbar3: "Navbar3" },
   hero: { hero1: "Hero1", hero2: "Hero2", hero3: "Hero3", hero4: "Hero4", hero5: "Hero5" },
   services: { services1: "Services1", services2: "Services2", services3: "Services3", services4: "Services4" },
   portfolio: { portfolio1: "Portfolio1", portfolio2: "Portfolio2", portfolio3: "Portfolio3" },

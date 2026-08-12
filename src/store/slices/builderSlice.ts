@@ -24,9 +24,6 @@ const builderSlice = createSlice({
     updateBusiness: (state, action: PayloadAction<Partial<WebsiteConfig["business"]>>) => {
       state.config.business = { ...state.config.business, ...action.payload };
     },
-    setGoals: (state, action: PayloadAction<string[]>) => {
-      state.config.goals = action.payload;
-    },
     setPages: (state, action: PayloadAction<string[]>) => {
       state.config.pages = action.payload;
     },
@@ -35,6 +32,15 @@ const builderSlice = createSlice({
     },
     setPageSections: (state, action: PayloadAction<{ page: string; sections: string[] }>) => {
       state.config.sections[action.payload.page] = action.payload.sections;
+    },
+    setPageContentField: (
+      state,
+      action: PayloadAction<{ page: string; section: "hero" | "about_story" | "cta"; field: string; value: string }>
+    ) => {
+      const { page, section, field, value } = action.payload;
+      if (!state.config.pageContent[page]) state.config.pageContent[page] = {};
+      if (!state.config.pageContent[page][section]) state.config.pageContent[page][section] = {};
+      (state.config.pageContent[page][section] as Record<string, string>)[field] = value;
     },
     setTheme: (state, action: PayloadAction<Partial<WebsiteConfig["theme"]>>) => {
       state.config.theme = { ...state.config.theme, ...action.payload };
@@ -78,10 +84,10 @@ const builderSlice = createSlice({
 
 export const {
   updateBusiness,
-  setGoals,
   setPages,
   setSections,
   setPageSections,
+  setPageContentField,
   setTheme,
   setComponent,
   setComponents,

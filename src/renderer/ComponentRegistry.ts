@@ -13,6 +13,10 @@ import {
   Breadcrumbs,
   AboutStory,
   AboutValues,
+  Stats,
+  Timeline,
+  BusinessHours,
+  ClassSchedule,
   TeamSection,
   CTABanner,
   ContactInfo,
@@ -28,7 +32,6 @@ import {
   MenuHighlights,
   DailySpecials,
   ChefTable,
-  ReservationForm,
 } from "@/component-library/Restaurant";
 
 import {
@@ -121,6 +124,10 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   Breadcrumbs,
   AboutStory,
   AboutValues,
+  Stats,
+  Timeline,
+  BusinessHours,
+  ClassSchedule,
   TeamSection,
   CTABanner,
   ContactInfo,
@@ -133,7 +140,6 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   MenuHighlights,
   DailySpecials,
   ChefTable,
-  ReservationForm,
   Services,
   AppointmentBooking,
   DoctorProfiles,

@@ -14,9 +14,6 @@ const Portfolio1 = ({ title, projects }: PortfolioProps) => (
             {title || "Selected Projects"}
           </h2>
         </div>
-        <a href="#" className="text-[11px] font-medium tracking-[0.15em] uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
-          View All
-        </a>
       </div>
 
       <div className="grid gap-1 lg:grid-cols-12 auto-rows-[minmax(200px,auto)]">
@@ -25,9 +22,8 @@ const Portfolio1 = ({ title, projects }: PortfolioProps) => (
           const aspectClass = i === 0 ? "aspect-[16/9]" : i % 3 === 0 ? "aspect-[3/4]" : "aspect-[4/3]";
 
           return (
-            <a
+            <div
               key={i}
-              href="#"
               className={`group relative overflow-hidden bg-muted ${colSpan}`}
               style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.06}s both` }}
             >
@@ -61,7 +57,7 @@ const Portfolio1 = ({ title, projects }: PortfolioProps) => (
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </div>
-            </a>
+            </div>
           );
         })}
       </div>

@@ -56,7 +56,7 @@ export const DESIGN_STYLES: DesignStyleOption[] = [
     id: "corporate",
     name: "Corporate",
     description: "Professional and trustworthy. Classic business appearance.",
-    preview: { colors: ["#1E3A5F", "#4A90D9", "#FFFFFF"], fontFamily: "Source Sans Pro", borderRadius: "4px", mood: "trustworthy" },
+    preview: { colors: ["#1E3A5F", "#4A90D9", "#FFFFFF"], fontFamily: "Source Sans 3", borderRadius: "4px", mood: "trustworthy" },
     bestFor: ["finance", "healthcare", "legal", "consulting"],
   },
   {
@@ -146,10 +146,10 @@ export const TYPOGRAPHY_OPTIONS: TypographyOption[] = [
 ];
 
 export const BUSINESS_CATEGORIES = [
-  { id: "restaurant", label: "Restaurant / Cafe", icon: "🍽️", suggestedPages: ["home", "menu", "about", "gallery", "reservations", "contact"], suggestedSections: ["hero", "menu-highlights", "gallery", "testimonials", "contact"] },
+  { id: "restaurant", label: "Restaurant / Cafe", icon: "🍽️", suggestedPages: ["home", "menu", "about", "gallery", "contact"], suggestedSections: ["hero", "menu-highlights", "gallery", "testimonials", "contact"] },
   { id: "agency", label: "Digital Agency", icon: "🚀", suggestedPages: ["home", "about", "services", "portfolio", "blog", "contact"], suggestedSections: ["hero", "services", "portfolio", "testimonials", "cta"] },
   { id: "consulting", label: "Consulting", icon: "💼", suggestedPages: ["home", "about", "services", "case-studies", "testimonials", "contact"], suggestedSections: ["hero", "services", "stats", "testimonials", "cta"] },
-  { id: "real-estate", label: "Real Estate", icon: "🏠", suggestedPages: ["home", "properties", "about", "agents", "contact"], suggestedSections: ["hero", "featured-properties", "search", "agents", "testimonials"] },
+  { id: "real-estate", label: "Real Estate", icon: "🏠", suggestedPages: ["home", "properties", "about", "contact"], suggestedSections: ["hero", "featured-properties", "search", "agents", "testimonials"] },
   { id: "healthcare", label: "Healthcare", icon: "🏥", suggestedPages: ["home", "services", "about", "doctors", "contact"], suggestedSections: ["hero", "services", "doctors", "testimonials", "contact"] },
   { id: "education", label: "Education", icon: "🎓", suggestedPages: ["home", "courses", "about", "blog", "contact"], suggestedSections: ["hero", "courses", "testimonials", "cta", "contact"] },
   { id: "fitness", label: "Fitness / Gym", icon: "💪", suggestedPages: ["home", "classes", "about", "pricing", "contact"], suggestedSections: ["hero", "classes", "pricing", "testimonials", "cta"] },
@@ -157,7 +157,7 @@ export const BUSINESS_CATEGORIES = [
   { id: "technology", label: "Technology / SaaS", icon: "💻", suggestedPages: ["home", "features", "pricing", "about", "blog", "contact"], suggestedSections: ["hero", "features", "pricing", "testimonials", "cta"] },
   { id: "finance", label: "Finance", icon: "💰", suggestedPages: ["home", "services", "about", "team", "contact"], suggestedSections: ["hero", "services", "stats", "testimonials", "cta"] },
   { id: "legal", label: "Legal", icon: "⚖️", suggestedPages: ["home", "services", "about", "team", "contact"], suggestedSections: ["hero", "services", "testimonials", "cta", "contact"] },
-  { id: "beauty", label: "Beauty / Salon", icon: "💄", suggestedPages: ["home", "services", "about", "gallery", "booking", "contact"], suggestedSections: ["hero", "services", "gallery", "testimonials", "contact"] },
+  { id: "beauty", label: "Beauty / Salon", icon: "💄", suggestedPages: ["home", "services", "about", "gallery", "contact"], suggestedSections: ["hero", "services", "gallery", "testimonials", "contact"] },
   { id: "automotive", label: "Automotive", icon: "🚗", suggestedPages: ["home", "inventory", "services", "about", "contact"], suggestedSections: ["hero", "inventory", "services", "testimonials", "contact"] },
   { id: "portfolio", label: "Portfolio / Creative", icon: "🎨", suggestedPages: ["home", "work", "about", "contact"], suggestedSections: ["hero", "portfolio", "about", "testimonials", "contact"] },
   { id: "startup", label: "Startup", icon: "🚀", suggestedPages: ["home", "features", "pricing", "about", "blog", "contact"], suggestedSections: ["hero", "features", "pricing", "testimonials", "cta"] },
@@ -166,16 +166,14 @@ export const BUSINESS_CATEGORIES = [
 
 export const PAGE_SECTIONS: Record<string, Array<{ id: string; label: string; description: string }>> = {
   home: [
-    { id: "hero", label: "Hero", description: "Main headline and introduction" },
-    { id: "about", label: "About Preview", description: "Brief about section" },
+    { id: "about_story", label: "About Preview", description: "Brief about section" },
     { id: "services", label: "Services", description: "What you offer" },
     { id: "portfolio", label: "Portfolio", description: "Your best work" },
     { id: "testimonials", label: "Testimonials", description: "Client reviews" },
-    { id: "stats", label: "Statistics", description: "Key numbers and achievements" },
-    { id: "process", label: "Process", description: "How you work" },
+    { id: "why_choose_us", label: "Why Choose Us", description: "What sets you apart" },
     { id: "pricing", label: "Pricing", description: "Plans and packages" },
     { id: "faq", label: "FAQ", description: "Common questions" },
-    { id: "blog", label: "Blog Preview", description: "Latest articles" },
+    { id: "blog_preview", label: "Blog Preview", description: "Latest articles" },
     { id: "cta", label: "Call to Action", description: "Drive conversions" },
     { id: "gallery", label: "Gallery", description: "Image showcase" },
     { id: "team", label: "Team", description: "Meet the team" },
@@ -222,8 +220,6 @@ export const PAGE_SECTIONS: Record<string, Array<{ id: string; label: string; de
     { id: "gallery", label: "Food Gallery", description: "Food photography" },
   ],
   properties: [
-    { id: "property-search", label: "Property Search", description: "Search and filter" },
-    { id: "property-grid", label: "Property Listings", description: "Available properties" },
     { id: "agents", label: "Agents", description: "Meet our agents" },
   ],
   courses: [
@@ -248,7 +244,6 @@ export const PAGE_SECTIONS: Record<string, Array<{ id: string; label: string; de
   ],
   inventory: [
     { id: "inventory-grid", label: "Inventory Grid", description: "Available items" },
-    { id: "filters", label: "Filters", description: "Search and filter" },
     { id: "testimonials", label: "Reviews", description: "Customer reviews" },
   ],
   faq: [
@@ -263,31 +258,9 @@ export const PAGE_SECTIONS: Record<string, Array<{ id: string; label: string; de
     { id: "team", label: "Team Members", description: "Meet the team" },
     { id: "cta", label: "Call to Action", description: "Work with us" },
   ],
-  reservations: [
-    { id: "reservation-form", label: "Reservation Form", description: "Book a table or appointment" },
-    { id: "info", label: "Business Info", description: "Hours and location" },
-    { id: "gallery", label: "Gallery", description: "Photo showcase" },
-  ],
   gallery: [
     { id: "gallery", label: "Gallery", description: "Image showcase" },
     { id: "cta", label: "Call to Action", description: "Get in touch" },
   ],
-  booking: [
-    { id: "booking-form", label: "Booking Form", description: "Schedule an appointment" },
-    { id: "services", label: "Services", description: "Available services" },
-    { id: "testimonials", label: "Reviews", description: "Client reviews" },
-  ],
 };
 
-export const BUSINESS_GOALS = [
-  { id: "leads", label: "Generate Leads", description: "Capture potential customer information" },
-  { id: "enquiries", label: "Get Contact Enquiries", description: "Receive messages and calls" },
-  { id: "services", label: "Promote Services", description: "Showcase what you offer" },
-  { id: "portfolio", label: "Showcase Portfolio", description: "Display your best work" },
-  { id: "brand", label: "Build Brand Awareness", description: "Establish your online presence" },
-  { id: "bookings", label: "Get Bookings", description: "Enable appointment/reservation scheduling" },
-  { id: "info", label: "Display Company Info", description: "Share your business details" },
-  { id: "articles", label: "Publish Articles", description: "Share knowledge and insights" },
-  { id: "products", label: "Sell Products (Future)", description: "Ready for eCommerce later" },
-  { id: "community", label: "Build Community", description: "Grow an audience" },
-];

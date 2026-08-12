@@ -16,9 +16,8 @@ const Portfolio2 = ({ title, projects }: PortfolioProps) => (
 
       <div className="space-y-1">
         {projects.map((project, i) => (
-          <a
+          <div
             key={i}
-            href="#"
             className={`group grid gap-0 lg:grid-cols-12 items-center bg-background border border-border transition-all duration-500 hover:bg-muted/50 ${
               i % 2 === 0 ? "" : ""
             }`}
@@ -53,7 +52,7 @@ const Portfolio2 = ({ title, projects }: PortfolioProps) => (
                 </svg>
               </div>
             </div>
-          </a>
+          </div>
         ))}
       </div>
     </div>

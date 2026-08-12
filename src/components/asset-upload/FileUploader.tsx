@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { cn } from "@/lib/utils";
 
 interface FileUploaderProps {
   onUpload: (file: File, type: string) => Promise<void>;
@@ -41,18 +42,20 @@ const FileUploader = ({ onUpload, uploading }: FileUploaderProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-foreground font-medium">File type:</span>
-        <div className="flex gap-2">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-sm font-medium text-foreground">File type:</span>
+        <div className="flex flex-wrap gap-2">
           {FILE_TYPES.map((ft) => (
             <button
               key={ft.value}
+              type="button"
               onClick={() => setSelectedType(ft.value)}
-              className={`px-3 py-1 rounded-full text-xs border transition-colors cursor-pointer ${
+              className={cn(
+                "cursor-pointer rounded-full border px-3 py-1 text-xs font-medium transition-colors",
                 selectedType === ft.value
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-foreground border-border hover:border-primary/50"
-              }`}
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-background text-foreground hover:border-primary/50"
+              )}
             >
               {ft.label}
             </button>
@@ -68,11 +71,10 @@ const FileUploader = ({ onUpload, uploading }: FileUploaderProps) => {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-          dragOver
-            ? "border-primary bg-primary/5"
-            : "border-border hover:border-primary/50"
-        }`}
+        className={cn(
+          "cursor-pointer rounded-xl border-2 border-dashed p-10 text-center transition-colors",
+          dragOver ? "border-primary bg-primary/5" : "border-border hover:border-primary/50 hover:bg-muted/40"
+        )}
       >
         <input
           ref={inputRef}
@@ -82,28 +84,25 @@ const FileUploader = ({ onUpload, uploading }: FileUploaderProps) => {
           onChange={(e) => handleFiles(e.target.files)}
           className="hidden"
         />
-        <div className="space-y-2">
-          <svg
-            className="w-10 h-10 mx-auto text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M12 16v-8m0 0l-3 3m3-3l3 3M9 20H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2h-2"
-            />
-          </svg>
-          <p className="text-sm text-foreground">
-            {uploading
-              ? "Uploading..."
-              : "Drag & drop files here, or click to browse"}
+        <div className="space-y-3">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            {uploading ? (
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            ) : (
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.75}
+                  d="M12 16v-8m0 0l-3 3m3-3l3 3M9 20H7a2 2 0 01-2-2V6a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V18a2 2 0 01-2 2h-2"
+                />
+              </svg>
+            )}
+          </div>
+          <p className="text-sm font-medium text-foreground">
+            {uploading ? "Uploading..." : "Drag & drop files here, or click to browse"}
           </p>
-          <p className="text-xs text-muted-foreground">
-            Images, PDF, DOCX, TXT — Max 10MB
-          </p>
+          <p className="text-xs text-muted-foreground">Images, PDF, DOCX, TXT — Max 10MB</p>
         </div>
       </div>
     </div>
