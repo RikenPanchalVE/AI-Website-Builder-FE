@@ -49,6 +49,54 @@ export const DailySpecials = (props: any) => (
   </section>
 );
 
+// ── MenuHighlights2 (classic printed-menu look — name, dotted leader
+//    line, price; no photos) ──────────────────────────────────
+export const MenuHighlights2 = (props: any) => (
+  <section className="py-16 sm:py-20">
+    <div className="mx-auto max-w-2xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="space-y-6">
+        {(props.items || []).map((item: any, i: number) => (
+          <div key={i}>
+            <div className="flex items-baseline gap-2">
+              <h3 className="whitespace-nowrap font-bold text-foreground">{item.name}</h3>
+              <span className="mb-1 flex-1 border-b border-dotted border-border" />
+              <span className="whitespace-nowrap text-lg font-extrabold text-primary">{item.price}</span>
+            </div>
+            {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// ── DailySpecials2 ─────────────────────────────────────────────
+export const DailySpecials2 = (props: any) => (
+  <section className="py-16 sm:py-20">
+    <div className="mx-auto max-w-3xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
+        {(props.items || []).map((item: any, i: number) => (
+          <div key={i} className="flex items-center justify-between gap-4 p-5">
+            <div>
+              <span className="mb-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary">{item.tag || "Today's Special"}</span>
+              <h3 className="font-bold text-foreground">{item.name}</h3>
+              {item.description && <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>}
+            </div>
+            <div className="flex-shrink-0 text-right">
+              {item.originalPrice && <p className="text-xs text-muted-foreground line-through">{item.originalPrice}</p>}
+              <p className="text-xl font-extrabold text-primary">{item.price}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 // ── ChefTable ──────────────────────────────────────────────────
 export const ChefTable = (props: any) => (
   <section className="py-16 sm:py-20">

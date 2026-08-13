@@ -25,6 +25,33 @@ export const DestinationGrid = (props: any) => (
   </section>
 );
 
+// ── DestinationGrid2 ───────────────────────────────────────────
+export const DestinationGrid2 = (props: any) => (
+  <section className="py-16 sm:py-20">
+    <div className="mx-auto max-w-6xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {(props.destinations || []).map((dest: any, i: number) => (
+          <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+            <div className="aspect-[4/3] overflow-hidden bg-muted">
+              {dest.image ? <img src={dest.image} alt={dest.name} className="h-full w-full object-cover" /> : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10"><span className="text-5xl text-primary/20">✈️</span></div>
+              )}
+            </div>
+            <div className="p-5 text-center">
+              <h3 className="text-lg font-bold text-foreground">{dest.name}</h3>
+              {dest.price && (
+                <span className="mt-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">From {dest.price}</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 // ── TravelDeals ────────────────────────────────────────────────
 export const TravelDeals = (props: any) => (
   <section className="py-16 sm:py-20 bg-muted/30">
@@ -46,6 +73,38 @@ export const TravelDeals = (props: any) => (
               <div className="mt-3 flex items-baseline gap-2">
                 <span className="text-lg font-extrabold text-primary">{deal.price}</span>
                 {deal.originalPrice && <span className="text-sm text-muted-foreground line-through">{deal.originalPrice}</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// ── TravelDeals2 ───────────────────────────────────────────────
+export const TravelDeals2 = (props: any) => (
+  <section className="py-16 sm:py-20">
+    <div className="mx-auto max-w-4xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="space-y-5">
+        {(props.deals || []).map((deal: any, i: number) => (
+          <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:flex-row">
+            <div className="relative aspect-[16/9] w-full flex-shrink-0 overflow-hidden bg-muted sm:aspect-square sm:w-40">
+              {deal.image ? <img src={deal.image} alt={deal.title} className="h-full w-full object-cover" /> : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10"><span className="text-4xl text-primary/20">🗺️</span></div>
+              )}
+              {deal.discount && <span className="absolute left-2 top-2 rounded-full bg-destructive px-2.5 py-1 text-[11px] font-bold text-white shadow-md">-{deal.discount}%</span>}
+            </div>
+            <div className="flex flex-1 items-center justify-between gap-4 p-5">
+              <div>
+                <h3 className="font-bold text-foreground">{deal.title}</h3>
+                {deal.description && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{deal.description}</p>}
+              </div>
+              <div className="flex-shrink-0 text-right">
+                <p className="text-lg font-extrabold text-primary">{deal.price}</p>
+                {deal.originalPrice && <p className="text-xs text-muted-foreground line-through">{deal.originalPrice}</p>}
               </div>
             </div>
           </div>

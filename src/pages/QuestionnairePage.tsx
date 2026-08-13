@@ -11,6 +11,7 @@ import {
   setComponent,
   setComponents,
   setContent,
+  setBranding,
   setCurrentStep,
 } from "@/store/slices/builderSlice";
 import { BUSINESS_TYPES, type BusinessTypeConfig } from "@/config/businessTypes";
@@ -27,35 +28,66 @@ import LivePreviewPanel from "@/components/questionnaire/LivePreviewPanel";
 import FullScreenPreviewModal from "@/components/questionnaire/FullScreenPreviewModal";
 import ImageUploadField from "@/components/questionnaire/ImageUploadField";
 import { AVAILABLE_PAGES, sectionType } from "@/components/questionnaire/previewSpec";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { Popover } from "radix-ui";
 
 interface StepDef {
   key: string;
   title: string;
   subtitle: string;
-  kind: "business" | "pages" | "page" | "design" | "colors" | "review";
-  pageId?: string;
+  kind: "business" | "pages" | "design" | "colors" | "review";
 }
 
-function buildSteps(pages: string[]): StepDef[] {
-  const selected = pages.length ? pages : ["home"];
-  const pageSteps: StepDef[] = selected.map((id) => {
-    const label = AVAILABLE_PAGES.find((p) => p.id === id)?.label || id;
-    return {
-      key: `page:${id}`,
-      title: label,
-      subtitle: `Everything about your ${label} page`,
-      kind: "page",
-      pageId: id,
-    };
-  });
+// Fixed, top-level steps — pages no longer clutter this row as individual
+// entries. Each selected page instead becomes a sub-tab nested under the
+// single "Pages" step (see pageSubStep state below), so the top bar stays
+// clean regardless of whether a business has 2 pages or 8.
+const STEPS: StepDef[] = [
+  { key: "business", title: "Business", subtitle: "Tell us about your business", kind: "business" },
+  { key: "pages", title: "Pages", subtitle: "Which pages do you need?", kind: "pages" },
+  { key: "design", title: "Design", subtitle: "Choose your visual style", kind: "design" },
+  { key: "colors", title: "Colors", subtitle: "Pick your brand colors", kind: "colors" },
+  { key: "review", title: "Review", subtitle: "Review and generate", kind: "review" },
+];
 
+// Only these hero layouts are actually built around a photo (Hero1's dark
+// cinematic full-bleed image, Hero4's full-bg image with overlaid text) — the
+// others (Split Editorial, Centered Statement, Minimal Text) are text-first
+// and don't use an uploaded background image, so the upload field would be
+// misleading to show for them.
+const IMAGE_HERO_IDS = new Set(["hero1", "hero4"]);
+
+const PAGE_SELECT_KEY = "select";
+
+interface PageSubStepDef {
+  key: string; // PAGE_SELECT_KEY or a page id
+  title: string;
+}
+
+function buildPageSubSteps(pages: string[]): PageSubStepDef[] {
+  const selected = pages.length ? pages : ["home"];
   return [
-    { key: "business", title: "Business", subtitle: "Tell us about your business", kind: "business" },
-    { key: "pages", title: "Pages", subtitle: "Which pages do you need?", kind: "pages" },
-    ...pageSteps,
-    { key: "design", title: "Design", subtitle: "Choose your visual style", kind: "design" },
-    { key: "colors", title: "Colors", subtitle: "Pick your brand colors", kind: "colors" },
-    { key: "review", title: "Review", subtitle: "Review and generate", kind: "review" },
+    { key: PAGE_SELECT_KEY, title: "Select Pages" },
+    ...selected.map((id) => ({
+      key: id,
+      title: AVAILABLE_PAGES.find((p) => p.id === id)?.label || id,
+    })),
   ];
 }
 
@@ -105,12 +137,15 @@ const QuestionnairePage = () => {
   const [localStep, setLocalStep] = useState(0);
   const step = currentStep || localStep;
 
+  const [pageSubStep, setPageSubStep] = useState<string>(PAGE_SELECT_KEY);
   const [previewPage, setPreviewPage] = useState("home");
   const [fullScreenPreview, setFullScreenPreview] = useState(false);
 
   const businessType = BUSINESS_TYPES[config.business.type] || null;
-  const STEPS = useMemo(() => buildSteps(config.pages), [config.pages]);
   const currentStepDef = STEPS[Math.min(step, STEPS.length - 1)];
+  const pageSubSteps = useMemo(() => buildPageSubSteps(config.pages), [config.pages]);
+  const pageSubIndex = Math.max(pageSubSteps.findIndex((s) => s.key === pageSubStep), 0);
+  const isOnPageDetail = currentStepDef.kind === "pages" && pageSubStep !== PAGE_SELECT_KEY;
 
   useEffect(() => {
     if (!currentProject) navigate("/");
@@ -128,17 +163,32 @@ const QuestionnairePage = () => {
     }
   }, [enquiry, config.business.name, config.business.type, dispatch]);
 
+  // If a page gets deselected while its sub-tab is active (or on first
+  // load), fall back to the page-selection sub-tab instead of pointing at
+  // a page that no longer exists.
+  useEffect(() => {
+    if (pageSubStep !== PAGE_SELECT_KEY && !config.pages.includes(pageSubStep)) {
+      setPageSubStep(PAGE_SELECT_KEY);
+    }
+  }, [config.pages, pageSubStep]);
+
   // Keep the live preview focused on whichever page the client is currently
   // configuring, so the answer to "how does this look" is always right there.
   useEffect(() => {
-    if (currentStepDef?.kind === "page" && currentStepDef.pageId) {
-      setPreviewPage(currentStepDef.pageId);
-    }
-  }, [currentStepDef]);
+    if (isOnPageDetail) setPreviewPage(pageSubStep);
+  }, [isOnPageDetail, pageSubStep]);
 
   const setStep = (s: number) => {
     setLocalStep(s);
     dispatch(setCurrentStep(s));
+  };
+
+  // Jumps to a top-level step from the main tab row. Always resets the
+  // Pages step back to its selection sub-tab so there's one predictable
+  // entry point, no matter which page sub-tab was open before.
+  const goToStep = (i: number) => {
+    setStep(i);
+    if (STEPS[i].kind === "pages") setPageSubStep(PAGE_SELECT_KEY);
   };
 
   const canNext = (): boolean => {
@@ -150,11 +200,25 @@ const QuestionnairePage = () => {
   };
 
   const handleNext = () => {
+    if (currentStepDef.kind === "pages" && pageSubIndex < pageSubSteps.length - 1) {
+      setPageSubStep(pageSubSteps[pageSubIndex + 1].key);
+      return;
+    }
     if (step < STEPS.length - 1) setStep(step + 1);
   };
 
   const handlePrev = () => {
-    if (step > 0) setStep(step - 1);
+    if (currentStepDef.kind === "pages" && pageSubIndex > 0) {
+      setPageSubStep(pageSubSteps[pageSubIndex - 1].key);
+      return;
+    }
+    if (step > 0) {
+      const prevStep = STEPS[step - 1];
+      // Re-entering Pages from Design mirrors going forward through it —
+      // land on the last page sub-tab rather than back at selection.
+      if (prevStep.kind === "pages") setPageSubStep(pageSubSteps[pageSubSteps.length - 1]?.key || PAGE_SELECT_KEY);
+      setStep(step - 1);
+    }
   };
 
   const handleSubmit = async () => {
@@ -171,7 +235,15 @@ const QuestionnairePage = () => {
     }
   };
 
-  const progress = ((step + 1) / STEPS.length) * 100;
+  // Folds the Pages step's sub-tab position into the overall progress so the
+  // bar still advances smoothly while stepping through individual pages.
+  const pagesSubFraction = currentStepDef.kind === "pages" ? (pageSubIndex + 1) / pageSubSteps.length : 1;
+  const progress = ((step + pagesSubFraction) / STEPS.length) * 100;
+  const activePageSubStepDef = pageSubSteps[pageSubIndex];
+  const headerTitle = isOnPageDetail ? activePageSubStepDef?.title || currentStepDef.title : currentStepDef.title;
+  const headerSubtitle = currentStepDef.kind === "pages"
+    ? (isOnPageDetail ? `Everything about your ${activePageSubStepDef?.title} page` : currentStepDef.subtitle)
+    : currentStepDef.subtitle;
 
   if (!currentProject) return null;
 
@@ -196,6 +268,7 @@ const QuestionnairePage = () => {
             </h1>
             <span className="text-sm text-muted-foreground">
               Step {step + 1} of {STEPS.length}
+              {isOnPageDetail && ` · ${activePageSubStepDef?.title}`}
             </span>
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -206,7 +279,7 @@ const QuestionnairePage = () => {
               <button
                 key={s.key}
                 type="button"
-                onClick={() => setStep(i)}
+                onClick={() => goToStep(i)}
                 className={cn(
                   "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors",
                   i === step ? "bg-primary/10 font-medium text-primary"
@@ -226,6 +299,28 @@ const QuestionnairePage = () => {
               </button>
             ))}
           </div>
+
+          {currentStepDef.kind === "pages" && (
+            <div className="mt-2 flex gap-1 overflow-x-auto border-t border-border/60 pt-2">
+              {pageSubSteps.map((s, i) => (
+                <button
+                  key={s.key}
+                  type="button"
+                  onClick={() => setPageSubStep(s.key)}
+                  className={cn(
+                    "shrink-0 rounded-full px-3 py-1 text-xs transition-colors",
+                    s.key === pageSubStep
+                      ? "bg-primary text-primary-foreground"
+                      : i < pageSubIndex
+                      ? "bg-primary/10 text-primary hover:bg-primary/15"
+                      : "bg-muted text-muted-foreground hover:bg-muted/70"
+                  )}
+                >
+                  {s.title}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
@@ -233,20 +328,20 @@ const QuestionnairePage = () => {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
           <div className="min-w-0">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-foreground">{currentStepDef.title}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{currentStepDef.subtitle}</p>
+              <h2 className="text-xl font-semibold text-foreground">{headerTitle}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{headerSubtitle}</p>
             </div>
 
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
               {currentStepDef.kind === "business" && <StepBusiness config={config} dispatch={dispatch} businessType={businessType} />}
-              {currentStepDef.kind === "pages" && <StepPages config={config} dispatch={dispatch} businessType={businessType} />}
-              {currentStepDef.kind === "page" && currentStepDef.pageId && (
+              {currentStepDef.kind === "pages" && !isOnPageDetail && <StepPages config={config} dispatch={dispatch} businessType={businessType} />}
+              {isOnPageDetail && (
                 <StepPageDetail
                   config={config}
                   dispatch={dispatch}
                   businessType={businessType}
-                  pageId={currentStepDef.pageId}
-                  isFirstPage={config.pages[0] === currentStepDef.pageId}
+                  pageId={pageSubStep}
+                  isFirstPage={config.pages[0] === pageSubStep}
                 />
               )}
               {currentStepDef.kind === "design" && <StepDesign config={config} dispatch={dispatch} businessType={businessType} />}
@@ -385,22 +480,13 @@ function StepBusiness({ config, dispatch, businessType }: { config: any; dispatc
         />
       </FieldBlock>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FieldBlock label="Location">
-          <Input
-            value={config.business.location}
-            onChange={(e) => dispatch(updateBusiness({ location: e.target.value }))}
-            placeholder="City, State, Country"
-          />
-        </FieldBlock>
-        <FieldBlock label="Target Audience">
-          <Input
-            value={config.business.targetAudience}
-            onChange={(e) => dispatch(updateBusiness({ targetAudience: e.target.value }))}
-            placeholder="e.g., Young professionals, Families"
-          />
-        </FieldBlock>
-      </div>
+      <FieldBlock label="Location">
+        <Input
+          value={config.business.location}
+          onChange={(e) => dispatch(updateBusiness({ location: e.target.value }))}
+          placeholder="City, State, Country"
+        />
+      </FieldBlock>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FieldBlock label="Email">
@@ -495,6 +581,74 @@ function SocialLinksEditor({ config, dispatch }: { config: any; dispatch: any })
 
 /* ── Step: Pages ───────────────────────────────────────────────────── */
 
+// Multi-select dropdown for pages outside the current business type's
+// suggested set. Stays open across multiple picks (only Escape / an
+// outside click closes it) so the user can add several at once instead of
+// re-opening it per page.
+function OtherPagesDropdown({
+  pages,
+  selected,
+  onToggle,
+}: {
+  pages: Array<{ id: string; label: string }>;
+  selected: string[];
+  onToggle: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selectedCount = pages.filter((p) => selected.includes(p.id)).length;
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-2 rounded-lg border border-dashed border-border bg-background px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:border-primary/40 sm:w-auto sm:min-w-[240px]"
+        >
+          <span className="flex items-center gap-2">
+            <svg className="h-4 w-4 shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            {selectedCount > 0 ? `${selectedCount} other page${selectedCount > 1 ? "s" : ""} added` : "Add another page"}
+          </span>
+          <svg className="h-4 w-4 shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+        </button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          align="start"
+          sideOffset={6}
+          className="z-50 w-72 rounded-lg border border-border bg-card p-2 shadow-lg outline-none"
+        >
+          <p className="mb-1.5 px-2 pt-1 text-xs text-muted-foreground">
+            Not related to your business type, but available if you need them. Select as many as you like.
+          </p>
+          <div className="max-h-72 space-y-0.5 overflow-y-auto">
+            {pages.map((p) => {
+              const isSelected = selected.includes(p.id);
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onToggle(p.id)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm transition-colors",
+                    isSelected ? "bg-primary/5 text-foreground" : "text-foreground hover:bg-muted"
+                  )}
+                >
+                  <CheckBox selected={isSelected} />
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+
 function StepPages({ config, dispatch, businessType }: { config: any; dispatch: any; businessType: BusinessTypeConfig | null }) {
   const togglePage = (id: string) => {
     if (id === "home") return;
@@ -506,15 +660,20 @@ function StepPages({ config, dispatch, businessType }: { config: any; dispatch: 
     }
   };
 
-  // Only offer pages that actually make sense for the selected business
-  // type — no more picking "Properties" for a bakery. Falls back to the
-  // full list on the rare case a business type couldn't be resolved.
+  // The main grid only offers pages that actually make sense for the
+  // selected business type — no more picking "Properties" for a bakery.
+  // Falls back to the full list on the rare case a business type couldn't
+  // be resolved (in which case there's nothing left over for the dropdown).
   const relevantIds = businessType
     ? new Set(["home", ...(businessType.suggestedPages || [])])
     : null;
   const visiblePages = relevantIds
     ? AVAILABLE_PAGES.filter((p) => relevantIds.has(p.id))
     : AVAILABLE_PAGES;
+  const otherPages = relevantIds
+    ? AVAILABLE_PAGES.filter((p) => !relevantIds.has(p.id))
+    : [];
+  const addedOtherPages = otherPages.filter((p) => config.pages.includes(p.id));
 
   return (
     <div className="space-y-4">
@@ -547,6 +706,32 @@ function StepPages({ config, dispatch, businessType }: { config: any; dispatch: 
           );
         })}
       </div>
+
+      {otherPages.length > 0 && (
+        <div className="border-t border-border pt-4">
+          <Label className="mb-2">Need something else?</Label>
+          <OtherPagesDropdown pages={otherPages} selected={config.pages} onToggle={togglePage} />
+          {addedOtherPages.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {addedOtherPages.map((p) => (
+                <Badge key={p.id} variant="secondary" className="gap-1 pr-1">
+                  {p.label}
+                  <button
+                    type="button"
+                    onClick={() => togglePage(p.id)}
+                    className="ml-1 flex h-3.5 w-3.5 items-center justify-center rounded-full hover:bg-muted-foreground/20"
+                    aria-label={`Remove ${p.label}`}
+                  >
+                    <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -657,6 +842,91 @@ function ContentBlock({ title, hint, children }: { title: string; hint?: string;
   );
 }
 
+/* ── Drag-and-drop section order ─────────────────────────────────────
+   Section order in the actual generated website is driven directly by the
+   order of ids in config.sections[pageId] (both the live preview and every
+   server-side page builder loop over that array in order and assign
+   order: order++ as they go) — so reordering this list is a real, direct
+   control over section order on the live site, not cosmetic. ─────────── */
+
+function SortableSectionRow({ id, index, label }: { id: string; index: number; label: string }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm",
+        isDragging && "z-10 opacity-90 shadow-md"
+      )}
+    >
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="flex h-6 w-6 shrink-0 touch-none cursor-grab items-center justify-center rounded text-muted-foreground hover:bg-muted active:cursor-grabbing"
+        aria-label={`Drag to reorder ${label}`}
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <circle cx="9" cy="6" r="1" /><circle cx="15" cy="6" r="1" />
+          <circle cx="9" cy="12" r="1" /><circle cx="15" cy="12" r="1" />
+          <circle cx="9" cy="18" r="1" /><circle cx="15" cy="18" r="1" />
+        </svg>
+      </button>
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
+        {index + 1}
+      </span>
+      <span className="font-medium text-foreground">{label}</span>
+    </div>
+  );
+}
+
+function SectionOrderList({
+  items,
+  labelFor,
+  onReorder,
+}: {
+  items: string[];
+  labelFor: (id: string) => string;
+  onReorder: (next: string[]) => void;
+}) {
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = items.indexOf(String(active.id));
+    const newIndex = items.indexOf(String(over.id));
+    if (oldIndex === -1 || newIndex === -1) return;
+    onReorder(arrayMove(items, oldIndex, newIndex));
+  };
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <Label>Section Order</Label>
+        <span className="text-xs text-muted-foreground">Drag to reorder</span>
+      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+          <div className="space-y-1.5">
+            {items.map((id, i) => (
+              <SortableSectionRow key={id} id={id} index={i} label={labelFor(id)} />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
+  );
+}
+
 function StepPageDetail({
   config,
   dispatch,
@@ -718,6 +988,15 @@ function StepPageDetail({
       )}
 
       <ContentBlock title="Hero Content" hint="The first thing visitors see on this page.">
+        {isFirstPage && IMAGE_HERO_IDS.has(config.components.hero || "hero1") && (
+          <ImageUploadField
+            value={config.branding?.bannerImages?.[0] || null}
+            onChange={(url) =>
+              dispatch(setBranding({ bannerImages: url ? [url] : [] }))
+            }
+            label="Background Image (optional). Leave blank for a solid gradient background instead."
+          />
+        )}
         <PageContentField
           pageId={pageId}
           section="hero"
@@ -778,18 +1057,37 @@ function StepPageDetail({
         </div>
       )}
 
+      {selectedSections.length > 1 && (
+        <SectionOrderList
+          items={selectedSections}
+          labelFor={(id) => pageSections.find((s) => s.id === id)?.label || id}
+          onReorder={(next) => dispatch(setPageSections({ page: pageId, sections: next }))}
+        />
+      )}
+
       {hasStory && (
-        <ContentBlock title="Your Story" hint="Tell visitors about your business in your own words.">
-          <PageContentField
-            pageId={pageId}
-            section="about_story"
-            field="content"
-            label="Story"
-            placeholder={`${businessName} was founded to...`}
-            dispatch={dispatch}
-            value={pageContent.about_story?.content || ""}
-            multiline
-          />
+        <>
+          <ContentBlock title="Your Story" hint="Tell visitors about your business in your own words.">
+            <PageContentField
+              pageId={pageId}
+              section="about_story"
+              field="content"
+              label="Story"
+              placeholder={`${businessName} was founded to...`}
+              dispatch={dispatch}
+              value={pageContent.about_story?.content || ""}
+              multiline
+            />
+          </ContentBlock>
+          {layoutFor("about_story") && (
+            <ComponentVariantPicker cat={layoutFor("about_story")!} currentComponent={config.components.about_story || ""} suggestedId={suggestedComponents.about_story} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("about_values") && layoutFor("about_values") && (
+        <ContentBlock title="Values Layout" hint="Choose how your Values section looks. Content is fixed for now.">
+          <ComponentVariantPicker cat={layoutFor("about_values")!} currentComponent={config.components.about_values || ""} suggestedId={suggestedComponents.about_values} dispatch={dispatch} />
         </ContentBlock>
       )}
 
@@ -820,7 +1118,14 @@ function StepPageDetail({
         </>
       )}
 
-      {has("team") && <TeamEditor config={config} dispatch={dispatch} />}
+      {has("team") && (
+        <>
+          <TeamEditor config={config} dispatch={dispatch} />
+          {layoutFor("team") && (
+            <ComponentVariantPicker cat={layoutFor("team")!} currentComponent={config.components.team || ""} suggestedId={suggestedComponents.team} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
       {has("testimonials") && (
         <>
@@ -831,7 +1136,14 @@ function StepPageDetail({
         </>
       )}
 
-      {has("why_choose_us") && <WhyChooseUsEditor config={config} dispatch={dispatch} />}
+      {has("why_choose_us") && (
+        <>
+          <WhyChooseUsEditor config={config} dispatch={dispatch} />
+          {layoutFor("why_choose_us") && (
+            <ComponentVariantPicker cat={layoutFor("why_choose_us")!} currentComponent={config.components.why_choose_us || ""} suggestedId={suggestedComponents.why_choose_us} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
       {has("pricing") && (
         <>
@@ -860,29 +1172,211 @@ function StepPageDetail({
         </>
       )}
 
-      {has("menu_items") && <MenuItemsEditor config={config} dispatch={dispatch} />}
+      {has("menu_items") && (
+        <>
+          <MenuItemsEditor config={config} dispatch={dispatch} />
+          {layoutFor("menu_items") && (
+            <ComponentVariantPicker cat={layoutFor("menu_items")!} currentComponent={config.components.menu_items || ""} suggestedId={suggestedComponents.menu_items} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
-      {has("daily_specials") && <DailySpecialsEditor config={config} dispatch={dispatch} />}
+      {has("daily_specials") && (
+        <>
+          <DailySpecialsEditor config={config} dispatch={dispatch} />
+          {layoutFor("daily_specials") && (
+            <ComponentVariantPicker cat={layoutFor("daily_specials")!} currentComponent={config.components.daily_specials || ""} suggestedId={suggestedComponents.daily_specials} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
-      {has("stats") && <StatsEditor config={config} dispatch={dispatch} />}
+      {has("stats") && (
+        <>
+          <StatsEditor config={config} dispatch={dispatch} />
+          {layoutFor("stats") && (
+            <ComponentVariantPicker cat={layoutFor("stats")!} currentComponent={config.components.stats || ""} suggestedId={suggestedComponents.stats} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
-      {has("timeline") && <TimelineEditor config={config} dispatch={dispatch} />}
+      {has("timeline") && (
+        <>
+          <TimelineEditor config={config} dispatch={dispatch} />
+          {layoutFor("timeline") && (
+            <ComponentVariantPicker cat={layoutFor("timeline")!} currentComponent={config.components.timeline || ""} suggestedId={suggestedComponents.timeline} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
-      {has("business_hours") && <BusinessHoursEditor config={config} dispatch={dispatch} />}
+      {has("business_hours") && (
+        <>
+          <BusinessHoursEditor config={config} dispatch={dispatch} />
+          {layoutFor("business_hours") && (
+            <ComponentVariantPicker cat={layoutFor("business_hours")!} currentComponent={config.components.business_hours || ""} suggestedId={suggestedComponents.business_hours} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
-      {(has("agents") || has("trainers")) && <TeamEditor config={config} dispatch={dispatch} />}
+      {(has("agents") || has("trainers") || has("doctors") || has("instructors")) && <TeamEditor config={config} dispatch={dispatch} />}
+      {/* Agents/Trainers/Doctors/Instructors all edit the same shared team
+          list above (TeamEditor), but each renders through its own
+          component family server-side, so each gets its own layout picker —
+          normally only one of these is active on a given page. */}
+      {has("agents") && layoutFor("agents") && (
+        <ComponentVariantPicker cat={layoutFor("agents")!} currentComponent={config.components.agents || ""} suggestedId={suggestedComponents.agents} dispatch={dispatch} />
+      )}
+      {has("trainers") && layoutFor("team") && (
+        <ComponentVariantPicker cat={layoutFor("team")!} currentComponent={config.components.team || ""} suggestedId={suggestedComponents.team} dispatch={dispatch} />
+      )}
+      {has("doctors") && layoutFor("doctors") && (
+        <ComponentVariantPicker cat={layoutFor("doctors")!} currentComponent={config.components.doctors || ""} suggestedId={suggestedComponents.doctors} dispatch={dispatch} />
+      )}
+      {has("instructors") && layoutFor("instructors") && (
+        <ComponentVariantPicker cat={layoutFor("instructors")!} currentComponent={config.components.instructors || ""} suggestedId={suggestedComponents.instructors} dispatch={dispatch} />
+      )}
 
       {has("class_schedule") && <ClassScheduleEditor config={config} dispatch={dispatch} />}
 
-      {has("course_grid") && <CoursesEditor config={config} dispatch={dispatch} />}
+      {has("course_grid") && (
+        <>
+          <CoursesEditor config={config} dispatch={dispatch} />
+          {layoutFor("course_grid") && (
+            <ComponentVariantPicker cat={layoutFor("course_grid")!} currentComponent={config.components.course_grid || ""} suggestedId={suggestedComponents.course_grid} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
-      {has("destination_grid") && <DestinationsEditor config={config} dispatch={dispatch} />}
+      {has("destination_grid") && (
+        <>
+          <DestinationsEditor config={config} dispatch={dispatch} />
+          {layoutFor("destination_grid") && (
+            <ComponentVariantPicker cat={layoutFor("destination_grid")!} currentComponent={config.components.destination_grid || ""} suggestedId={suggestedComponents.destination_grid} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
-      {has("travel_deals") && <DailySpecialsEditor config={config} dispatch={dispatch} />}
+      {has("travel_deals") && (
+        <>
+          <DailySpecialsEditor config={config} dispatch={dispatch} />
+          {layoutFor("travel_deals") && (
+            <ComponentVariantPicker cat={layoutFor("travel_deals")!} currentComponent={config.components.travel_deals || ""} suggestedId={suggestedComponents.travel_deals} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
       {has("feature_grid") && <ServicesEditor config={config} dispatch={dispatch} />}
 
       {has("inventory_grid") && <PortfolioEditor config={config} dispatch={dispatch} />}
+
+      {has("solutions") && (
+        <>
+          <SolutionsEditor config={config} dispatch={dispatch} />
+          {/* Solutions reuses the Services layout family server-side (there's
+              no separate "solutions" component set) — same picker, same
+              selection, so it stays in sync with any Services section on
+              the same page instead of offering a second, disconnected
+              choice for what resolves to the same component either way. */}
+          {layoutFor("services") && (
+            <ComponentVariantPicker cat={layoutFor("services")!} currentComponent={config.components.services || ""} suggestedId={suggestedComponents.services} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("industries") && (
+        <>
+          <IndustriesEditor config={config} dispatch={dispatch} />
+          {/* Industries reuses the Services layout family server-side too. */}
+          {layoutFor("services") && (
+            <ComponentVariantPicker cat={layoutFor("services")!} currentComponent={config.components.services || ""} suggestedId={suggestedComponents.services} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("case_studies") && (
+        <>
+          <CaseStudiesEditor config={config} dispatch={dispatch} />
+          {/* Case Studies reuses the Portfolio layout family server-side. */}
+          {layoutFor("portfolio") && (
+            <ComponentVariantPicker cat={layoutFor("portfolio")!} currentComponent={config.components.portfolio || ""} suggestedId={suggestedComponents.portfolio} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("rooms") && (
+        <>
+          <RoomsEditor config={config} dispatch={dispatch} />
+          {layoutFor("course_grid") && (
+            <ComponentVariantPicker cat={layoutFor("course_grid")!} currentComponent={config.components.course_grid || ""} suggestedId={suggestedComponents.course_grid} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("amenities") && (
+        <>
+          <AmenitiesEditor config={config} dispatch={dispatch} />
+          {/* Amenities reuses the Why Choose Us layout family server-side. */}
+          {layoutFor("why_choose_us") && (
+            <ComponentVariantPicker cat={layoutFor("why_choose_us")!} currentComponent={config.components.why_choose_us || ""} suggestedId={suggestedComponents.why_choose_us} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("experiences") && (
+        <>
+          <ExperiencesEditor config={config} dispatch={dispatch} />
+          {/* Experiences reuses the Portfolio layout family server-side. */}
+          {layoutFor("portfolio") && (
+            <ComponentVariantPicker cat={layoutFor("portfolio")!} currentComponent={config.components.portfolio || ""} suggestedId={suggestedComponents.portfolio} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("travel_packages") && (
+        <>
+          <TravelPackagesEditor config={config} dispatch={dispatch} />
+          {layoutFor("course_grid") && (
+            <ComponentVariantPicker cat={layoutFor("course_grid")!} currentComponent={config.components.course_grid || ""} suggestedId={suggestedComponents.course_grid} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("process") && (
+        <>
+          <ProcessEditor config={config} dispatch={dispatch} />
+          {layoutFor("process") && (
+            <ComponentVariantPicker cat={layoutFor("process")!} currentComponent={config.components.process || ""} suggestedId={suggestedComponents.process} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("programs") && (
+        <>
+          <ProgramsEditor config={config} dispatch={dispatch} />
+          {layoutFor("course_grid") && (
+            <ComponentVariantPicker cat={layoutFor("course_grid")!} currentComponent={config.components.course_grid || ""} suggestedId={suggestedComponents.course_grid} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("facilities") && (
+        <>
+          <FacilitiesEditor config={config} dispatch={dispatch} />
+          {/* Facilities reuses the Why Choose Us layout family server-side. */}
+          {layoutFor("why_choose_us") && (
+            <ComponentVariantPicker cat={layoutFor("why_choose_us")!} currentComponent={config.components.why_choose_us || ""} suggestedId={suggestedComponents.why_choose_us} dispatch={dispatch} />
+          )}
+        </>
+      )}
+
+      {has("skills") && (
+        <>
+          <SkillsEditor config={config} dispatch={dispatch} />
+          {/* Skills reuses the Why Choose Us layout family server-side. */}
+          {layoutFor("why_choose_us") && (
+            <ComponentVariantPicker cat={layoutFor("why_choose_us")!} currentComponent={config.components.why_choose_us || ""} suggestedId={suggestedComponents.why_choose_us} dispatch={dispatch} />
+          )}
+        </>
+      )}
 
       {(has("contact") || has("map") || has("contact_info")) && (
         <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
@@ -893,39 +1387,54 @@ function StepPageDetail({
               <ComponentVariantPicker cat={layoutFor("contact")!} currentComponent={config.components.contact || ""} suggestedId={suggestedComponents.contact} dispatch={dispatch} />
             </div>
           )}
+          {has("map") && layoutFor("map") && (
+            <div className="mt-3">
+              <ComponentVariantPicker cat={layoutFor("map")!} currentComponent={config.components.map || ""} suggestedId={suggestedComponents.map} dispatch={dispatch} />
+            </div>
+          )}
+          {has("contact_info") && layoutFor("contact_info") && (
+            <div className="mt-3">
+              <ComponentVariantPicker cat={layoutFor("contact_info")!} currentComponent={config.components.contact_info || ""} suggestedId={suggestedComponents.contact_info} dispatch={dispatch} />
+            </div>
+          )}
         </div>
       )}
 
       {hasCta && (
-        <ContentBlock title="Call-to-Action Content">
-          <PageContentField
-            pageId={pageId}
-            section="cta"
-            field="headline"
-            label="Headline"
-            placeholder="Ready to Get Started?"
-            dispatch={dispatch}
-            value={pageContent.cta?.headline || ""}
-          />
-          <PageContentField
-            pageId={pageId}
-            section="cta"
-            field="subheadline"
-            label="Subheadline"
-            placeholder="A short supporting line"
-            dispatch={dispatch}
-            value={pageContent.cta?.subheadline || ""}
-          />
-          <PageContentField
-            pageId={pageId}
-            section="cta"
-            field="ctaText"
-            label="Button Text"
-            placeholder="Contact Us"
-            dispatch={dispatch}
-            value={pageContent.cta?.ctaText || ""}
-          />
-        </ContentBlock>
+        <>
+          <ContentBlock title="Call-to-Action Content">
+            <PageContentField
+              pageId={pageId}
+              section="cta"
+              field="headline"
+              label="Headline"
+              placeholder="Ready to Get Started?"
+              dispatch={dispatch}
+              value={pageContent.cta?.headline || ""}
+            />
+            <PageContentField
+              pageId={pageId}
+              section="cta"
+              field="subheadline"
+              label="Subheadline"
+              placeholder="A short supporting line"
+              dispatch={dispatch}
+              value={pageContent.cta?.subheadline || ""}
+            />
+            <PageContentField
+              pageId={pageId}
+              section="cta"
+              field="ctaText"
+              label="Button Text"
+              placeholder="Contact Us"
+              dispatch={dispatch}
+              value={pageContent.cta?.ctaText || ""}
+            />
+          </ContentBlock>
+          {layoutFor("cta") && (
+            <ComponentVariantPicker cat={layoutFor("cta")!} currentComponent={config.components.cta || ""} suggestedId={suggestedComponents.cta} dispatch={dispatch} />
+          )}
+        </>
       )}
     </div>
   );
@@ -1311,6 +1820,250 @@ function DestinationsEditor({ config, dispatch }: { config: any; dispatch: any }
   );
 }
 
+function SolutionsEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; icon: string }>(config, dispatch, "solutions");
+  return (
+    <EditableList
+      title="Solutions"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", icon: "star" })}
+      addLabel="+ Add Solution"
+      emptyLabel='No solutions added yet. Click "+ Add Solution" to get started.'
+      onRemove={removeItem}
+      renderItem={(item, i) => (
+        <>
+          <Input value={item.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Solution name" />
+          <Input value={item.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" />
+        </>
+      )}
+    />
+  );
+}
+
+function IndustriesEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; icon: string }>(config, dispatch, "industries");
+  return (
+    <EditableList
+      title="Industries"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", icon: "star" })}
+      addLabel="+ Add Industry"
+      emptyLabel='No industries added yet. Click "+ Add Industry" to get started.'
+      onRemove={removeItem}
+      renderItem={(item, i) => (
+        <>
+          <Input value={item.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Industry name" />
+          <Input value={item.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" />
+        </>
+      )}
+    />
+  );
+}
+
+function CaseStudiesEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; image?: string | null }>(config, dispatch, "caseStudies");
+  return (
+    <EditableList
+      title="Case Studies"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", image: null })}
+      addLabel="+ Add Case Study"
+      emptyLabel='No case studies added yet. Click "+ Add Case Study" to get started.'
+      onRemove={removeItem}
+      renderItem={(c, i) => (
+        <>
+          <Input value={c.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Case study title" />
+          <Textarea value={c.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="What you did and the result" rows={2} />
+          <ImageUploadField value={c.image} onChange={(url) => updateItem(i, { image: url })} label="Cover Image (optional)" />
+        </>
+      )}
+    />
+  );
+}
+
+function RoomsEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>(config, dispatch, "rooms");
+  return (
+    <EditableList
+      title="Rooms & Suites"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", price: "", category: "", level: "", duration: "", image: null })}
+      addLabel="+ Add Room"
+      emptyLabel='No rooms added yet. Click "+ Add Room" to get started.'
+      onRemove={removeItem}
+      renderItem={(r, i) => (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <Input value={r.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Room name" />
+            <Input value={r.price} onChange={(e) => updateItem(i, { price: e.target.value })} placeholder="$189/night" />
+          </div>
+          <Textarea value={r.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Room description" rows={2} />
+          <Input value={r.category || ""} onChange={(e) => updateItem(i, { category: e.target.value })} placeholder="Category, e.g. Deluxe" />
+          <ImageUploadField value={r.image} onChange={(url) => updateItem(i, { image: url })} label="Room Photo (optional)" />
+        </>
+      )}
+    />
+  );
+}
+
+function AmenitiesEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string }>(config, dispatch, "amenities");
+  return (
+    <EditableList
+      title="Amenities"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "" })}
+      addLabel="+ Add Amenity"
+      emptyLabel='No amenities added yet. Click "+ Add Amenity" to get started.'
+      onRemove={removeItem}
+      renderItem={(a, i) => (
+        <>
+          <Input value={a.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="e.g. Pool & Spa" />
+          <Input value={a.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" />
+        </>
+      )}
+    />
+  );
+}
+
+function ExperiencesEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; image?: string | null }>(config, dispatch, "experiences");
+  return (
+    <EditableList
+      title="Experiences"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", image: null })}
+      addLabel="+ Add Experience"
+      emptyLabel='No experiences added yet. Click "+ Add Experience" to get started.'
+      onRemove={removeItem}
+      renderItem={(e_, i) => (
+        <>
+          <Input value={e_.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Experience name" />
+          <Textarea value={e_.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" rows={2} />
+          <ImageUploadField value={e_.image} onChange={(url) => updateItem(i, { image: url })} label="Photo (optional)" />
+        </>
+      )}
+    />
+  );
+}
+
+function TravelPackagesEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>(config, dispatch, "travelPackages");
+  return (
+    <EditableList
+      title="Travel Packages"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", price: "", category: "", level: "", duration: "", image: null })}
+      addLabel="+ Add Package"
+      emptyLabel='No packages added yet. Click "+ Add Package" to get started.'
+      onRemove={removeItem}
+      renderItem={(p, i) => (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <Input value={p.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Package name" />
+            <Input value={p.price} onChange={(e) => updateItem(i, { price: e.target.value })} placeholder="$1,299" />
+          </div>
+          <Textarea value={p.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="What's included" rows={2} />
+          <div className="grid grid-cols-2 gap-2">
+            <Input value={p.category || ""} onChange={(e) => updateItem(i, { category: e.target.value })} placeholder="Category, e.g. Adventure" />
+            <Input value={p.duration || ""} onChange={(e) => updateItem(i, { duration: e.target.value })} placeholder="Duration, e.g. 7 days" />
+          </div>
+          <ImageUploadField value={p.image} onChange={(url) => updateItem(i, { image: url })} label="Cover Image (optional)" />
+        </>
+      )}
+    />
+  );
+}
+
+function ProcessEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; icon?: string }>(config, dispatch, "process");
+  return (
+    <EditableList
+      title="Our Process"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", icon: String(items.length + 1) })}
+      addLabel="+ Add Step"
+      emptyLabel='No process steps added yet. Click "+ Add Step" to get started.'
+      onRemove={removeItem}
+      renderItem={(s, i) => (
+        <>
+          <Input value={s.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Step name, e.g. Discover" />
+          <Textarea value={s.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="What happens in this step" rows={2} />
+        </>
+      )}
+    />
+  );
+}
+
+function ProgramsEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>(config, dispatch, "programs");
+  return (
+    <EditableList
+      title="Programs"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "", price: "", category: "", level: "", duration: "", image: null })}
+      addLabel="+ Add Program"
+      emptyLabel='No programs added yet. Click "+ Add Program" to get started.'
+      onRemove={removeItem}
+      renderItem={(p, i) => (
+        <>
+          <div className="grid grid-cols-2 gap-2">
+            <Input value={p.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="Program name" />
+            <Input value={p.price} onChange={(e) => updateItem(i, { price: e.target.value })} placeholder="$89/mo" />
+          </div>
+          <Textarea value={p.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="What's included" rows={2} />
+          <div className="grid grid-cols-3 gap-2">
+            <Input value={p.category || ""} onChange={(e) => updateItem(i, { category: e.target.value })} placeholder="Category" />
+            <Input value={p.level || ""} onChange={(e) => updateItem(i, { level: e.target.value })} placeholder="Level" />
+            <Input value={p.duration || ""} onChange={(e) => updateItem(i, { duration: e.target.value })} placeholder="Duration" />
+          </div>
+          <ImageUploadField value={p.image} onChange={(url) => updateItem(i, { image: url })} label="Cover Image (optional)" />
+        </>
+      )}
+    />
+  );
+}
+
+function FacilitiesEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string }>(config, dispatch, "facilities");
+  return (
+    <EditableList
+      title="Facilities"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "" })}
+      addLabel="+ Add Facility"
+      emptyLabel='No facilities added yet. Click "+ Add Facility" to get started.'
+      onRemove={removeItem}
+      renderItem={(f, i) => (
+        <>
+          <Input value={f.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="e.g. Modern Exam Rooms" />
+          <Input value={f.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" />
+        </>
+      )}
+    />
+  );
+}
+
+function SkillsEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string }>(config, dispatch, "skills");
+  return (
+    <EditableList
+      title="Skills"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "" })}
+      addLabel="+ Add Skill"
+      emptyLabel='No skills added yet. Click "+ Add Skill" to get started.'
+      onRemove={removeItem}
+      renderItem={(s, i) => (
+        <>
+          <Input value={s.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="e.g. Brand Strategy" />
+          <Input value={s.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" />
+        </>
+      )}
+    />
+  );
+}
+
 function PricingPlansEditor({ config, dispatch }: { config: any; dispatch: any }) {
   const { items, addItem, updateItem, removeItem } = useListContent<{ name: string; price: string; period?: string; features: string[]; popular?: boolean }>(config, dispatch, "pricingPlans");
   return (
@@ -1345,13 +2098,13 @@ function StepDesign({ config, dispatch, businessType }: { config: any; dispatch:
   const navbarCat = COMPONENT_CATEGORIES.find((c) => c.category === "navbar");
   const footerCat = COMPONENT_CATEGORIES.find((c) => c.category === "footer");
 
-  // theme.typography defaults to "inter" (and gets pinned again by the
-  // business-type preset in Step 1), so the live preview's font lookup
-  // (`typography?.fontFamily || styleProfile.preview.fontFamily`) almost
-  // always resolves via typography first — meaning a Design Style pick
-  // never actually changed the visible font. Re-sync typography to match
-  // the style's own font whenever a style is picked; the Typography step
-  // below can still override it afterward.
+  // theme.typography AND theme.primaryColor/secondaryColor default to fixed
+  // values that get pinned again by the business-type preset in Step 1
+  // (selectBusinessType dispatches its own colorScheme), so picking a
+  // Design Style here used to only change its font — the color swatches
+  // shown on each style card were purely decorative and never actually
+  // applied. Re-sync typography AND colors to match the style whenever one
+  // is picked; the Colors step below can still override either afterward.
   const selectDesignStyle = (styleId: string) => {
     const style = DESIGN_STYLES.find((s) => s.id === styleId);
     const matchedTypography = TYPOGRAPHY_OPTIONS.find((t) => t.fontFamily === style?.preview.fontFamily)?.id;
@@ -1359,7 +2112,11 @@ function StepDesign({ config, dispatch, businessType }: { config: any; dispatch:
     // font isn't one of the Typography options) so a leftover selection
     // from a previous style or the business-type preset can never shadow
     // the style that was just picked.
-    dispatch(setTheme({ style: styleId, typography: matchedTypography || "" }));
+    dispatch(setTheme({
+      style: styleId,
+      typography: matchedTypography || "",
+      ...(style ? { primaryColor: style.primaryColor, secondaryColor: style.secondaryColor } : {}),
+    }));
   };
 
   return (
@@ -1620,7 +2377,6 @@ function StepReview({ config }: { config: any }) {
           <div><span className="text-muted-foreground">Type:</span> <span className="font-medium text-foreground">{businessType?.icon} {businessType?.label || config.business.type}</span></div>
           <div><span className="text-muted-foreground">Name:</span> <span className="font-medium text-foreground">{config.business.name || "Not provided"}</span></div>
           <div><span className="text-muted-foreground">Location:</span> <span className="font-medium text-foreground">{config.business.location || "Not provided"}</span></div>
-          <div><span className="text-muted-foreground">Audience:</span> <span className="font-medium text-foreground">{config.business.targetAudience || "Not provided"}</span></div>
           <div><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{config.business.email || "Not provided"}</span></div>
           <div><span className="text-muted-foreground">Phone:</span> <span className="font-medium text-foreground">{config.business.phone || "Not provided"}</span></div>
           <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="font-medium text-foreground">{config.business.address || "Not provided"}</span></div>

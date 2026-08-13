@@ -113,3 +113,28 @@ export const AgentProfiles = (props: any) => (
     </div>
   </section>
 );
+
+// ── AgentProfiles2 ─────────────────────────────────────────────
+export const AgentProfiles2 = (props: any) => (
+  <section className="py-16 sm:py-20 bg-muted/30">
+    <div className="mx-auto max-w-6xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {(props.agents || []).map((a: any, i: number) => (
+          <div key={i} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-lg">
+            <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-primary/10 to-secondary/10">
+              {a.avatar ? <img src={a.avatar} alt={a.name} className="h-full w-full object-cover" /> : (
+                <div className="flex h-full w-full items-center justify-center text-lg font-bold text-primary">{a.name?.split(" ").map((n: string) => n[0]).join("")}</div>
+              )}
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground">{a.name}</h3>
+              <p className="text-sm font-medium text-primary">{a.specialty}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);

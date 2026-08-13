@@ -19,7 +19,7 @@ const Navbar3 = ({ logo, brandName, links }: NavbarProps) => {
           )}
           <span className="text-lg font-extrabold tracking-tight text-foreground">{brandName}</span>
         </div>
-        <div className="hidden items-center gap-0.5 md:flex">
+        <div className="hidden flex-wrap items-center justify-end gap-0.5 md:flex">
           {links.map((link, i) => (
             <a key={link.href} href={link.href} className="relative rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground">
               {i === 0 && <span className="absolute inset-0 rounded-lg bg-primary/8 opacity-0 transition-opacity duration-300 hover:opacity-100" />}

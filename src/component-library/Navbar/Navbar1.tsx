@@ -19,7 +19,7 @@ const Navbar1 = ({ logo, brandName, links }: NavbarProps) => {
           )}
           <span className="text-lg font-extrabold tracking-tight text-foreground">{brandName}</span>
         </div>
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden flex-wrap items-center justify-end gap-1 md:flex">
           {links.map((link) => (
             <a key={link.href} href={link.href} className="relative rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-300 hover:text-foreground">
               <span className="relative z-10">{link.label}</span>

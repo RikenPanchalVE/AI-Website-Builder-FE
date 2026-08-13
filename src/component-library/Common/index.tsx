@@ -5,6 +5,63 @@ import { useState } from "react";
    Premium design system — each component is unique
    ═══════════════════════════════════════════════════════════ */
 
+// Platform-accurate social icons for the footer's social links row. These
+// used to render as plain two-letter initials (e.g. "IN" for both
+// Instagram and LinkedIn), which looked unfinished and was ambiguous.
+// Monochrome + currentColor so each icon inherits whatever text color the
+// footer badge is already using, including its hover state.
+const SOCIAL_ICON_PATHS: Record<string, { viewBox: string; path: string }> = {
+  facebook: {
+    viewBox: "0 0 320 512",
+    path: "M279.1 288l14.2-92.7h-88.9v-60.1c0-25.4 12.4-50.1 52.2-50.1h40.4V6.3S260.4 0 225.4 0c-73.2 0-121.1 44.4-121.1 124.7v70.6H22.9V288h81.4v224h100.2V288z",
+  },
+  twitter: {
+    viewBox: "0 0 24 24",
+    path: "M18.24 2.25h3.3l-7.2 8.23L23 21.75h-6.62l-5.2-6.8-5.94 6.8H2l7.73-8.84L1 2.25h6.78l4.7 6.22 5.76-6.22Zm-1.16 17.52h1.83L7.02 4.13H5.06l12.02 15.64Z",
+  },
+  linkedin: {
+    viewBox: "0 0 448 512",
+    path: "M100.3 448H7.4V148.9h92.9V448zM53.8 108.1C24.1 108.1 0 83.9 0 54.3a53.8 53.8 0 1 1 107.6 0c0 29.6-24.1 53.8-53.8 53.8zM447.9 448h-92.7V302.4c0-34.7-.7-79.3-48.3-79.3-48.3 0-55.7 37.7-55.7 76.7V448h-92.8V148.9h89.1v40.8h1.3c12.4-23.5 42.7-48.3 87.9-48.3 94 0 111.3 61.9 111.3 142.3V448z",
+  },
+  tiktok: {
+    viewBox: "0 0 448 512",
+    path: "M448 209.9a210.06 210.06 0 0 1-122.77-39.25v178.72A162.55 162.55 0 1 1 185 188.31v89.89a74.62 74.62 0 1 0 52.23 71.18V0h88a121.18 121.18 0 0 0 1.86 22.17A122.18 122.18 0 0 0 381 102.39a121.43 121.43 0 0 0 67 20.14z",
+  },
+};
+
+export const SocialIcon = ({ platform, className }: { platform?: string; className?: string }) => {
+  const key = (platform || "").toLowerCase();
+  const cls = className || "h-4 w-4";
+
+  if (key === "instagram") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" className={cls} aria-label="Instagram">
+        <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8" />
+        <circle cx="17.7" cy="6.3" r="1.15" fill="currentColor" />
+      </svg>
+    );
+  }
+  if (key === "youtube") {
+    return (
+      <svg viewBox="0 0 24 24" fill="none" className={cls} aria-label="YouTube">
+        <rect x="2" y="5" width="20" height="14" rx="4" stroke="currentColor" strokeWidth="1.8" />
+        <path d="M10.5 9l6 3-6 3V9z" fill="currentColor" />
+      </svg>
+    );
+  }
+  const icon = SOCIAL_ICON_PATHS[key];
+  if (icon) {
+    return (
+      <svg viewBox={icon.viewBox} fill="currentColor" className={cls} aria-label={platform}>
+        <path d={icon.path} />
+      </svg>
+    );
+  }
+  // Unknown platform — fall back to initials rather than rendering nothing.
+  return <span className="text-[10px] font-bold uppercase">{platform?.substring(0, 2)}</span>;
+};
+
 export const WhyChooseUs = (props: any) => (
   <section className="relative bg-foreground text-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-40">
@@ -292,31 +349,24 @@ export const StoreLocator = (props: any) => (
   </section>
 );
 
+// A compact page-title bar for every page other than Home — deliberately
+// not built to be a second hero. It used to share Hero1-5's own scale
+// (min-h-screen-style padding, an h1 that reads at the same enforced size
+// as the actual Home hero, an optional side image) so every single page in
+// the site opened with what looked like its own repeated hero banner. Real
+// sites reserve that treatment for the homepage and give inner pages a
+// modest title instead.
 export const PageHero = (props: any) => (
-  <section className="relative bg-background overflow-hidden">
-    <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-40">
-      <div className="grid gap-12 lg:grid-cols-12 items-end">
-        <div className="lg:col-span-8">
-          {props.subtitle && (
-            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-muted-foreground mb-6">
-              {props.subtitle}
-            </p>
-          )}
-          <h1 className="text-5xl lg:text-8xl font-bold tracking-tight leading-[0.9]" style={{ letterSpacing: "-0.05em" }}>
-            {props.title}
-          </h1>
-          {props.description && (
-            <p className="mt-8 text-lg text-muted-foreground max-w-xl leading-relaxed">{props.description}</p>
-          )}
-        </div>
-        <div className="lg:col-span-4">
-          {props.backgroundImage && (
-            <div className="aspect-[4/3] overflow-hidden">
-              <img src={props.backgroundImage} alt="" className="h-full w-full object-cover" />
-            </div>
-          )}
-        </div>
-      </div>
+  <section className="relative border-b border-border bg-muted/30 overflow-hidden">
+    <div className="mx-auto max-w-4xl px-6 lg:px-12 py-12 lg:py-16 text-center">
+      <h2 className="text-3xl lg:text-4xl font-bold tracking-tight text-foreground" style={{ letterSpacing: "-0.03em" }}>
+        {props.title}
+      </h2>
+      {props.subtitle && (
+        <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground leading-relaxed lg:text-base">
+          {props.subtitle}
+        </p>
+      )}
     </div>
   </section>
 );
@@ -531,6 +581,230 @@ export const TeamSection = (props: any) => (
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  </section>
+);
+
+// ── Variant 2s for the About page's Story/Values/Team/Statistics/Timeline
+// sections — these used to have no layout choice at all (unlike every Home
+// page section), so picking a design style never changed how they looked.
+export const AboutStory2 = (props: any) => (
+  <section className="bg-muted/30 overflow-hidden">
+    <div className="mx-auto max-w-4xl px-6 lg:px-12 py-24 lg:py-32 text-center">
+      {props.subtitle && (
+        <p className="mb-4 text-[11px] font-medium tracking-[0.2em] uppercase text-primary">{props.subtitle}</p>
+      )}
+      {props.title && (
+        <h2 className="text-4xl lg:text-5xl font-bold tracking-tight leading-[1.05] mb-8" style={{ letterSpacing: "-0.03em" }}>
+          {props.title}
+        </h2>
+      )}
+      <p className="mx-auto max-w-2xl text-lg text-muted-foreground leading-relaxed mb-12">{props.content}</p>
+      {props.stats && (
+        <div className="flex flex-wrap items-center justify-center gap-10 lg:gap-16">
+          {props.stats.map((s: any, i: number) => (
+            <div key={i}>
+              <div className="text-3xl lg:text-4xl font-bold tracking-tight text-primary" style={{ letterSpacing: "-0.03em" }}>{s.value}</div>
+              <div className="mt-1 text-xs font-medium uppercase tracking-[0.15em] text-muted-foreground">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+);
+
+export const AboutValues2 = (props: any) => (
+  <section className="bg-background overflow-hidden">
+    <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
+      <div className="mb-16 text-center">
+        <p className="mb-4 text-[11px] font-medium tracking-[0.2em] uppercase text-primary">Values</p>
+        {props.title && (
+          <h2 className="text-4xl lg:text-5xl font-bold tracking-tight" style={{ letterSpacing: "-0.03em" }}>{props.title}</h2>
+        )}
+      </div>
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        {(props.values || []).map((v: any, i: number) => (
+          <div key={i} className="rounded-2xl border border-border bg-card p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+              {String(i + 1).padStart(2, "0")}
+            </div>
+            <h3 className="text-lg font-bold tracking-tight mb-3">{v.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{v.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const Stats2 = (props: any) => (
+  <section className="bg-foreground text-background overflow-hidden">
+    <div className="mx-auto max-w-7xl px-6 lg:px-12 py-20 lg:py-28">
+      {(props.title || props.subtitle) && (
+        <div className="mb-14 text-center">
+          {props.title && (
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>{props.title}</h2>
+          )}
+          {props.subtitle && <p className="mt-3 text-background/60">{props.subtitle}</p>}
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
+        {(props.stats || []).map((s: any, i: number) => (
+          <div key={i} className="text-center" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+            <div className="text-5xl font-extrabold tracking-tight sm:text-6xl" style={{ letterSpacing: "-0.03em" }}>{s.value}</div>
+            <p className="mt-3 text-xs font-medium uppercase tracking-[0.15em] text-background/50">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const Timeline2 = (props: any) => (
+  <section className="bg-background overflow-hidden">
+    <div className="mx-auto max-w-5xl px-6 lg:px-12 py-16 lg:py-24">
+      {(props.title || props.subtitle) && (
+        <div className="mb-16 text-center">
+          {props.title && (
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>{props.title}</h2>
+          )}
+          {props.subtitle && <p className="mt-3 text-muted-foreground">{props.subtitle}</p>}
+        </div>
+      )}
+      <div className="relative">
+        <div className="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-border lg:block" />
+        <div className="space-y-10 lg:space-y-16">
+          {(props.milestones || []).map((m: any, i: number) => (
+            <div key={i} className={`relative flex flex-col gap-2 lg:flex-row lg:items-center ${i % 2 === 0 ? "" : "lg:flex-row-reverse"}`} style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+              <div className={`lg:w-1/2 ${i % 2 === 0 ? "lg:pr-12 lg:text-right" : "lg:pl-12"}`}>
+                <p className="text-xs font-bold uppercase tracking-[0.15em] text-primary">{m.year}</p>
+                <h3 className="mt-1 text-lg font-bold text-foreground">{m.title}</h3>
+                {m.description && <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{m.description}</p>}
+              </div>
+              <span className="absolute left-1/2 top-1.5 hidden h-3 w-3 -translate-x-1/2 rounded-full bg-primary lg:block" />
+              <div className="hidden lg:block lg:w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+);
+
+export const TeamSection2 = (props: any) => (
+  <section className="bg-muted/30 overflow-hidden">
+    <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
+      <div className="mb-16 text-center">
+        <p className="mb-4 text-[11px] font-medium tracking-[0.2em] uppercase text-primary">Team</p>
+        <h2 className="text-4xl lg:text-5xl font-bold tracking-tight" style={{ letterSpacing: "-0.03em" }}>{props.title || "Our People"}</h2>
+        {props.subtitle && <p className="mx-auto mt-4 max-w-lg text-muted-foreground">{props.subtitle}</p>}
+      </div>
+      <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-4">
+        {(props.members || []).map((m: any, i: number) => (
+          <div key={i} className="text-center" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+            <div className="mx-auto mb-4 h-28 w-28 overflow-hidden rounded-full bg-muted shadow-md">
+              {m.avatar ? (
+                <img src={m.avatar} alt={m.name} className="h-full w-full object-cover" />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-primary/20">
+                  {m.name?.split(" ").map((n: string) => n[0]).join("")}
+                </div>
+              )}
+            </div>
+            <h3 className="font-bold tracking-tight">{m.name}</h3>
+            <p className="mt-1 text-[11px] font-medium tracking-[0.15em] uppercase text-muted-foreground">{m.role}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// ── Variant 2s for Why Choose Us, Business Hours, Contact Info, and Map —
+// these had no layout choice at all, same gap as the About page sections.
+export const WhyChooseUs2 = (props: any) => (
+  <section className="bg-muted/30 overflow-hidden">
+    <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
+      <div className="mb-16 text-center">
+        <p className="mb-4 text-[11px] font-medium tracking-[0.2em] uppercase text-primary">Why Us</p>
+        <h2 className="text-4xl lg:text-5xl font-bold tracking-tight" style={{ letterSpacing: "-0.03em" }}>
+          {props.title || "Built Different"}
+        </h2>
+        {props.subtitle && <p className="mx-auto mt-4 max-w-xl text-muted-foreground">{props.subtitle}</p>}
+      </div>
+      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        {(props.reasons || props.features || []).map((r: any, i: number) => (
+          <div key={i} className="rounded-2xl border border-border bg-background p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+              {String(i + 1).padStart(2, "0")}
+            </div>
+            <h3 className="text-lg font-bold tracking-tight mb-3">{r.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">{r.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const BusinessHours2 = (props: any) => (
+  <section className="bg-foreground text-background overflow-hidden">
+    <div className="mx-auto max-w-3xl px-6 lg:px-12 py-16 lg:py-24 text-center">
+      {props.title && (
+        <h2 className="mb-10 text-3xl font-bold tracking-tight sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>{props.title}</h2>
+      )}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {(props.hours || []).map((h: any, i: number) => (
+          <div key={i} className="rounded-xl bg-background/10 px-4 py-5" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.06}s both` }}>
+            <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-background/50">{h.day}</p>
+            <p className="mt-1 text-sm font-bold">{h.hours}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const ContactInfo2 = (props: any) => (
+  <section className="bg-muted/30 overflow-hidden">
+    <div className="mx-auto max-w-2xl px-6 lg:px-12 py-16">
+      <div className="space-y-4">
+        {(props.methods || []).map((m: any, i: number) => (
+          <div key={i} className="flex items-center gap-5 rounded-2xl border border-border bg-background p-6 shadow-sm" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+              {String(i + 1).padStart(2, "0")}
+            </div>
+            <div>
+              <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-muted-foreground">{m.title}</p>
+              <p className="mt-1 text-sm font-bold tracking-tight">{m.value}</p>
+              {m.description && <p className="mt-0.5 text-xs text-muted-foreground">{m.description}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+export const MapEmbed2 = (props: any) => (
+  <section className="bg-background overflow-hidden">
+    <div className="mx-auto max-w-5xl px-6 lg:px-12 py-16 lg:py-24">
+      <div className="overflow-hidden rounded-2xl border border-border shadow-lg">
+        {props.lat && props.lng ? (
+          <iframe
+            src={`https://maps.google.com/maps?q=${props.lat},${props.lng}&z=15&output=embed`}
+            className="h-[420px] w-full border-0"
+            loading="lazy"
+            title="Map"
+          />
+        ) : (
+          <div className="flex h-[420px] flex-col items-center justify-center bg-muted/30 text-center text-muted-foreground">
+            <p className="text-lg font-bold text-foreground">{props.title || "Find Us"}</p>
+            <p className="mt-2 text-sm">{props.address || "Map placeholder"}</p>
+          </div>
+        )}
       </div>
     </div>
   </section>

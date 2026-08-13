@@ -1,5 +1,27 @@
 import { COMPONENT_MAP } from "@/data/componentOptions";
-import { DESIGN_STYLES, TYPOGRAPHY_OPTIONS } from "@/data/designOptions";
+import { TYPOGRAPHY_OPTIONS } from "@/data/designOptions";
+
+// The full visual identity behind each of the 12 design styles — not just a
+// font and a border radius. Mirrors server/src/services/ai/MockAIProvider.ts's
+// _buildTheme exactly, so the live preview matches what actually generates.
+const STYLE_THEME_PROFILES: Record<string, {
+  font: string; darkMode: boolean; borderRadius: string; buttonStyle: string;
+  spacing: string; shadow: string; letterSpacing: string; borderWidth: string;
+  backgroundTreatment: string;
+}> = {
+  minimal:      { font: "Inter", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
+  modern:       { font: "Inter", darkMode: false, borderRadius: "8px", buttonStyle: "rounded", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+  premium:      { font: "Playfair Display", darkMode: true, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "2px", backgroundTreatment: "gradient" },
+  corporate:    { font: "Source Sans 3", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+  creative:     { font: "Poppins", darkMode: false, borderRadius: "16px", buttonStyle: "pill", spacing: "relaxed", shadow: "md", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "gradient" },
+  luxury:       { font: "Playfair Display", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
+  friendly:     { font: "Nunito", darkMode: false, borderRadius: "20px", buttonStyle: "pill", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "plain" },
+  professional: { font: "Lato", darkMode: false, borderRadius: "6px", buttonStyle: "rounded", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+  bold:         { font: "Montserrat", darkMode: true, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "xl", letterSpacing: "tight", borderWidth: "2px", backgroundTreatment: "gradient" },
+  elegant:      { font: "Cormorant Garamond", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
+  tech:         { font: "Inter", darkMode: true, borderRadius: "8px", buttonStyle: "rounded", spacing: "compact", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+  editorial:    { font: "Playfair Display", darkMode: false, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
+};
 
 // Mixes a hex color toward white/black (amount 0 = pure color, 1 = pure
 // white/black). Mirrors server/src/services/ai/MockAIProvider.ts so the
@@ -17,6 +39,8 @@ function mixColor(hex: string, amount: number, towards: "white" | "black" = "whi
   const toHex = (channel: number) => channel.toString(16).padStart(2, "0");
   return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
 }
+
+const IMAGE_HERO_COMPONENTS = new Set(["Hero1", "Hero4"]);
 
 function resolveComponent(category: string, selectedId?: string): string {
   const map = (COMPONENT_MAP as Record<string, Record<string, string>>)[category];
@@ -117,6 +141,72 @@ const GENERIC_DESTINATIONS = [
   { name: "City Escape", price: "$649", image: null },
 ];
 
+const GENERIC_SOLUTIONS = [
+  { title: "Cloud Infrastructure", description: "Scalable, secure infrastructure tailored to your business needs.", icon: "settings" },
+  { title: "Custom Software", description: "Purpose-built software that solves your specific challenges.", icon: "star" },
+  { title: "IT Consulting", description: "Strategic guidance to help you make the right technology decisions.", icon: "heart" },
+];
+
+const GENERIC_INDUSTRIES = [
+  { title: "Healthcare", description: "Solutions tailored to the unique needs of healthcare organizations.", icon: "heart" },
+  { title: "Finance", description: "Secure, compliant solutions for financial institutions.", icon: "star" },
+  { title: "Retail", description: "Tools that help retailers compete and grow.", icon: "settings" },
+];
+
+const GENERIC_CASE_STUDIES = [
+  { title: "Doubling Conversion Rates", description: "How we helped a growing brand double its online conversion rate in three months.", image: null },
+  { title: "A Full Brand Refresh", description: "From dated to distinctive — a complete visual identity overhaul.", image: null },
+  { title: "Scaling to 10x Traffic", description: "The strategy behind a tenfold increase in organic traffic.", image: null },
+];
+
+const GENERIC_ROOMS = [
+  { title: "Deluxe Room", description: "Spacious comfort with a king bed and city views.", price: "$189/night", category: "Deluxe", duration: "", image: null },
+  { title: "Executive Suite", description: "A separate living area and premium amenities.", price: "$289/night", category: "Suite", duration: "", image: null },
+  { title: "Presidential Suite", description: "Our most luxurious accommodations, with panoramic views.", price: "$549/night", category: "Suite", duration: "", image: null },
+];
+
+const GENERIC_AMENITIES = [
+  { title: "Pool & Spa", description: "Unwind in our resort-style pool and full-service spa." },
+  { title: "Fitness Center", description: "State-of-the-art equipment, open 24 hours." },
+  { title: "Free Wi-Fi", description: "High-speed internet throughout the property." },
+];
+
+const GENERIC_EXPERIENCES = [
+  { title: "Sunset Wine Tasting", description: "An evening of curated wines paired with local bites.", image: null },
+  { title: "Guided City Tour", description: "Explore the highlights with a local expert guide.", image: null },
+  { title: "Private Chef's Table", description: "An intimate multi-course dinner prepared just for you.", image: null },
+];
+
+const GENERIC_TRAVEL_PACKAGES = [
+  { title: "Weekend Getaway", description: "A quick escape to recharge, all-inclusive.", price: "$599", category: "Short Trip", level: "", duration: "3 days", image: null },
+  { title: "Classic Adventure", description: "Our most popular week-long itinerary.", price: "$1,299", category: "Adventure", level: "", duration: "7 days", image: null },
+  { title: "Luxury Escape", description: "Premium accommodations and exclusive experiences.", price: "$2,499", category: "Luxury", level: "", duration: "10 days", image: null },
+];
+
+const GENERIC_PROCESS = [
+  { title: "Discover", description: "We start by understanding your goals, space, and style.", icon: "1" },
+  { title: "Design", description: "We create a tailored plan and bring it to life in concept form.", icon: "2" },
+  { title: "Deliver", description: "We execute the plan and hand over a finished space you'll love.", icon: "3" },
+];
+
+const GENERIC_PROGRAMS = [
+  { title: "Beginner Program", description: "A gentle introduction built for lasting habits.", price: "$49/mo", category: "Beginner", level: "Beginner", duration: "4 weeks", image: null },
+  { title: "Performance Program", description: "Structured training to hit your next milestone.", price: "$89/mo", category: "Intermediate", level: "Intermediate", duration: "8 weeks", image: null },
+  { title: "Elite Program", description: "Advanced coaching for serious, dedicated athletes.", price: "$149/mo", category: "Advanced", level: "Advanced", duration: "12 weeks", image: null },
+];
+
+const GENERIC_FACILITIES = [
+  { title: "Modern Exam Rooms", description: "Comfortable, private spaces equipped with the latest technology." },
+  { title: "On-Site Lab", description: "Fast, accurate testing without the extra trip." },
+  { title: "Accessible Facility", description: "Fully accessible for patients of all mobility levels." },
+];
+
+const GENERIC_SKILLS = [
+  { title: "Brand Strategy", description: "Defining a clear, compelling identity for growing businesses." },
+  { title: "Visual Design", description: "Crafting polished, on-brand visuals across every touchpoint." },
+  { title: "Web Development", description: "Building fast, accessible, well-crafted websites." },
+];
+
 const GENERIC_BLOG_POSTS = [
   { title: "A Behind-the-Scenes Look", excerpt: "Get a look at how we work and what makes us different.", author: "", date: "", image: null, category: "" },
   { title: "Tips From Our Team", excerpt: "Practical advice based on years of experience.", author: "", date: "", image: null, category: "" },
@@ -157,6 +247,25 @@ export const AVAILABLE_PAGES = [
   { id: "destinations", label: "Destinations" },
   { id: "features", label: "Features" },
   { id: "inventory", label: "Inventory" },
+  { id: "solutions", label: "Solutions" },
+  { id: "case-studies", label: "Case Studies" },
+  { id: "industries", label: "Industries" },
+  { id: "agents", label: "Agents" },
+  { id: "location", label: "Location" },
+  { id: "our-story", label: "Our Story" },
+  { id: "rooms", label: "Rooms" },
+  { id: "amenities", label: "Amenities" },
+  { id: "experiences", label: "Experiences" },
+  { id: "travel-packages", label: "Travel Packages" },
+  { id: "process", label: "Process" },
+  { id: "programs", label: "Programs" },
+  { id: "trainers", label: "Trainers" },
+  { id: "doctors", label: "Doctors" },
+  { id: "facilities", label: "Facilities" },
+  { id: "instructors", label: "Instructors" },
+  { id: "skills", label: "Skills" },
+  { id: "projects", label: "Projects" },
+  { id: "experience", label: "Experience" },
 ];
 
 // Per-page hero copy for the preview. Any page not listed falls back to a
@@ -172,6 +281,25 @@ const PAGE_HERO_COPY: Record<string, { headline: string; subheadline: string }> 
   testimonials: { headline: "What Clients Say", subheadline: "Real feedback from real customers." },
   gallery: { headline: "Gallery", subheadline: "A look at our work and space." },
   team: { headline: "Meet the Team", subheadline: "The people behind the business." },
+  solutions: { headline: "Our Solutions", subheadline: "How we solve problems for businesses like yours." },
+  "case-studies": { headline: "Case Studies", subheadline: "Real results for real clients." },
+  industries: { headline: "Industries We Serve", subheadline: "Specialized expertise across sectors." },
+  agents: { headline: "Meet Our Agents", subheadline: "Local experts ready to help." },
+  location: { headline: "Find Us", subheadline: "Come say hello." },
+  "our-story": { headline: "Our Story", subheadline: "How it all began." },
+  rooms: { headline: "Rooms & Suites", subheadline: "Comfort designed around you." },
+  amenities: { headline: "Amenities", subheadline: "Everything you need for a great stay." },
+  experiences: { headline: "Experiences", subheadline: "Curated moments you won't forget." },
+  "travel-packages": { headline: "Travel Packages", subheadline: "Thoughtfully planned trips, ready to book." },
+  process: { headline: "Our Process", subheadline: "How we bring your vision to life." },
+  programs: { headline: "Our Programs", subheadline: "Find the program that's right for you." },
+  trainers: { headline: "Meet Our Trainers", subheadline: "The coaches who keep you moving." },
+  doctors: { headline: "Meet Our Doctors", subheadline: "Experienced, compassionate care." },
+  facilities: { headline: "Our Facilities", subheadline: "A comfortable, modern space for your care." },
+  instructors: { headline: "Meet Your Instructors", subheadline: "Learn from experienced professionals." },
+  skills: { headline: "Skills & Expertise", subheadline: "What I bring to every project." },
+  projects: { headline: "Selected Projects", subheadline: "A look at recent work." },
+  experience: { headline: "Experience", subheadline: "Where I've been and what I've learned." },
 };
 
 // Maps the various page-specific section ids (from designOptions.ts's
@@ -190,7 +318,13 @@ export const SECTION_ALIASES: Record<string, string> = {
   "pricing-table": "pricing",
   story: "about_story",
   about_story: "about_story",
-  values: "why_choose_us",
+  // "values" is the About page's own Values/mission section (rendered via
+  // AboutValues, matching the server) — it used to alias to the same type
+  // as "why_choose_us"/"benefits" (a completely different component used
+  // by other pages' "reasons to choose us" sections), so the live preview
+  // showed the wrong section entirely for About's Values checkbox.
+  values: "about_values",
+  about_values: "about_values",
   why_choose_us: "why_choose_us",
   benefits: "why_choose_us",
   portfolio: "portfolio",
@@ -216,6 +350,21 @@ export const SECTION_ALIASES: Record<string, string> = {
   deals: "travel_deals",
   "feature-grid": "feature_grid",
   "inventory-grid": "inventory_grid",
+  "solutions-grid": "solutions",
+  "case-studies-grid": "case_studies",
+  "industries-grid": "industries",
+  "rooms-grid": "rooms",
+  "amenities-grid": "amenities",
+  "experiences-grid": "experiences",
+  "packages-grid": "travel_packages",
+  "process-steps": "process",
+  "programs-grid": "programs",
+  "doctors-grid": "doctors",
+  "facilities-grid": "facilities",
+  "instructors-grid": "instructors",
+  "skills-grid": "skills",
+  "projects-grid": "portfolio",
+  "experience-timeline": "timeline",
 };
 
 export function sectionType(rawId: string): string | undefined {
@@ -248,6 +397,17 @@ interface PreviewCtx {
   classSchedule: Array<{ day: string; time: string; className: string }>;
   courses: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
   destinations: Array<{ name: string; price?: string; image?: string | null }>;
+  solutions: Array<{ title: string; description: string; icon: string }>;
+  industries: Array<{ title: string; description: string; icon: string }>;
+  caseStudies: Array<{ title: string; description: string; image?: string | null }>;
+  rooms: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+  amenities: Array<{ title: string; description: string }>;
+  experiences: Array<{ title: string; description: string; image?: string | null }>;
+  travelPackages: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+  process: Array<{ title: string; description: string; icon?: string }>;
+  programs: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+  facilities: Array<{ title: string; description: string }>;
+  skills: Array<{ title: string; description: string }>;
   contactPhone: string;
   contactEmail: string;
   contactAddress: string;
@@ -300,8 +460,24 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "why_choose_us":
         sections.push({
           id: "why_choose_us",
-          component: "WhyChooseUs",
+          component: resolveComponent("why_choose_us", ctx.components.why_choose_us),
           props: { title: "Why Choose Us", subtitle: "What sets us apart", reasons: ctx.reasons },
+          order: order++,
+        });
+        break;
+      case "about_values":
+        sections.push({
+          id: "about_values",
+          component: resolveComponent("about_values", ctx.components.about_values),
+          props: {
+            title: "Our Values",
+            values: [
+              { title: "Excellence", description: "We strive for excellence in everything we do, setting high standards and exceeding expectations." },
+              { title: "Integrity", description: "We conduct our business with honesty, transparency, and ethical practices." },
+              { title: "Innovation", description: "We embrace new ideas and continuously improve our approach to better serve our clients." },
+              { title: "Customer Focus", description: "Our clients are at the heart of every decision we make." },
+            ],
+          },
           order: order++,
         });
         break;
@@ -331,7 +507,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "team":
         sections.push({
           id: "team",
-          component: "TeamSection",
+          component: resolveComponent("team", ctx.components.team),
           props: { title: "Meet the Team", subtitle: "The people behind the business", members: ctx.team },
           order: order++,
         });
@@ -350,7 +526,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "menu_items":
         sections.push({
           id: "menu_items",
-          component: "MenuHighlights",
+          component: resolveComponent("menu_items", ctx.components.menu_items),
           props: { title: "Our Menu", subtitle: "Carefully crafted selections", items: ctx.menuItems },
           order: order++,
         });
@@ -358,7 +534,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "daily_specials":
         sections.push({
           id: "daily_specials",
-          component: "DailySpecials",
+          component: resolveComponent("daily_specials", ctx.components.daily_specials),
           props: { title: "Today's Specials", subtitle: "Chef's picks for today", items: ctx.dailySpecials },
           order: order++,
         });
@@ -366,7 +542,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "stats":
         sections.push({
           id: "stats",
-          component: "Stats",
+          component: resolveComponent("stats", ctx.components.stats),
           props: { title: "By the Numbers", stats: ctx.stats },
           order: order++,
         });
@@ -374,7 +550,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "timeline":
         sections.push({
           id: "timeline",
-          component: "Timeline",
+          component: resolveComponent("timeline", ctx.components.timeline),
           props: { title: "Our Journey", milestones: ctx.timeline },
           order: order++,
         });
@@ -395,7 +571,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "map":
         sections.push({
           id: "map",
-          component: "MapEmbed",
+          component: resolveComponent("map", ctx.components.map),
           props: { title: "Find Us", address: ctx.contactAddress },
           order: order++,
         });
@@ -403,7 +579,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "contact_info":
         sections.push({
           id: "contact_info",
-          component: "ContactInfo",
+          component: resolveComponent("contact_info", ctx.components.contact_info),
           props: {
             methods: [
               { title: "Phone", value: ctx.contactPhone, description: "Call us directly" },
@@ -417,7 +593,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "business_hours":
         sections.push({
           id: "business_hours",
-          component: "BusinessHours",
+          component: resolveComponent("business_hours", ctx.components.business_hours),
           props: { title: "Business Hours", hours: ctx.businessHours },
           order: order++,
         });
@@ -425,7 +601,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "agents":
         sections.push({
           id: "agents",
-          component: "AgentProfiles",
+          component: resolveComponent("agents", ctx.components.agents),
           props: {
             title: "Meet Our Agents",
             agents: ctx.team.map((t) => ({ name: t.name, specialty: t.role, avatar: t.avatar })),
@@ -436,7 +612,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "trainers":
         sections.push({
           id: "trainers",
-          component: "TeamSection",
+          component: resolveComponent("team", ctx.components.team),
           props: { title: "Meet Our Trainers", subtitle: "The coaches who keep you moving", members: ctx.team },
           order: order++,
         });
@@ -452,7 +628,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "course_grid":
         sections.push({
           id: "course_grid",
-          component: "CourseGrid",
+          component: resolveComponent("course_grid", ctx.components.course_grid),
           props: { title: "Our Courses", subtitle: "Pick the path that's right for you", courses: ctx.courses },
           order: order++,
         });
@@ -460,7 +636,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "destination_grid":
         sections.push({
           id: "destination_grid",
-          component: "DestinationGrid",
+          component: resolveComponent("destination_grid", ctx.components.destination_grid),
           props: { title: "Popular Destinations", subtitle: "Where our travelers love to go", destinations: ctx.destinations },
           order: order++,
         });
@@ -468,7 +644,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
       case "travel_deals":
         sections.push({
           id: "travel_deals",
-          component: "TravelDeals",
+          component: resolveComponent("travel_deals", ctx.components.travel_deals),
           props: {
             title: "Travel Deals",
             subtitle: "Limited-time offers you won't want to miss",
@@ -496,10 +672,128 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
           order: order++,
         });
         break;
+      case "solutions":
+        sections.push({
+          id: "solutions",
+          component: resolveComponent("services", ctx.components.services),
+          props: { title: "Our Solutions", subtitle: "How we solve problems for businesses like yours", services: ctx.solutions },
+          order: order++,
+        });
+        break;
+      case "case_studies":
+        sections.push({
+          id: "case_studies",
+          component: resolveComponent("portfolio", ctx.components.portfolio),
+          props: {
+            title: "Case Studies",
+            projects: ctx.caseStudies.map((c) => ({ category: "Case Study", ...c })),
+          },
+          order: order++,
+        });
+        break;
+      case "industries":
+        sections.push({
+          id: "industries",
+          component: resolveComponent("services", ctx.components.services),
+          props: { title: "Industries We Serve", subtitle: "Specialized expertise across sectors", services: ctx.industries },
+          order: order++,
+        });
+        break;
+      case "rooms":
+        sections.push({
+          id: "rooms",
+          component: resolveComponent("course_grid", ctx.components.course_grid),
+          props: { title: "Rooms & Suites", subtitle: "Comfort designed around you", courses: ctx.rooms },
+          order: order++,
+        });
+        break;
+      case "amenities":
+        sections.push({
+          id: "amenities",
+          component: resolveComponent("why_choose_us", ctx.components.why_choose_us),
+          props: { title: "Amenities", subtitle: "Everything you need for a great stay", reasons: ctx.amenities },
+          order: order++,
+        });
+        break;
+      case "experiences":
+        sections.push({
+          id: "experiences",
+          component: resolveComponent("portfolio", ctx.components.portfolio),
+          props: {
+            title: "Experiences",
+            projects: ctx.experiences.map((e) => ({ category: "Featured", ...e })),
+          },
+          order: order++,
+        });
+        break;
+      case "travel_packages":
+        sections.push({
+          id: "travel_packages",
+          component: resolveComponent("course_grid", ctx.components.course_grid),
+          props: { title: "Travel Packages", subtitle: "Thoughtfully planned trips, ready to book", courses: ctx.travelPackages },
+          order: order++,
+        });
+        break;
+      case "process":
+        sections.push({
+          id: "process",
+          component: resolveComponent("process", ctx.components.process),
+          props: { title: "Our Process", subtitle: "How we bring your vision to life", steps: ctx.process },
+          order: order++,
+        });
+        break;
+      case "programs":
+        sections.push({
+          id: "programs",
+          component: resolveComponent("course_grid", ctx.components.course_grid),
+          props: { title: "Our Programs", subtitle: "Find the program that's right for you", courses: ctx.programs },
+          order: order++,
+        });
+        break;
+      case "doctors":
+        sections.push({
+          id: "doctors",
+          component: resolveComponent("doctors", ctx.components.doctors),
+          props: {
+            title: "Meet Our Doctors",
+            subtitle: "Experienced, compassionate care",
+            doctors: ctx.team.map((t) => ({ name: t.name, specialty: t.role, image: t.avatar, description: t.bio })),
+          },
+          order: order++,
+        });
+        break;
+      case "facilities":
+        sections.push({
+          id: "facilities",
+          component: resolveComponent("why_choose_us", ctx.components.why_choose_us),
+          props: { title: "Our Facilities", subtitle: "A comfortable, modern space for your care", reasons: ctx.facilities },
+          order: order++,
+        });
+        break;
+      case "instructors":
+        sections.push({
+          id: "instructors",
+          component: resolveComponent("instructors", ctx.components.instructors),
+          props: {
+            title: "Meet Your Instructors",
+            subtitle: "Learn from experienced professionals",
+            instructors: ctx.team.map((t) => ({ name: t.name, specialty: t.role, avatar: t.avatar })),
+          },
+          order: order++,
+        });
+        break;
+      case "skills":
+        sections.push({
+          id: "skills",
+          component: resolveComponent("why_choose_us", ctx.components.why_choose_us),
+          props: { title: "Skills & Expertise", subtitle: "What I bring to every project", reasons: ctx.skills },
+          order: order++,
+        });
+        break;
       case "about_story":
         sections.push({
           id: "about_story",
-          component: "AboutStory",
+          component: resolveComponent("about_story", ctx.components.about_story),
           props: {
             title: "Our Story",
             subtitle: "Learn about our journey",
@@ -548,29 +842,76 @@ export function buildPreviewSpec(config: any) {
   const logo = config.branding?.logo || null;
 
   const businessName = (business.name || "").trim() || "Your Business";
-  const styleProfile = DESIGN_STYLES.find((s) => s.id === theme.style) || DESIGN_STYLES[1];
   const typography = TYPOGRAPHY_OPTIONS.find((t) => t.id === theme.typography);
 
   const primaryColor = theme.primaryColor || "#2563EB";
   const secondaryColor = theme.secondaryColor || "#1E40AF";
-  const darkMode = theme.mode === "dark";
-  const fontFamily = typography?.fontFamily || styleProfile.preview.fontFamily || "Inter";
-  const borderRadius = styleProfile.preview.borderRadius || "8px";
-  // Every accent style used to collapse onto the same "rounded" button shape
-  // unless it was exactly "gradient" — so Minimal/Bold/Monochrome all looked
-  // identical. Give each its own look, mirroring the server's _buildTheme.
-  const accentStyleMap: Record<string, { buttonStyle: string; borderWidth: string }> = {
-    minimal: { buttonStyle: "rounded", borderWidth: "1px" },
-    bold: { buttonStyle: "square", borderWidth: "2px" },
-    gradient: { buttonStyle: "pill", borderWidth: "0px" },
-    monochrome: { buttonStyle: "sharp", borderWidth: "1px" },
-  };
-  const accent = accentStyleMap[theme.accentStyle] || (borderRadius === "0px" ? { buttonStyle: "sharp", borderWidth: "1px" } : { buttonStyle: "rounded", borderWidth: "1px" });
 
-  const backgroundColor = darkMode ? "#0F0F0F" : mixColor(primaryColor, 0.94);
-  const mutedColor = darkMode ? "#262626" : mixColor(primaryColor, 0.88);
-  const borderColor = darkMode ? "#333333" : mixColor(primaryColor, 0.8);
+  // Each of the 12 design styles used to only change the font and border
+  // radius here — every other knob (spacing, shadow depth, letter spacing,
+  // border width, light/dark mode, gradient vs. plain background) was
+  // hardcoded to the same "normal" value regardless of style, so switching
+  // styles in the live preview barely looked different. This profile table
+  // mirrors the server's _buildTheme exactly, so the preview you configure
+  // against is the theme you actually get.
+  const styleKey = (theme.style || "modern").toLowerCase();
+  const profile = STYLE_THEME_PROFILES[styleKey] || STYLE_THEME_PROFILES.modern;
+
+  // Respect an explicit Light/Dark choice; "auto" (or unset) falls back to
+  // whatever the design style normally uses.
+  const mode = (theme.mode || "auto").toLowerCase();
+  const darkMode = mode === "dark" ? true : mode === "light" ? false : profile.darkMode;
+
+  const fontFamily = typography?.fontFamily || profile.font || "Inter";
+  const borderRadius = profile.borderRadius || "8px";
+
+  // An explicit accent choice (Minimal/Bold/Gradient/Monochrome) wins over
+  // the design style's own default button shape / border / background
+  // treatment, mirroring the server's _buildTheme.
+  //
+  // The button treatment used to only reach a handful of `bg-primary`
+  // buttons — most hero CTAs actually use bg-foreground or bg-background,
+  // so the accent choice barely showed up anywhere. WebsiteRenderer now
+  // targets every CTA button pattern in the library, and each accent has
+  // its own fill AND shadow treatment (not just corner radius/border), so
+  // the difference reads clearly at a glance instead of needing a
+  // side-by-side close-up to spot:
+  //   Minimal    — soft round, solid fill, no shadow: quiet and clean.
+  //   Bold       — square, solid fill, hard offset "brutalist" shadow that
+  //                shifts on hover: loud and graphic.
+  //   Gradient   — pill, the button itself is gradient-filled (not just the
+  //                page background) with a soft colored glow: vivid, modern.
+  //   Monochrome — square, transparent/outlined, fills in on hover, no
+  //                shadow: understated and refined.
+  const accentStyleMap: Record<string, { buttonStyle: string; borderWidth: string; backgroundTreatment: string; buttonFill: string; buttonShadow: string }> = {
+    minimal: { buttonStyle: "rounded", borderWidth: "1px", backgroundTreatment: "plain", buttonFill: "solid", buttonShadow: "none" },
+    bold: { buttonStyle: "square", borderWidth: "3px", backgroundTreatment: "plain", buttonFill: "solid", buttonShadow: "offset" },
+    gradient: { buttonStyle: "pill", borderWidth: "0px", backgroundTreatment: "gradient", buttonFill: "gradient", buttonShadow: "glow" },
+    monochrome: { buttonStyle: "sharp", borderWidth: "2px", backgroundTreatment: "plain", buttonFill: "outline", buttonShadow: "none" },
+  };
+  const accent = accentStyleMap[(theme.accentStyle || "").toLowerCase()];
+
+  // Both light AND dark mode get a subtle tint of the chosen primary color
+  // instead of a flat neutral, so the brand color is visible across the
+  // whole page, not just on buttons. Dark mode used to hardcode the exact
+  // same "#0F0F0F"/"#262626"/"#333333" for every style, so any two
+  // dark-mode styles (Premium, Luxury, Bold, Elegant, Tech) rendered an
+  // identical page background and only differed by a small accent color —
+  // easy to miss, especially between styles with muted/desaturated
+  // primaries like Premium's crimson and Luxury's gold. Mirrors the
+  // server's _buildTheme.
+  const backgroundColor = darkMode ? mixColor(primaryColor, 0.93, "black") : mixColor(primaryColor, 0.94);
+  const mutedColor = darkMode ? mixColor(primaryColor, 0.85, "black") : mixColor(primaryColor, 0.88);
+  const borderColor = darkMode ? mixColor(primaryColor, 0.72, "black") : mixColor(primaryColor, 0.8);
   const foregroundColor = darkMode ? "#F5F5F5" : "#1A1A1A";
+
+  const shadowMap: Record<string, string> = {
+    none: "none",
+    sm: "0 1px 2px 0 rgba(0,0,0,0.05)",
+    md: "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)",
+    lg: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
+    xl: "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
+  };
 
   const themeSpec = {
     primaryColor,
@@ -585,12 +926,14 @@ export function buildPreviewSpec(config: any) {
     fontStyle: fontFamily,
     darkMode,
     borderRadius,
-    buttonStyle: accent.buttonStyle,
-    spacing: "normal",
-    shadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
-    letterSpacing: "normal",
-    borderWidth: accent.borderWidth,
-    backgroundTreatment: "plain",
+    buttonStyle: accent?.buttonStyle || profile.buttonStyle,
+    spacing: profile.spacing,
+    shadow: shadowMap[profile.shadow],
+    letterSpacing: profile.letterSpacing,
+    borderWidth: accent?.borderWidth || profile.borderWidth,
+    backgroundTreatment: accent?.backgroundTreatment || profile.backgroundTreatment,
+    buttonFill: accent?.buttonFill || "solid",
+    buttonShadow: accent?.buttonShadow || "none",
   };
 
   const selectedPageIds: string[] = config.pages?.length ? config.pages : ["home"];
@@ -612,19 +955,39 @@ export function buildPreviewSpec(config: any) {
       ? { headline: `Welcome to ${businessName}`, subheadline: business.description?.trim() || "Tell your customers what makes your business special — this updates live as you type." }
       : PAGE_HERO_COPY[pageId] || { headline: AVAILABLE_PAGES.find((p) => p.id === pageId)?.label || pageId, subheadline: `Learn more about ${businessName}.` };
 
-    const heroSection = {
-      id: "hero",
-      component: heroComponent,
-      props: {
-        headline: pageContent?.hero?.headline?.trim() || defaultCopy.headline,
-        subheadline: pageContent?.hero?.subheadline?.trim() || defaultCopy.subheadline,
-        ctaText: pageContent?.hero?.ctaText?.trim() || "Get Started",
-        ctaLink: "/contact",
-        badge: isHome ? "Welcome" : undefined,
-        logo,
-      },
-      order: 1,
-    };
+    // Only Home gets the real Hero1-5 component the client picked — every
+    // other page gets the compact PageHero title bar. These used to share
+    // one hero section built with the same component + props for every
+    // page, which meant every single page in the site rendered as a
+    // repeat of the Home hero with different text.
+    const heroSection = isHome
+      ? {
+          id: "hero",
+          component: heroComponent,
+          props: {
+            headline: pageContent?.hero?.headline?.trim() || defaultCopy.headline,
+            subheadline: pageContent?.hero?.subheadline?.trim() || defaultCopy.subheadline,
+            ctaText: pageContent?.hero?.ctaText?.trim() || "Get Started",
+            ctaLink: "/contact",
+            badge: "Welcome",
+            logo,
+            // Only Hero1 (Full-Screen Statement) and Hero4 (Image-Focused)
+            // are built around a photo — the other layouts are text-first,
+            // so don't hand them a background image even if one was
+            // uploaded while a different hero style was selected.
+            backgroundImage: IMAGE_HERO_COMPONENTS.has(heroComponent) ? config.branding?.bannerImages?.[0] || null : null,
+          },
+          order: 1,
+        }
+      : {
+          id: "page_hero",
+          component: "PageHero",
+          props: {
+            title: pageContent?.hero?.headline?.trim() || defaultCopy.headline,
+            subtitle: pageContent?.hero?.subheadline?.trim() || defaultCopy.subheadline,
+          },
+          order: 1,
+        };
 
     const ctx: PreviewCtx = {
       businessName,
@@ -646,6 +1009,17 @@ export function buildPreviewSpec(config: any) {
       classSchedule: content.classSchedule?.length ? content.classSchedule : GENERIC_CLASS_SCHEDULE,
       courses: content.courses?.length ? content.courses : GENERIC_COURSES,
       destinations: content.destinations?.length ? content.destinations : GENERIC_DESTINATIONS,
+      solutions: content.solutions?.length ? content.solutions : GENERIC_SOLUTIONS,
+      industries: content.industries?.length ? content.industries : GENERIC_INDUSTRIES,
+      caseStudies: content.caseStudies?.length ? content.caseStudies : GENERIC_CASE_STUDIES,
+      rooms: content.rooms?.length ? content.rooms : GENERIC_ROOMS,
+      amenities: content.amenities?.length ? content.amenities : GENERIC_AMENITIES,
+      experiences: content.experiences?.length ? content.experiences : GENERIC_EXPERIENCES,
+      travelPackages: content.travelPackages?.length ? content.travelPackages : GENERIC_TRAVEL_PACKAGES,
+      process: content.process?.length ? content.process : GENERIC_PROCESS,
+      programs: content.programs?.length ? content.programs : GENERIC_PROGRAMS,
+      facilities: content.facilities?.length ? content.facilities : GENERIC_FACILITIES,
+      skills: content.skills?.length ? content.skills : GENERIC_SKILLS,
       contactPhone: business.phone?.trim() || "+1 (555) 123-4567",
       contactEmail: business.email?.trim() || "hello@example.com",
       contactAddress: business.address?.trim() || "123 Business St, Suite 100",

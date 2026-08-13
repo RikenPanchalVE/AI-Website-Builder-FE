@@ -33,6 +33,40 @@ export const CourseGrid = (props: any) => (
   </section>
 );
 
+// ── CourseGrid2 (also used by Rooms & Suites / Travel Packages / Programs,
+//    which all share this component family server-side) ───────
+export const CourseGrid2 = (props: any) => (
+  <section className="py-16 sm:py-20 bg-muted/30">
+    <div className="mx-auto max-w-5xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="space-y-5">
+        {(props.courses || []).map((course: any, i: number) => (
+          <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-lg sm:flex-row">
+            <div className="aspect-[16/9] w-full flex-shrink-0 overflow-hidden bg-muted sm:aspect-square sm:w-48">
+              {course.image ? <img src={course.image} alt={course.title} className="h-full w-full object-cover" /> : (
+                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10"><span className="text-4xl text-primary/20">📚</span></div>
+              )}
+            </div>
+            <div className="flex flex-1 flex-col justify-center gap-1 p-5">
+              <div className="flex items-center gap-2">
+                {course.category && <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{course.category}</span>}
+                {course.level && <span className="text-xs text-muted-foreground">{course.level}</span>}
+              </div>
+              <h3 className="font-bold text-foreground">{course.title}</h3>
+              {course.description && <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>}
+            </div>
+            <div className="flex flex-row items-center justify-between gap-1 border-t border-border p-5 sm:flex-col sm:items-end sm:justify-center sm:border-l sm:border-t-0">
+              <span className="text-lg font-extrabold text-primary">{course.price}</span>
+              {course.duration && <span className="text-xs text-muted-foreground">{course.duration}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 // ── LearningPaths ──────────────────────────────────────────────
 export const LearningPaths = (props: any) => (
   <section className="py-16 sm:py-20 bg-muted/30">
@@ -48,6 +82,31 @@ export const LearningPaths = (props: any) => (
               {step.description && <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>}
               {step.courses && <p className="mt-2 text-xs font-medium text-primary">{step.courses} courses</p>}
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// ── LearningPaths2 (used for the "Our Process" section) ─────────
+export const LearningPaths2 = (props: any) => (
+  <section className="py-16 sm:py-20">
+    <div className="mx-auto max-w-6xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+        {(props.steps || props.paths || []).map((step: any, i: number, arr: any[]) => (
+          <div key={i} className="relative text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-primary bg-background text-lg font-extrabold text-primary">
+              {step.icon || i + 1}
+            </div>
+            <h3 className="font-bold text-foreground">{step.title}</h3>
+            {step.description && <p className="mt-1 text-sm text-muted-foreground">{step.description}</p>}
+            {step.courses && <p className="mt-2 text-xs font-medium text-primary">{step.courses} courses</p>}
+            {i < arr.length - 1 && (
+              <span className="absolute right-[-14%] top-6 hidden text-2xl text-primary/30 lg:block">→</span>
+            )}
           </div>
         ))}
       </div>
@@ -106,6 +165,31 @@ export const InstructorProfiles = (props: any) => (
             </div>
             <h3 className="font-bold text-foreground">{ins.name}</h3>
             <p className="mt-0.5 text-sm font-medium text-primary">{ins.specialty}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+// ── InstructorProfiles2 ────────────────────────────────────────
+export const InstructorProfiles2 = (props: any) => (
+  <section className="py-16 sm:py-20 bg-muted/30">
+    <div className="mx-auto max-w-6xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {(props.instructors || []).map((ins: any, i: number) => (
+          <div key={i} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-lg">
+            <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10">
+              {ins.avatar ? <img src={ins.avatar} alt={ins.name} className="h-full w-full object-cover" /> : (
+                <div className="flex h-full w-full items-center justify-center text-lg font-bold text-primary">{ins.name?.split(" ").map((n: string) => n[0]).join("")}</div>
+              )}
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground">{ins.name}</h3>
+              <p className="text-sm font-medium text-primary">{ins.specialty}</p>
+            </div>
           </div>
         ))}
       </div>

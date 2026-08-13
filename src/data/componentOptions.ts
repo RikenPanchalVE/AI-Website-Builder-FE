@@ -368,6 +368,402 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
       },
     ],
   },
+  {
+    category: "about_story",
+    label: "Company Story Layout",
+    description: "How your journey and mission are presented.",
+    required: false,
+    options: [
+      {
+        id: "about_story1",
+        name: "Split with Image",
+        description: "Photo on one side, story and stats on the other.",
+        preview: { layout: "image-split", style: "editorial", elements: ["image", "headline", "content", "stat-grid"] },
+        bestFor: ["agency", "consulting", "real-estate", "portfolio"],
+      },
+      {
+        id: "about_story2",
+        name: "Centered Statement",
+        description: "No image — a centered pull-quote style story with inline stats.",
+        preview: { layout: "centered", style: "minimal", elements: ["headline", "content", "inline-stats"] },
+        bestFor: ["consulting", "technology", "finance", "luxury"],
+      },
+    ],
+  },
+  {
+    category: "about_values",
+    label: "Values Layout",
+    description: "How your mission and values are displayed.",
+    required: false,
+    options: [
+      {
+        id: "about_values1",
+        name: "Numbered Grid",
+        description: "Bordered grid with large index numbers. Editorial and structured.",
+        preview: { layout: "bordered-grid", style: "editorial", elements: ["numbered-cards"] },
+        bestFor: ["agency", "consulting", "portfolio", "finance"],
+      },
+      {
+        id: "about_values2",
+        name: "Icon Cards",
+        description: "Rounded cards with icon badges. Friendly and approachable.",
+        preview: { layout: "card-grid", style: "visual", elements: ["icon-cards", "shadow"] },
+        bestFor: ["healthcare", "education", "restaurant", "local-business"],
+      },
+    ],
+  },
+  {
+    category: "team",
+    label: "Team Layout",
+    description: "How team member profiles are displayed.",
+    required: false,
+    options: [
+      {
+        id: "team1",
+        name: "Photo Grid",
+        description: "Full-bleed square photos in a bordered grid. Editorial.",
+        preview: { layout: "bordered-grid", style: "editorial", elements: ["square-photos", "name", "role", "bio"] },
+        bestFor: ["agency", "consulting", "portfolio", "creative"],
+      },
+      {
+        id: "team2",
+        name: "Circular Avatars",
+        description: "Centered circular avatars in a clean row. Warm and approachable.",
+        preview: { layout: "centered-grid", style: "friendly", elements: ["circle-avatars", "name", "role"] },
+        bestFor: ["healthcare", "education", "restaurant", "local-business"],
+      },
+    ],
+  },
+  {
+    category: "stats",
+    label: "Statistics Layout",
+    description: "How key numbers and achievements are shown.",
+    required: false,
+    options: [
+      {
+        id: "stats1",
+        name: "Bordered Grid",
+        description: "Light background with a bordered stat grid. Clean and structured.",
+        preview: { layout: "bordered-grid", style: "editorial", elements: ["stat-grid"] },
+        bestFor: ["agency", "consulting", "portfolio", "finance"],
+      },
+      {
+        id: "stats2",
+        name: "Bold Band",
+        description: "Full-width inverted dark band with large numbers. High impact.",
+        preview: { layout: "inverted-band", style: "bold", elements: ["large-numbers"] },
+        bestFor: ["technology", "fitness", "startup", "automotive"],
+      },
+    ],
+  },
+  {
+    category: "timeline",
+    label: "Timeline Layout",
+    description: "How company milestones are presented.",
+    required: false,
+    options: [
+      {
+        id: "timeline1",
+        name: "Vertical List",
+        description: "A simple left-bordered vertical list of milestones.",
+        preview: { layout: "vertical-list", style: "minimal", elements: ["year", "title", "description"] },
+        bestFor: ["consulting", "finance", "healthcare", "local-business"],
+      },
+      {
+        id: "timeline2",
+        name: "Alternating",
+        description: "Milestones alternate left and right along a center line.",
+        preview: { layout: "alternating", style: "editorial", elements: ["year", "title", "description", "center-line"] },
+        bestFor: ["agency", "portfolio", "creative", "real-estate"],
+      },
+    ],
+  },
+  {
+    category: "why_choose_us",
+    label: "Why Choose Us Layout",
+    description: "How your reasons/benefits are presented.",
+    required: false,
+    options: [
+      {
+        id: "why_choose_us1",
+        name: "Inverted List",
+        description: "Dark, full-bleed section with a numbered list. Bold and editorial.",
+        preview: { layout: "split-list", style: "inverted", elements: ["numbered-list"] },
+        bestFor: ["agency", "technology", "consulting", "finance"],
+      },
+      {
+        id: "why_choose_us2",
+        name: "Icon Cards",
+        description: "Light background with rounded icon cards. Friendly and approachable.",
+        preview: { layout: "card-grid", style: "visual", elements: ["icon-cards", "shadow"] },
+        bestFor: ["healthcare", "education", "restaurant", "local-business"],
+      },
+    ],
+  },
+  {
+    category: "business_hours",
+    label: "Business Hours Layout",
+    description: "How your operating hours are displayed.",
+    required: false,
+    options: [
+      {
+        id: "business_hours1",
+        name: "Simple List",
+        description: "A clean bordered list of days and hours.",
+        preview: { layout: "vertical-list", style: "minimal", elements: ["day", "hours"] },
+        bestFor: ["local-business", "healthcare", "restaurant", "consulting"],
+      },
+      {
+        id: "business_hours2",
+        name: "Inverted Grid",
+        description: "Dark full-bleed section with hours in a card grid.",
+        preview: { layout: "card-grid", style: "inverted", elements: ["day-cards"] },
+        bestFor: ["restaurant", "fitness", "local-business", "beauty"],
+      },
+    ],
+  },
+  {
+    category: "contact_info",
+    label: "Contact Info Layout",
+    description: "How your contact methods are displayed.",
+    required: false,
+    options: [
+      {
+        id: "contact_info1",
+        name: "Bordered Grid",
+        description: "Contact methods in a clean bordered grid.",
+        preview: { layout: "bordered-grid", style: "editorial", elements: ["method-cards"] },
+        bestFor: ["agency", "consulting", "portfolio", "finance"],
+      },
+      {
+        id: "contact_info2",
+        name: "Stacked Cards",
+        description: "Contact methods as a vertical list of icon cards.",
+        preview: { layout: "vertical-list", style: "visual", elements: ["icon-rows"] },
+        bestFor: ["healthcare", "education", "restaurant", "local-business"],
+      },
+    ],
+  },
+  {
+    category: "map",
+    label: "Map Layout",
+    description: "How your location map is displayed.",
+    required: false,
+    options: [
+      {
+        id: "map1",
+        name: "Full Width",
+        description: "A large, full-width map panel.",
+        preview: { layout: "full-width", style: "minimal", elements: ["map"] },
+        bestFor: ["local-business", "real-estate", "healthcare", "restaurant"],
+      },
+      {
+        id: "map2",
+        name: "Rounded Card",
+        description: "A rounded, shadowed map card with more breathing room.",
+        preview: { layout: "contained-card", style: "visual", elements: ["map", "shadow"] },
+        bestFor: ["agency", "consulting", "portfolio", "beauty"],
+      },
+    ],
+  },
+  {
+    category: "course_grid",
+    label: "Grid Layout",
+    description: "How your listings (courses, rooms, packages, or programs) are displayed.",
+    required: false,
+    options: [
+      {
+        id: "course_grid1",
+        name: "Card Grid",
+        description: "A responsive grid of cards with image, details, and price.",
+        preview: { layout: "card-grid", style: "clean", elements: ["image", "title", "price"] },
+        bestFor: ["education", "fitness", "travel", "real-estate"],
+      },
+      {
+        id: "course_grid2",
+        name: "Listing Rows",
+        description: "A vertical list of wide rows — image, details, and price side by side.",
+        preview: { layout: "row-list", style: "editorial", elements: ["image", "title", "price"] },
+        bestFor: ["real-estate", "travel", "education", "fitness"],
+      },
+    ],
+  },
+  {
+    category: "process",
+    label: "Process Layout",
+    description: "How your process/workflow steps are presented.",
+    required: false,
+    options: [
+      {
+        id: "process1",
+        name: "Stacked Steps",
+        description: "Steps stacked vertically as wide cards with a number badge.",
+        preview: { layout: "vertical-list", style: "clean", elements: ["number", "title", "description"] },
+        bestFor: ["agency", "consulting", "technology", "real-estate"],
+      },
+      {
+        id: "process2",
+        name: "Connected Flow",
+        description: "Steps in a row connected by arrows — reads left to right like a flowchart.",
+        preview: { layout: "horizontal-flow", style: "visual", elements: ["number", "title", "arrow"] },
+        bestFor: ["technology", "agency", "education", "consulting"],
+      },
+    ],
+  },
+  {
+    category: "daily_specials",
+    label: "Daily Specials Layout",
+    description: "How today's specials are displayed.",
+    required: false,
+    options: [
+      {
+        id: "daily_specials1",
+        name: "Bold Banner",
+        description: "A vivid full-width gradient banner with special cards.",
+        preview: { layout: "card-grid", style: "vibrant", elements: ["gradient-bg", "cards"] },
+        bestFor: ["restaurant"],
+      },
+      {
+        id: "daily_specials2",
+        name: "Simple List",
+        description: "A clean, restrained list — better fit for upscale or minimal menus.",
+        preview: { layout: "vertical-list", style: "minimal", elements: ["tag", "price"] },
+        bestFor: ["restaurant"],
+      },
+    ],
+  },
+  {
+    category: "agents",
+    label: "Agents Layout",
+    description: "How your agent profiles are displayed.",
+    required: false,
+    options: [
+      {
+        id: "agents1",
+        name: "Photo Grid",
+        description: "Centered circular photos in a clean grid.",
+        preview: { layout: "centered-grid", style: "clean", elements: ["circle-avatars", "name", "specialty"] },
+        bestFor: ["real-estate"],
+      },
+      {
+        id: "agents2",
+        name: "Contact Cards",
+        description: "Bordered cards with photo and details side by side.",
+        preview: { layout: "card-list", style: "visual", elements: ["avatar", "name", "specialty"] },
+        bestFor: ["real-estate"],
+      },
+    ],
+  },
+  {
+    category: "destination_grid",
+    label: "Destinations Layout",
+    description: "How your destinations are displayed.",
+    required: false,
+    options: [
+      {
+        id: "destination_grid1",
+        name: "Overlay Cards",
+        description: "Photo cards with the name overlaid at the bottom. Travel-magazine feel.",
+        preview: { layout: "card-grid", style: "visual", elements: ["image", "overlay-text"] },
+        bestFor: ["travel"],
+      },
+      {
+        id: "destination_grid2",
+        name: "Framed Cards",
+        description: "Photo above, name and price below in a clean bordered card.",
+        preview: { layout: "card-grid", style: "clean", elements: ["image", "title", "price-pill"] },
+        bestFor: ["travel"],
+      },
+    ],
+  },
+  {
+    category: "travel_deals",
+    label: "Travel Deals Layout",
+    description: "How your travel deals are displayed.",
+    required: false,
+    options: [
+      {
+        id: "travel_deals1",
+        name: "Card Grid",
+        description: "A grid of deal cards with a discount badge.",
+        preview: { layout: "card-grid", style: "clean", elements: ["image", "discount-badge", "price"] },
+        bestFor: ["travel"],
+      },
+      {
+        id: "travel_deals2",
+        name: "Listing Rows",
+        description: "A vertical list of wide rows — easier to scan a long list of deals.",
+        preview: { layout: "row-list", style: "editorial", elements: ["image", "discount-badge", "price"] },
+        bestFor: ["travel"],
+      },
+    ],
+  },
+  {
+    category: "doctors",
+    label: "Doctors Layout",
+    description: "How your doctor profiles are displayed.",
+    required: false,
+    options: [
+      {
+        id: "doctors1",
+        name: "Profile Cards",
+        description: "Bordered cards with a rectangular photo. Clinical and structured.",
+        preview: { layout: "card-grid", style: "clean", elements: ["image", "name", "specialty"] },
+        bestFor: ["healthcare"],
+      },
+      {
+        id: "doctors2",
+        name: "Circular Photos",
+        description: "Centered circular photos in a clean grid. Warmer and more personal.",
+        preview: { layout: "centered-grid", style: "friendly", elements: ["circle-photo", "name", "specialty"] },
+        bestFor: ["healthcare"],
+      },
+    ],
+  },
+  {
+    category: "instructors",
+    label: "Instructors Layout",
+    description: "How your instructor profiles are displayed.",
+    required: false,
+    options: [
+      {
+        id: "instructors1",
+        name: "Photo Grid",
+        description: "Centered circular photos in a clean grid.",
+        preview: { layout: "centered-grid", style: "clean", elements: ["circle-avatars", "name", "specialty"] },
+        bestFor: ["education"],
+      },
+      {
+        id: "instructors2",
+        name: "Contact Cards",
+        description: "Bordered cards with photo and details side by side.",
+        preview: { layout: "card-list", style: "visual", elements: ["avatar", "name", "specialty"] },
+        bestFor: ["education"],
+      },
+    ],
+  },
+  {
+    category: "menu_items",
+    label: "Menu Layout",
+    description: "How your menu items are displayed.",
+    required: false,
+    options: [
+      {
+        id: "menu_items1",
+        name: "Photo Cards",
+        description: "Bordered cards with a photo, name, description, and price.",
+        preview: { layout: "card-grid", style: "visual", elements: ["image", "name", "price"] },
+        bestFor: ["restaurant"],
+      },
+      {
+        id: "menu_items2",
+        name: "Classic List",
+        description: "A classic printed-menu look — name, dotted leader line, price. No photos.",
+        preview: { layout: "vertical-list", style: "editorial", elements: ["name", "dotted-line", "price"] },
+        bestFor: ["restaurant"],
+      },
+    ],
+  },
 ];
 
 export const COMPONENT_MAP: Record<string, Record<string, string>> = {
@@ -384,4 +780,32 @@ export const COMPONENT_MAP: Record<string, Record<string, string>> = {
   about: { about1: "About1", about2: "About2" },
   gallery: { gallery1: "Gallery1", gallery2: "Gallery2" },
   blog: { blog1: "BlogPreview", blog2: "BlogGrid" },
+  // The About page's own sections (Company Story, Values, Team, Statistics,
+  // Timeline) never had a layout choice at all, unlike every Home page
+  // section — picking a design style changed colors/fonts but these five
+  // always rendered the exact same fixed layout.
+  about_story: { about_story1: "AboutStory", about_story2: "AboutStory2" },
+  about_values: { about_values1: "AboutValues", about_values2: "AboutValues2" },
+  team: { team1: "TeamSection", team2: "TeamSection2" },
+  stats: { stats1: "Stats", stats2: "Stats2" },
+  timeline: { timeline1: "Timeline", timeline2: "Timeline2" },
+  // Same gap: Why Choose Us, Business Hours, Contact Info, and Map never
+  // had a layout choice either.
+  why_choose_us: { why_choose_us1: "WhyChooseUs", why_choose_us2: "WhyChooseUs2" },
+  business_hours: { business_hours1: "BusinessHours", business_hours2: "BusinessHours2" },
+  contact_info: { contact_info1: "ContactInfo", contact_info2: "ContactInfo2" },
+  map: { map1: "MapEmbed", map2: "MapEmbed2" },
+  // Course Grid / Rooms & Suites / Travel Packages / Programs all share this
+  // same card-grid component family server-side (a title/description/
+  // price/duration listing fits all four content types structurally), so
+  // one shared category covers all of them.
+  course_grid: { course_grid1: "CourseGrid", course_grid2: "CourseGrid2" },
+  process: { process1: "LearningPaths", process2: "LearningPaths2" },
+  daily_specials: { daily_specials1: "DailySpecials", daily_specials2: "DailySpecials2" },
+  agents: { agents1: "AgentProfiles", agents2: "AgentProfiles2" },
+  destination_grid: { destination_grid1: "DestinationGrid", destination_grid2: "DestinationGrid2" },
+  travel_deals: { travel_deals1: "TravelDeals", travel_deals2: "TravelDeals2" },
+  doctors: { doctors1: "DoctorProfiles", doctors2: "DoctorProfiles2" },
+  instructors: { instructors1: "InstructorProfiles", instructors2: "InstructorProfiles2" },
+  menu_items: { menu_items1: "MenuHighlights", menu_items2: "MenuHighlights2" },
 };

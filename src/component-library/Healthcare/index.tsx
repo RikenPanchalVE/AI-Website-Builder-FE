@@ -84,6 +84,30 @@ export const DoctorProfiles = (props: any) => (
   </section>
 );
 
+// ── DoctorProfiles2 ────────────────────────────────────────────
+export const DoctorProfiles2 = (props: any) => (
+  <section className="py-16 sm:py-20 bg-muted/30">
+    <div className="mx-auto max-w-6xl px-6">
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-muted-foreground">{props.subtitle}</p>}
+      <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-4">
+        {(props.doctors || []).map((doc: any, i: number) => (
+          <div key={i} className="text-center">
+            <div className="mx-auto mb-4 h-28 w-28 overflow-hidden rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 shadow-md">
+              {doc.image ? <img src={doc.image} alt={doc.name} className="h-full w-full object-cover" /> : (
+                <div className="flex h-full w-full items-center justify-center text-3xl">👨‍⚕️</div>
+              )}
+            </div>
+            <h3 className="font-bold text-foreground">{doc.name}</h3>
+            <p className="mt-0.5 text-sm font-medium text-primary">{doc.specialty}</p>
+            {doc.description && <p className="mt-2 text-xs text-muted-foreground leading-relaxed">{doc.description}</p>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 // ── HealthResources ────────────────────────────────────────────
 export const HealthResources = (props: any) => (
   <section className="py-16 sm:py-20">

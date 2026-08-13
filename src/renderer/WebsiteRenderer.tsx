@@ -154,6 +154,57 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   const borderWidth = (theme as any)?.borderWidth || "1px";
   const borderRadius = (theme as any)?.borderRadius || "8px";
   const buttonStyle = (theme as any)?.buttonStyle || "rounded";
+  // Computed per design style (premium/creative/luxury/bold/elegant get
+  // "gradient", the rest "plain") but never actually applied anywhere —
+  // every page rendered with a flat background regardless. A subtle
+  // diagonal wash on top of the flat color is enough to read as a
+  // distinct, more polished treatment without fighting page content.
+  const backgroundTreatment = (theme as any)?.backgroundTreatment || "plain";
+  const backgroundImageCss =
+    backgroundTreatment === "gradient"
+      ? "linear-gradient(165deg, var(--theme-primary-soft) 0%, transparent 45%, var(--theme-secondary-soft) 100%)"
+      : "none";
+  // "solid" (Minimal/Bold) fills CTA buttons with the primary color;
+  // "gradient" (Gradient) fills them with an actual primary→secondary
+  // gradient, not just a flat color; "outline" (Monochrome) renders them as
+  // a bordered, transparent button that fills in on hover. Each is a
+  // genuinely different treatment, not just a different corner radius, so
+  // no accent reads as a slight variation on another.
+  const buttonFill = (theme as any)?.buttonFill || "solid";
+  // "offset" (Bold) adds a hard, unblurred "brutalist" drop shadow that
+  // punches further out on hover; "glow" (Gradient) adds a soft colored
+  // glow. Combined with buttonFill, this is what actually makes each accent
+  // recognizable at a glance instead of requiring a close-up comparison.
+  const buttonShadow = (theme as any)?.buttonShadow || "none";
+
+  // The accent-style button treatment used to only ever reach `bg-primary`
+  // buttons — but most Hero CTAs in the component library use
+  // bg-foreground or bg-white, and Hero1 specifically uses bg-background
+  // (paired with px-8 padding, which nothing else in the library combines
+  // with bg-background), so the single most prominent button on the page
+  // very often showed no accent styling at all. This selector list covers
+  // every CTA pattern actually used across Hero/CTA/Contact/Footer.
+  // bg-foreground and bg-background require a companion px-* class (real
+  // CTA buttons always carry horizontal padding) — otherwise this would
+  // also sweep up small fixed-size elements like Footer3's h-6 w-6 social
+  // icon badges (which use "hover:bg-foreground" purely for its color, not
+  // as a button) into full CTA-button padding/shadow treatment.
+  const ctaSelector = [
+    'button[class*="bg-primary"]', 'a[class*="bg-primary"]',
+    'button[class*="bg-foreground"][class*="px-"]', 'a[class*="bg-foreground"][class*="px-"]',
+    'button[class*="bg-background"][class*="px-"]', 'a[class*="bg-background"][class*="px-"]',
+    'button[class*="bg-white"]', 'a[class*="bg-white"]',
+    '[class*="btn-gradient"]',
+  ].map((s) => `.theme-preview ${s}`).join(",\n    ");
+  const ctaHoverSelector = [
+    'button[class*="bg-primary"]:hover', 'a[class*="bg-primary"]:hover',
+    'button[class*="bg-foreground"][class*="px-"]:hover', 'a[class*="bg-foreground"][class*="px-"]:hover',
+    'button[class*="bg-background"][class*="px-"]:hover', 'a[class*="bg-background"][class*="px-"]:hover',
+    'button[class*="bg-white"]:hover', 'a[class*="bg-white"]:hover',
+    '[class*="btn-gradient"]:hover',
+  ].map((s) => `.theme-preview ${s}`).join(",\n    ");
+  const formBtnSelector = '.theme-preview form button[type="submit"],\n    .theme-preview form button:not([type])';
+  const formBtnHoverSelector = '.theme-preview form button[type="submit"]:hover,\n    .theme-preview form button:not([type]):hover';
 
   const themeStyle = {
     "--color-primary": primaryColor,
@@ -204,9 +255,16 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       --ds-letter-spacing: ${letterSpacing === "tight" ? "-0.04em" : letterSpacing === "wide" ? "0.06em" : "0"};
       --ds-border-width: ${borderWidth};
       --ds-radius: ${borderRadius};
-      --ds-btn-radius: ${buttonStyle === "pill" ? "9999px" : buttonStyle === "sharp" ? "0px" : buttonStyle === "square" ? "2px" : borderRadius};
+      /* Fixed per-shape values instead of "rounded" falling back to the
+         design style's own base radius — that fallback could land right on
+         top of "square"'s 4px for styles with a small base radius (Premium,
+         Editorial, etc.), making Minimal and Bold's buttons look the same
+         shape even after everything else about them was made distinct. */
+      --ds-btn-radius: ${buttonStyle === "pill" ? "9999px" : buttonStyle === "sharp" ? "0px" : buttonStyle === "square" ? "4px" : "14px"};
+      --ds-bg-image: ${backgroundImageCss};
 
       background-color: var(--theme-background);
+      background-image: var(--ds-bg-image);
       color: var(--theme-foreground);
       font-family: ${fontFamily}, Inter, system-ui, -apple-system, sans-serif;
       scroll-behavior: smooth;
@@ -239,7 +297,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     .theme-preview .to-secondary { --tw-gradient-to: var(--theme-gradient-to) !important; }
     .theme-preview .from-primary\\/10 { --tw-gradient-from: color-mix(in srgb, var(--theme-primary) 10%, transparent) !important; }
     .theme-preview .to-secondary\\/10 { --tw-gradient-to: color-mix(in srgb, var(--theme-secondary) 10%, transparent) !important; }
-    .theme-preview .bg-background { background-color: var(--theme-background) !important; }
+    .theme-preview .bg-background { background-color: var(--theme-background) !important; background-image: var(--ds-bg-image) !important; }
     .theme-preview .text-foreground { color: var(--theme-foreground) !important; }
     .theme-preview .bg-muted { background-color: var(--theme-muted) !important; }
     .theme-preview .bg-muted\\/50 { background-color: color-mix(in srgb, var(--theme-muted) 50%, white) !important; }
@@ -255,34 +313,41 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     .theme-preview .ring-glow { box-shadow: 0 0 0 4px var(--theme-ring-glow) !important; }
     .theme-preview .text-glow { text-shadow: 0 0 20px var(--theme-ring-glow) !important; }
 
-    /* ── Editorial Typography Scale ──────────────────────────── */
+    /* ── Editorial Typography Scale ──────────────────────────────────
+       Every h1–h4/p in every component is forced through this scale with
+       !important (so per-component Tailwind size classes never actually
+       apply) — it used to run all the way up to a 6rem/96px h1 and an
+       8rem/128px stat number, and forced even a Footer column label
+       explicitly set to text-xs (12px) up to 16px. Toned down to sizes
+       that read as confident on a Hero without dominating every section
+       heading and card title on the page. ────────────────────────── */
     .theme-preview h1 {
-      font-size: clamp(2.8rem, 7vw, 6rem) !important;
+      font-size: clamp(2rem, 4vw, 3.25rem) !important;
       font-weight: 800 !important;
-      line-height: 0.95 !important;
+      line-height: 1.1 !important;
       letter-spacing: var(--ds-letter-spacing) !important;
     }
     .theme-preview h2 {
-      font-size: clamp(2rem, 4.5vw, 3.5rem) !important;
+      font-size: clamp(1.5rem, 2.5vw, 2.25rem) !important;
       font-weight: 700 !important;
-      line-height: 1.05 !important;
+      line-height: 1.15 !important;
       letter-spacing: var(--ds-letter-spacing) !important;
     }
     .theme-preview h3 {
-      font-size: clamp(1.25rem, 2vw, 1.75rem) !important;
+      font-size: clamp(1.125rem, 1.4vw, 1.375rem) !important;
       font-weight: 600 !important;
-      line-height: 1.3 !important;
+      line-height: 1.35 !important;
       letter-spacing: var(--ds-letter-spacing) !important;
     }
     .theme-preview h4 {
-      font-size: 1rem !important;
+      font-size: 0.75rem !important;
       font-weight: 600 !important;
       letter-spacing: var(--ds-letter-spacing) !important;
       text-transform: uppercase !important;
     }
     .theme-preview p {
-      font-size: clamp(1rem, 1.2vw, 1.15rem) !important;
-      line-height: 1.7 !important;
+      font-size: clamp(0.9375rem, 0.5vw, 1.0625rem) !important;
+      line-height: 1.65 !important;
     }
 
     /* ── Section Spacing ────────────────────────────────────── */
@@ -303,39 +368,84 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     @keyframes pTextReveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0% 0 0); } }
 
     /* ── Buttons ────────────────────────────────────────────── */
-    .theme-preview button[class*="bg-primary"],
-    .theme-preview a[class*="bg-primary"],
-    .theme-preview [class*="btn-gradient"] {
+    ${ctaSelector},
+    ${formBtnSelector} {
       position: relative !important;
-      overflow: hidden !important;
+      overflow: visible !important;
       border-radius: var(--ds-btn-radius) !important;
       font-weight: 600 !important;
       letter-spacing: 0.05em !important;
       text-transform: uppercase !important;
       font-size: 0.8rem !important;
       padding: 1rem 2.5rem !important;
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
-    .theme-preview button[class*="bg-primary"]:hover,
-    .theme-preview a[class*="bg-primary"]:hover,
-    .theme-preview [class*="btn-gradient"]:hover {
+    ${ctaHoverSelector},
+    ${formBtnHoverSelector} {
       transform: translateY(-2px) !important;
       letter-spacing: 0.12em !important;
     }
-    .theme-preview a[class*="bg-white"],
-    .theme-preview button[class*="bg-white"] {
-      border-radius: var(--ds-btn-radius) !important;
-      font-weight: 600 !important;
-      letter-spacing: 0.05em !important;
-      text-transform: uppercase !important;
-      font-size: 0.8rem !important;
-      padding: 1rem 2.5rem !important;
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    ${buttonFill === "gradient" ? `
+    /* Gradient's signature: the button itself is gradient-filled, not just
+       the page background — so the accent's name is actually visible on
+       the single most-looked-at element on the page. */
+    ${ctaSelector},
+    ${formBtnSelector} {
+      background-color: var(--theme-primary) !important;
+      background-image: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%) !important;
+      color: var(--theme-primary-foreground) !important;
+      border: none !important;
     }
-    .theme-preview a[class*="bg-white"]:hover,
-    .theme-preview button[class*="bg-white"]:hover {
-      letter-spacing: 0.12em !important;
+    ` : ""}
+    ${buttonFill === "outline" ? `
+    /* Monochrome's signature: buttons read as an outline instead of a
+       solid fill, filling in only on hover — a black/white inversion, not
+       a color swatch. Deliberately keyed off foreground/background rather
+       than the brand primary color: "Monochrome" should mean no color at
+       all, and tying it to primary risked an unreadable low-contrast
+       outline whenever the chosen primary happened to be a dark shade on a
+       dark-mode hero. Placed after the solid-fill rules above so it wins
+       the cascade (equal selector specificity, later wins). */
+    ${ctaSelector},
+    ${formBtnSelector} {
+      background-color: transparent !important;
+      background-image: none !important;
+      color: var(--theme-foreground) !important;
+      border: max(2px, var(--ds-border-width)) solid var(--theme-foreground) !important;
     }
+    ${ctaHoverSelector},
+    ${formBtnHoverSelector} {
+      background-color: var(--theme-foreground) !important;
+      color: var(--theme-background) !important;
+    }
+    ` : ""}
+    ${buttonShadow === "offset" ? `
+    /* Bold's signature: a hard, unblurred "brutalist" drop shadow that
+       punches further out (and the button shifts to meet it) on hover —
+       loud and graphic, on-trend, unmistakable even in a thumbnail. */
+    ${ctaSelector},
+    ${formBtnSelector} {
+      border: 2px solid var(--theme-foreground) !important;
+      box-shadow: 6px 6px 0 0 var(--theme-foreground) !important;
+    }
+    ${ctaHoverSelector},
+    ${formBtnHoverSelector} {
+      transform: translate(-3px, -3px) !important;
+      box-shadow: 9px 9px 0 0 var(--theme-foreground) !important;
+    }
+    ` : ""}
+    ${buttonShadow === "glow" ? `
+    /* Gradient's signature companion: a soft colored glow instead of a
+       neutral drop shadow, matching the gradient fill. */
+    ${ctaSelector},
+    ${formBtnSelector} {
+      box-shadow: 0 10px 30px -8px var(--theme-primary) !important;
+    }
+    ${ctaHoverSelector},
+    ${formBtnHoverSelector} {
+      box-shadow: 0 16px 40px -6px var(--theme-primary) !important;
+    }
+    ` : ""}
 
     /* ── Navigation ─────────────────────────────────────────── */
     .theme-preview nav {
@@ -360,23 +470,10 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       box-shadow: none !important;
     }
 
-    /* ── Form Submit ────────────────────────────────────────── */
-    .theme-preview form button[type="submit"],
-    .theme-preview form button:not([type]) {
-      background-color: var(--theme-primary) !important;
-      color: var(--theme-primary-foreground) !important;
-      font-weight: 600 !important;
-      letter-spacing: 0.08em !important;
-      text-transform: uppercase !important;
-      font-size: 0.8rem !important;
-      padding: 1rem 2.5rem !important;
-      border-radius: var(--ds-btn-radius) !important;
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }
-    .theme-preview form button[type="submit"]:hover,
-    .theme-preview form button:not([type]):hover {
-      letter-spacing: 0.15em !important;
-    }
+    /* Form submit buttons are now covered by the unified button block above
+       (formBtnSelector / formBtnHoverSelector), so they get the exact same
+       fill/shadow/radius treatment as every other CTA — no separate rule
+       set left to keep in sync or fight the cascade with. */
 
     /* ── CTA Gradient Sections ──────────────────────────────── */
     .theme-preview section[class*="bg-gradient-to-r"],
@@ -402,10 +499,10 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
 
     /* ── Number Typography ──────────────────────────────────── */
     .theme-preview .number-display {
-      font-size: clamp(3rem, 8vw, 8rem) !important;
+      font-size: clamp(2rem, 4vw, 3.5rem) !important;
       font-weight: 800 !important;
-      line-height: 0.9 !important;
-      letter-spacing: -0.06em !important;
+      line-height: 1 !important;
+      letter-spacing: -0.03em !important;
     }
 
     /* ── Image Treatments ───────────────────────────────────── */
@@ -441,6 +538,15 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     .theme-preview [class*="border"][class*="rounded"] {
       box-shadow: none !important;
       transition: box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    /* Scoped to the border+bg-background combo specifically (not the
+       broader "border"+"rounded" selector above, which also matches
+       directional classes like border-b — forcing a full border-width
+       there would add sides that were never meant to have one). This is
+       what actually makes Bold's thick border and Minimal's hairline
+       border visible on real content cards, not just buttons. */
+    .theme-preview [class*="border-border"][class*="bg-background"] {
+      border-width: var(--ds-border-width) !important;
     }
     .theme-preview [class*="border-border"][class*="bg-background"]:hover,
     .theme-preview [class*="border"][class*="rounded"]:hover {

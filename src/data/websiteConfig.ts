@@ -4,7 +4,6 @@ export interface WebsiteConfig {
     type: string;
     industry: string;
     description: string;
-    targetAudience: string;
     location: string;
     countriesServed: string;
     email: string;
@@ -49,6 +48,17 @@ export interface WebsiteConfig {
     classSchedule: Array<{ day: string; time: string; className: string }>;
     courses: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
     destinations: Array<{ name: string; price?: string; image?: string | null }>;
+    solutions: Array<{ title: string; description: string; icon: string }>;
+    industries: Array<{ title: string; description: string; icon: string }>;
+    caseStudies: Array<{ title: string; description: string; image?: string | null }>;
+    rooms: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+    amenities: Array<{ title: string; description: string }>;
+    experiences: Array<{ title: string; description: string; image?: string | null }>;
+    travelPackages: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+    process: Array<{ title: string; description: string; icon?: string }>;
+    programs: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
+    facilities: Array<{ title: string; description: string }>;
+    skills: Array<{ title: string; description: string }>;
   };
   branding: {
     logo: string | null;
@@ -62,7 +72,6 @@ export const DEFAULT_WEBSITE_CONFIG: WebsiteConfig = {
     type: "",
     industry: "",
     description: "",
-    targetAudience: "",
     location: "",
     countriesServed: "",
     email: "",
@@ -77,7 +86,14 @@ export const DEFAULT_WEBSITE_CONFIG: WebsiteConfig = {
     style: "modern",
     primaryColor: "#2563EB",
     secondaryColor: "#1E40AF",
-    mode: "light",
+    // "auto" lets each design style show its own intended light/dark
+    // character (Luxury, Premium, Bold, Elegant, and Tech / SaaS are all
+    // meant to read as dark by default) — defaulting to "light" pinned
+    // every style to a light background regardless of what it was
+    // designed to look like, which was a big part of why styles all
+    // looked so similar. The Theme Mode step still lets the client force
+    // Light or Dark explicitly.
+    mode: "auto",
     typography: "inter",
     accentStyle: "minimal",
   },
@@ -114,6 +130,17 @@ export const DEFAULT_WEBSITE_CONFIG: WebsiteConfig = {
     classSchedule: [],
     courses: [],
     destinations: [],
+    solutions: [],
+    industries: [],
+    caseStudies: [],
+    rooms: [],
+    amenities: [],
+    experiences: [],
+    travelPackages: [],
+    process: [],
+    programs: [],
+    facilities: [],
+    skills: [],
   },
   branding: {
     logo: null,
