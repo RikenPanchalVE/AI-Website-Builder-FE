@@ -5,10 +5,15 @@ interface HeroProps {
   ctaLink: string;
   backgroundImage?: string | null;
   logo?: string | null;
+  // The "Trusted by 1,000+ / happy clients" social-proof line used to be
+  // hardcoded — no way to change it for a business that isn't a 1,000+
+  // customer consumer brand (an agency's first project, a new clinic, etc).
+  socialProofText?: string;
+  socialProofSubtext?: string;
 }
 
 /* Hero2 — Split editorial hero with large image */
-const Hero2 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: HeroProps) => (
+const Hero2 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage, socialProofText, socialProofSubtext }: HeroProps) => (
   <section className="relative bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-16 lg:py-24">
       <div className="grid gap-12 lg:grid-cols-12 min-h-[70vh] items-center">
@@ -58,8 +63,8 @@ const Hero2 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: Her
               ))}
             </div>
             <div>
-              <p className="text-sm font-bold tracking-tight">Trusted by 1,000+</p>
-              <p className="text-[11px] text-muted-foreground">happy clients</p>
+              <p className="text-sm font-bold tracking-tight">{socialProofText || "Trusted by 1,000+"}</p>
+              <p className="text-[11px] text-muted-foreground">{socialProofSubtext || "happy clients"}</p>
             </div>
           </div>
         </div>

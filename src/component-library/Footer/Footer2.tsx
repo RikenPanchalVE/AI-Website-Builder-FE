@@ -5,6 +5,7 @@ interface FooterProps {
   description: string;
   links: { label: string; href: string }[];
   socialLinks: { platform: string; href: string }[];
+  copyrightText?: string;
 }
 
 // The page-link list used to be repeated here even though the exact same
@@ -12,7 +13,7 @@ interface FooterProps {
 // with more than 4-5 pages it wrapped into a cramped multi-line list that
 // looked cluttered rather than useful. Footer keeps brand/social and drops
 // the duplicate navigation.
-const Footer2 = ({ brandName, socialLinks }: FooterProps) => (
+const Footer2 = ({ brandName, socialLinks, copyrightText }: FooterProps) => (
   <footer className="border-t border-border bg-muted/30">
     <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8">
       <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
@@ -28,7 +29,7 @@ const Footer2 = ({ brandName, socialLinks }: FooterProps) => (
           ))}
         </div>
       </div>
-      <div className="mt-8 text-center text-[11px] text-muted-foreground/50">&copy; {new Date().getFullYear()} {brandName}. All rights reserved.</div>
+      <div className="mt-8 text-center text-[11px] text-muted-foreground/50">{copyrightText || `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`}</div>
     </div>
   </footer>
 );

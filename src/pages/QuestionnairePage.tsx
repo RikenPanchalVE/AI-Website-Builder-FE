@@ -15,6 +15,7 @@ import {
   setCurrentStep,
 } from "@/store/slices/builderSlice";
 import { BUSINESS_TYPES, type BusinessTypeConfig } from "@/config/businessTypes";
+import type { WebsiteConfig } from "@/data/websiteConfig";
 import { BUSINESS_CATEGORIES, PAGE_SECTIONS } from "@/data/designOptions";
 import { COMPONENT_CATEGORIES, type ComponentCategory } from "@/data/componentOptions";
 import { DESIGN_STYLES, COLOR_PALETTES, TYPOGRAPHY_OPTIONS } from "@/data/designOptions";
@@ -45,7 +46,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Popover } from "radix-ui";
+import { Popover, Accordion } from "radix-ui";
 
 interface StepDef {
   key: string;
@@ -71,7 +72,10 @@ const STEPS: StepDef[] = [
 // others (Split Editorial, Centered Statement, Minimal Text) are text-first
 // and don't use an uploaded background image, so the upload field would be
 // misleading to show for them.
-const IMAGE_HERO_IDS = new Set(["hero1", "hero4"]);
+// Hero2 (Split Editorial) has an image slot too — its right column falls
+// back to a decorative gradient with no image, same as Hero1/Hero4 — it
+// was just missing from this set, so the upload field never showed for it.
+const IMAGE_HERO_IDS = new Set(["hero1", "hero2", "hero4"]);
 
 const PAGE_SELECT_KEY = "select";
 
@@ -189,6 +193,15 @@ const QuestionnairePage = () => {
   const goToStep = (i: number) => {
     setStep(i);
     if (STEPS[i].kind === "pages") setPageSubStep(PAGE_SELECT_KEY);
+  };
+
+  // Same idea, but for the Review step's per-item "Edit" buttons — jumps
+  // straight into a specific page's own sub-tab (or the page-selection
+  // tab, for anything not tied to one particular page) instead of always
+  // landing on selection first.
+  const goToPageTab = (pageId: string) => {
+    setStep(STEPS.findIndex((s) => s.kind === "pages"));
+    setPageSubStep(pageId);
   };
 
   const canNext = (): boolean => {
@@ -346,7 +359,16 @@ const QuestionnairePage = () => {
               )}
               {currentStepDef.kind === "design" && <StepDesign config={config} dispatch={dispatch} businessType={businessType} />}
               {currentStepDef.kind === "colors" && <StepColors config={config} dispatch={dispatch} />}
-              {currentStepDef.kind === "review" && <StepReview config={config} />}
+              {currentStepDef.kind === "review" && (
+                <StepReview
+                  config={config}
+                  onEditStep={goToStep}
+                  onEditPage={goToPageTab}
+                  businessStepIndex={STEPS.findIndex((s) => s.kind === "business")}
+                  designStepIndex={STEPS.findIndex((s) => s.kind === "design")}
+                  colorsStepIndex={STEPS.findIndex((s) => s.kind === "colors")}
+                />
+              )}
             </div>
 
             <div className="mt-6 flex justify-between">
@@ -368,6 +390,7 @@ const QuestionnairePage = () => {
           <div className="hidden lg:block">
             <LivePreviewPanel
               config={config}
+              projectId={currentProject.projectId}
               activePage={previewPage}
               onPageChange={setPreviewPage}
               onExpand={() => setFullScreenPreview(true)}
@@ -390,6 +413,7 @@ const QuestionnairePage = () => {
       {fullScreenPreview && (
         <FullScreenPreviewModal
           config={config}
+          projectId={currentProject.projectId}
           activePage={previewPage}
           onPageChange={setPreviewPage}
           onClose={() => setFullScreenPreview(false)}
@@ -946,11 +970,7 @@ function StepPageDetail({
   const sections = config.sections as Record<string, string[]>;
   const selectedSections = sections[pageId] || [];
   const suggestedComponents = businessType?.suggestedComponents || {};
-  const pageContent = (config.pageContent?.[pageId] || {}) as {
-    hero?: { headline?: string; subheadline?: string; ctaText?: string };
-    about_story?: { content?: string };
-    cta?: { headline?: string; subheadline?: string; ctaText?: string };
-  };
+  const pageContent = (config.pageContent?.[pageId] || {}) as WebsiteConfig["pageContent"][string];
 
   const toggleSection = (sectionId: string) => {
     const current = selectedSections;
@@ -1025,6 +1045,64 @@ function StepPageDetail({
           dispatch={dispatch}
           value={pageContent.hero?.ctaText || ""}
         />
+        {isFirstPage && (config.components.hero || "hero1") === "hero2" && (
+          <>
+            <PageContentField
+              pageId={pageId}
+              section="hero"
+              field="socialProofText"
+              label="Social Proof Heading"
+              placeholder="Trusted by 1,000+"
+              dispatch={dispatch}
+              value={pageContent.hero?.socialProofText || ""}
+            />
+            <PageContentField
+              pageId={pageId}
+              section="hero"
+              field="socialProofSubtext"
+              label="Social Proof Subtext"
+              placeholder="happy clients"
+              dispatch={dispatch}
+              value={pageContent.hero?.socialProofSubtext || ""}
+            />
+          </>
+        )}
+        {isFirstPage && (config.components.hero || "hero1") === "hero3" && (
+          <>
+            <PageContentField
+              pageId={pageId}
+              section="hero"
+              field="secondaryCtaText"
+              label="Second Button Text"
+              placeholder="Learn More"
+              dispatch={dispatch}
+              value={pageContent.hero?.secondaryCtaText || ""}
+            />
+            <div>
+              <Label className="mb-1.5 text-xs text-muted-foreground">Stats Bar</Label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {([1, 2, 3] as const).map((n) => (
+                  <div key={n} className="space-y-1.5 rounded-lg border border-border p-2.5">
+                    <Input
+                      value={(pageContent.hero as Record<string, string> | undefined)?.[`stat${n}Value`] || ""}
+                      onChange={(e) =>
+                        dispatch(setPageContentField({ page: pageId, section: "hero", field: `stat${n}Value`, value: e.target.value }))
+                      }
+                      placeholder={["500+", "98%", "24/7"][n - 1]}
+                    />
+                    <Input
+                      value={(pageContent.hero as Record<string, string> | undefined)?.[`stat${n}Label`] || ""}
+                      onChange={(e) =>
+                        dispatch(setPageContentField({ page: pageId, section: "hero", field: `stat${n}Label`, value: e.target.value }))
+                      }
+                      placeholder={["Projects", "Satisfaction", "Support"][n - 1]}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </ContentBlock>
 
       {pageSections.length > 0 && (
@@ -1085,10 +1163,13 @@ function StepPageDetail({
         </>
       )}
 
-      {has("about_values") && layoutFor("about_values") && (
-        <ContentBlock title="Values Layout" hint="Choose how your Values section looks. Content is fixed for now.">
-          <ComponentVariantPicker cat={layoutFor("about_values")!} currentComponent={config.components.about_values || ""} suggestedId={suggestedComponents.about_values} dispatch={dispatch} />
-        </ContentBlock>
+      {has("about_values") && (
+        <>
+          <AboutValuesEditor config={config} dispatch={dispatch} />
+          {layoutFor("about_values") && (
+            <ComponentVariantPicker cat={layoutFor("about_values")!} currentComponent={config.components.about_values || ""} suggestedId={suggestedComponents.about_values} dispatch={dispatch} />
+          )}
+        </>
       )}
 
       {has("services") && (
@@ -1380,24 +1461,69 @@ function StepPageDetail({
 
       {(has("contact") || has("map") || has("contact_info")) && (
         <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
-          Your contact form, map, and contact info sections use the phone, email, and address from the Business step —
-          nothing else to fill in here.
-          {has("contact") && layoutFor("contact") && (
-            <div className="mt-3">
-              <ComponentVariantPicker cat={layoutFor("contact")!} currentComponent={config.components.contact || ""} suggestedId={suggestedComponents.contact} dispatch={dispatch} />
-            </div>
-          )}
-          {has("map") && layoutFor("map") && (
-            <div className="mt-3">
-              <ComponentVariantPicker cat={layoutFor("map")!} currentComponent={config.components.map || ""} suggestedId={suggestedComponents.map} dispatch={dispatch} />
-            </div>
-          )}
-          {has("contact_info") && layoutFor("contact_info") && (
-            <div className="mt-3">
-              <ComponentVariantPicker cat={layoutFor("contact_info")!} currentComponent={config.components.contact_info || ""} suggestedId={suggestedComponents.contact_info} dispatch={dispatch} />
-            </div>
-          )}
+          Your contact form, map, and contact info sections use the phone, email, and address from the Business step.
         </div>
+      )}
+
+      {has("contact") && (
+        <ContentBlock title="Contact Form Content" hint="Customize the heading, intro text, and submit button on your contact form.">
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Heading</Label>
+            <Input
+              value={config.content.contact?.heading || ""}
+              onChange={(e) => dispatch(setContent({ contact: { ...config.content.contact, heading: e.target.value } }))}
+              placeholder="Get In Touch"
+            />
+          </div>
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Intro Text</Label>
+            <Textarea
+              value={config.content.contact?.intro || ""}
+              onChange={(e) => dispatch(setContent({ contact: { ...config.content.contact, intro: e.target.value } }))}
+              placeholder="We'd love to hear from you. Send us a message and we'll respond as soon as possible."
+              rows={2}
+            />
+          </div>
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Submit Button Text</Label>
+            <Input
+              value={config.content.contact?.submitButtonText || ""}
+              onChange={(e) => dispatch(setContent({ contact: { ...config.content.contact, submitButtonText: e.target.value } }))}
+              placeholder="Send Message"
+            />
+          </div>
+          {layoutFor("contact") && (
+            <ComponentVariantPicker cat={layoutFor("contact")!} currentComponent={config.components.contact || ""} suggestedId={suggestedComponents.contact} dispatch={dispatch} />
+          )}
+        </ContentBlock>
+      )}
+
+      {has("map") && layoutFor("map") && (
+        <ComponentVariantPicker cat={layoutFor("map")!} currentComponent={config.components.map || ""} suggestedId={suggestedComponents.map} dispatch={dispatch} />
+      )}
+
+      {has("contact_info") && (
+        <ContentBlock title="Contact Info Content" hint="Optional heading shown above your phone/email/address block.">
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Heading</Label>
+            <Input
+              value={config.content.contact?.infoHeading || ""}
+              onChange={(e) => dispatch(setContent({ contact: { ...config.content.contact, infoHeading: e.target.value } }))}
+              placeholder="e.g. Get in Touch"
+            />
+          </div>
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Subtitle</Label>
+            <Input
+              value={config.content.contact?.infoSubtitle || ""}
+              onChange={(e) => dispatch(setContent({ contact: { ...config.content.contact, infoSubtitle: e.target.value } }))}
+              placeholder="Optional subtitle"
+            />
+          </div>
+          {layoutFor("contact_info") && (
+            <ComponentVariantPicker cat={layoutFor("contact_info")!} currentComponent={config.components.contact_info || ""} suggestedId={suggestedComponents.contact_info} dispatch={dispatch} />
+          )}
+        </ContentBlock>
       )}
 
       {hasCta && (
@@ -1602,6 +1728,30 @@ function WhyChooseUsEditor({ config, dispatch }: { config: any; dispatch: any })
         <>
           <Input value={r.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="e.g. Expert Team" />
           <Input value={r.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" />
+        </>
+      )}
+    />
+  );
+}
+
+// The About page's Values section had a layout picker but its actual
+// content — 4 values, always "Excellence/Integrity/Innovation/Customer
+// Focus" — was hardcoded with no editor anywhere, unlike every other list
+// section on this page.
+function AboutValuesEditor({ config, dispatch }: { config: any; dispatch: any }) {
+  const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string }>(config, dispatch, "aboutValues");
+  return (
+    <EditableList
+      title="Our Values"
+      items={items}
+      onAdd={() => addItem({ title: "", description: "" })}
+      addLabel="+ Add Value"
+      emptyLabel="No values added yet — defaults to Excellence, Integrity, Innovation, and Customer Focus."
+      onRemove={removeItem}
+      renderItem={(v, i) => (
+        <>
+          <Input value={v.title} onChange={(e) => updateItem(i, { title: e.target.value })} placeholder="e.g. Integrity" />
+          <Input value={v.description} onChange={(e) => updateItem(i, { description: e.target.value })} placeholder="Brief description" />
         </>
       )}
     />
@@ -2093,6 +2243,59 @@ function PricingPlansEditor({ config, dispatch }: { config: any; dispatch: any }
 
 /* ── Step: Design ──────────────────────────────────────────────────── */
 
+// Footer text was entirely hardcoded (tagline fell back silently to the
+// business description, copyright/CTA copy couldn't be touched at all) —
+// this is the only place in the questionnaire to edit it, since the footer
+// is site-wide rather than per-page like Hero/CTA content.
+function FooterContentEditor({ config, dispatch, isRichFooter }: { config: any; dispatch: any; isRichFooter: boolean }) {
+  const footer = config.content.footer || {};
+  const update = (patch: Record<string, string>) => dispatch(setContent({ footer: { ...footer, ...patch } }));
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <ContentBlock title="Footer Content" hint="Customize the text shown at the bottom of every page. Leave anything blank to use the defaults.">
+      <div>
+        <Label className="mb-1.5 text-xs text-muted-foreground">Tagline</Label>
+        <Textarea
+          value={footer.tagline || ""}
+          onChange={(e) => update({ tagline: e.target.value })}
+          placeholder={config.business.description || "A short line about your business shown in the footer."}
+          rows={2}
+        />
+      </div>
+      <div>
+        <Label className="mb-1.5 text-xs text-muted-foreground">Copyright Text</Label>
+        <Input
+          value={footer.copyrightText || ""}
+          onChange={(e) => update({ copyrightText: e.target.value })}
+          placeholder={`© ${currentYear} ${config.business.name || "Your Business"}. All rights reserved.`}
+        />
+      </div>
+      {isRichFooter && (
+        <>
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Call-to-Action Heading</Label>
+            <Input value={footer.ctaHeading || ""} onChange={(e) => update({ ctaHeading: e.target.value })} placeholder="Get in Touch" />
+          </div>
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Call-to-Action Text</Label>
+            <Textarea
+              value={footer.ctaSubtext || ""}
+              onChange={(e) => update({ ctaSubtext: e.target.value })}
+              placeholder="Ready to start your project? Let's talk about how we can help."
+              rows={2}
+            />
+          </div>
+          <div>
+            <Label className="mb-1.5 text-xs text-muted-foreground">Call-to-Action Button Text</Label>
+            <Input value={footer.ctaButtonText || ""} onChange={(e) => update({ ctaButtonText: e.target.value })} placeholder="Start a Project" />
+          </div>
+        </>
+      )}
+    </ContentBlock>
+  );
+}
+
 function StepDesign({ config, dispatch, businessType }: { config: any; dispatch: any; businessType: BusinessTypeConfig | null }) {
   const suggestedComponents = businessType?.suggestedComponents || {};
   const navbarCat = COMPONENT_CATEGORIES.find((c) => c.category === "navbar");
@@ -2213,6 +2416,11 @@ function StepDesign({ config, dispatch, businessType }: { config: any; dispatch:
               dispatch={dispatch}
             />
           )}
+          <FooterContentEditor
+            config={config}
+            dispatch={dispatch}
+            isRichFooter={(config.components.footer || suggestedComponents.footer) === "footer1"}
+          />
         </div>
       </div>
     </div>
@@ -2357,77 +2565,469 @@ function EditableList<T>({
 
 /* ── Step: Review ──────────────────────────────────────────────────── */
 
-function ReviewCard({ title, children }: { title: string; children: React.ReactNode }) {
+function EditIcon() {
   return (
-    <div className="rounded-lg bg-muted/50 p-4">
-      <h3 className="mb-2 font-medium text-foreground">{title}</h3>
-      {children}
-    </div>
+    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
+    </svg>
   );
 }
 
-function StepReview({ config }: { config: any }) {
+// The Review step used to be a long wall of always-expanded cards — once
+// every section actually showed its real content (not just a name), that
+// got long enough to be hard to scan. An accordion keeps everything just
+// as reachable (nothing summarized away) while only showing full detail
+// for whatever the client is actually looking at right now.
+function ReviewCard({ value, title, badge, onEdit, children }: { value: string; title: string; badge?: string; onEdit?: () => void; children: React.ReactNode }) {
+  return (
+    <Accordion.Item value={value} className="overflow-hidden rounded-lg border border-border bg-muted/30">
+      <Accordion.Header className="flex items-stretch">
+        <Accordion.Trigger className="group flex flex-1 items-center gap-2 px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted/60">
+          <svg className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+          {title}
+          {badge && <span className="font-normal text-muted-foreground">{badge}</span>}
+        </Accordion.Trigger>
+        {onEdit && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="my-auto mr-3 h-auto shrink-0 gap-1 px-2 py-1 text-xs"
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          >
+            <EditIcon />
+            Edit
+          </Button>
+        )}
+      </Accordion.Header>
+      <Accordion.Content className="border-t border-border bg-background/40 px-4 py-3">
+        {children}
+      </Accordion.Content>
+    </Accordion.Item>
+  );
+}
+
+// Every list-content type the client can fill in across every business
+// type/page, so the Review step can show all of it generically instead of
+// the previous "layout choices only" summary that left every typed-in
+// service, testimonial, team member, menu item, etc. completely invisible
+// until generation.
+const CONTENT_LABELS: Record<string, string> = {
+  services: "Services",
+  testimonials: "Testimonials",
+  faq: "FAQ",
+  stats: "Statistics",
+  team: "Team Members",
+  portfolio: "Portfolio",
+  gallery: "Gallery Images",
+  whyChooseUs: "Why Choose Us",
+  pricingPlans: "Pricing Plans",
+  menuItems: "Menu Items",
+  dailySpecials: "Daily Specials",
+  blogPosts: "Blog Posts",
+  timeline: "Timeline",
+  businessHours: "Business Hours",
+  classSchedule: "Class Schedule",
+  courses: "Courses",
+  destinations: "Destinations",
+  solutions: "Solutions",
+  industries: "Industries",
+  caseStudies: "Case Studies",
+  rooms: "Rooms & Suites",
+  amenities: "Amenities",
+  experiences: "Experiences",
+  travelPackages: "Travel Packages",
+  process: "Process Steps",
+  programs: "Programs",
+  facilities: "Facilities",
+  skills: "Skills",
+};
+
+function contentItemLabel(item: Record<string, any>): string {
+  return item?.title || item?.name || item?.question || item?.label || item?.day || item?.year || "Untitled";
+}
+
+// The short description/body text for a content item — different list
+// types name this field differently (a service's "description", a
+// testimonial's "content", a team member's "bio", an FAQ's "answer"...),
+// so this checks every field actually used across the editors above
+// instead of just "description".
+function contentItemDescription(item: Record<string, any>): string | undefined {
+  return (
+    item?.description || item?.content || item?.bio || item?.answer ||
+    item?.excerpt || item?.hours || item?.value || item?.price || undefined
+  );
+}
+
+// Maps a section's canonical type (from previewSpec.ts's sectionType()) to
+// the config.content key it actually pulls from — mirrors exactly which
+// useListContent(config, dispatch, "key") each editor above is wired to
+// (including the handful that share a family: Feature Grid reuses
+// Services' own list, Inventory Grid reuses Portfolio's, Travel Deals
+// reuses Daily Specials', and Agents/Trainers/Doctors/Instructors all
+// share one Team list). Lets the Review step show what will actually
+// render for each section the client picked, not just its name.
+const SECTION_CONTENT_KEY: Record<string, string> = {
+  services: "services",
+  feature_grid: "services",
+  testimonials: "testimonials",
+  faq: "faq",
+  portfolio: "portfolio",
+  inventory_grid: "portfolio",
+  gallery: "gallery",
+  team: "team",
+  agents: "team",
+  trainers: "team",
+  doctors: "team",
+  instructors: "team",
+  why_choose_us: "whyChooseUs",
+  pricing: "pricingPlans",
+  blog_preview: "blogPosts",
+  menu_items: "menuItems",
+  daily_specials: "dailySpecials",
+  travel_deals: "dailySpecials",
+  stats: "stats",
+  timeline: "timeline",
+  business_hours: "businessHours",
+  class_schedule: "classSchedule",
+  course_grid: "courses",
+  rooms: "rooms",
+  travel_packages: "travelPackages",
+  programs: "programs",
+  destination_grid: "destinations",
+  solutions: "solutions",
+  industries: "industries",
+  case_studies: "caseStudies",
+  amenities: "amenities",
+  experiences: "experiences",
+  process: "process",
+  facilities: "facilities",
+  skills: "skills",
+  about_values: "aboutValues",
+};
+
+interface SectionDetail {
+  // Every item that will actually render in this section — full title +
+  // description, not a truncated summary — so a service or FAQ entry can
+  // be checked at a glance instead of guessed at from just its name.
+  items?: Array<{ title: string; description?: string }>;
+  // Set instead of `items` when there's nothing customized yet — explains
+  // what will show in its place rather than just going blank.
+  note?: string;
+}
+
+function sectionDetail(
+  type: string | undefined,
+  ctx: { content: Record<string, any>; pageContent?: any; contactContent: Record<string, any>; business: Record<string, any> }
+): SectionDetail {
+  if (!type) return {};
+  const contentKey = SECTION_CONTENT_KEY[type];
+  if (contentKey) {
+    const items = (ctx.content[contentKey] || []) as Record<string, any>[];
+    if (items.length === 0) return { note: "Not customized — will use content suited to your business type." };
+    return { items: items.map((it) => ({ title: contentItemLabel(it), description: contentItemDescription(it) })) };
+  }
+  if (type === "about_story") {
+    const storyContent = ctx.pageContent?.about_story?.content?.trim();
+    return storyContent ? { items: [{ title: "Company Story", description: storyContent }] } : { note: "Not customized — will use a generated company story." };
+  }
+  if (type === "cta") {
+    const headline = ctx.pageContent?.cta?.headline?.trim();
+    return headline
+      ? { items: [{ title: headline, description: ctx.pageContent?.cta?.subheadline?.trim() }] }
+      : { note: "Not customized — will use default call-to-action text." };
+  }
+  if (type === "contact") {
+    const heading = ctx.contactContent.heading?.trim();
+    return heading || ctx.contactContent.intro
+      ? { items: [{ title: heading || "Contact Form", description: ctx.contactContent.intro }] }
+      : { note: "Not customized — will use a default heading and button text." };
+  }
+  if (type === "contact_info" || type === "map") {
+    const line = [ctx.business.phone, ctx.business.email, ctx.business.address].filter(Boolean).join(" · ");
+    return line ? { items: [{ title: "Contact Details", description: line }] } : { note: "Phone/email/address not provided yet." };
+  }
+  return {};
+}
+
+// Shared renderer for a section's full detail — used both inside each
+// page's section list and inside the top-level "Content" card, so a
+// service's title+description looks identical wherever it's reviewed.
+function SectionDetailView({ detail }: { detail: SectionDetail }) {
+  if (detail.items && detail.items.length > 0) {
+    return (
+      <div className="mt-1.5 space-y-1.5">
+        {detail.items.map((it, i) => (
+          <div key={i} className="rounded bg-background px-2.5 py-1.5">
+            <div className="text-xs font-medium text-foreground">{it.title}</div>
+            {it.description && <div className="mt-0.5 text-xs text-muted-foreground">{it.description}</div>}
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (detail.note) {
+    return <p className="mt-1 text-xs text-muted-foreground">{detail.note}</p>;
+  }
+  return null;
+}
+
+const REVIEW_CARD_KEYS = ["business", "pages", "design", "colors", "layout", "content", "values", "footer", "contact", "branding"];
+
+function StepReview({
+  config,
+  onEditStep,
+  onEditPage,
+  businessStepIndex,
+  designStepIndex,
+  colorsStepIndex,
+}: {
+  config: any;
+  onEditStep: (index: number) => void;
+  onEditPage: (pageId: string) => void;
+  businessStepIndex: number;
+  designStepIndex: number;
+  colorsStepIndex: number;
+}) {
   const businessType = BUSINESS_TYPES[config.business.type];
-  const pages = config.pages as string[];
+  const pages = (config.pages || []) as string[];
+  const content = config.content || {};
+  const pageContentMap = config.pageContent || {};
+  const footerContent = content.footer || {};
+  const contactContent = content.contact || {};
+
+  // Business Information + Pages & Sections open by default — the two most
+  // useful things to check right after clicking through — everything else
+  // starts collapsed so the page reads as a scannable list, not a wall of
+  // text, while still being one click away.
+  const [openCards, setOpenCards] = useState<string[]>(["business", "pages"]);
+  const [openPages, setOpenPages] = useState<string[]>(pages[0] ? [pages[0]] : []);
+  const allExpanded = openCards.length >= REVIEW_CARD_KEYS.length;
 
   return (
     <div className="space-y-4">
-      <ReviewCard title="Business Information">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="text-muted-foreground">Type:</span> <span className="font-medium text-foreground">{businessType?.icon} {businessType?.label || config.business.type}</span></div>
-          <div><span className="text-muted-foreground">Name:</span> <span className="font-medium text-foreground">{config.business.name || "Not provided"}</span></div>
-          <div><span className="text-muted-foreground">Location:</span> <span className="font-medium text-foreground">{config.business.location || "Not provided"}</span></div>
-          <div><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{config.business.email || "Not provided"}</span></div>
-          <div><span className="text-muted-foreground">Phone:</span> <span className="font-medium text-foreground">{config.business.phone || "Not provided"}</span></div>
-          <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="font-medium text-foreground">{config.business.address || "Not provided"}</span></div>
-          {(config.business.socialLinks || []).length > 0 && (
-            <div className="col-span-2">
-              <span className="text-muted-foreground">Social:</span>{" "}
-              <span className="font-medium capitalize text-foreground">
-                {(config.business.socialLinks as Array<{ platform: string; url: string }>).map((l) => l.platform).join(", ")}
-              </span>
-            </div>
-          )}
-        </div>
-      </ReviewCard>
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            if (allExpanded) { setOpenCards([]); setOpenPages([]); }
+            else { setOpenCards([...REVIEW_CARD_KEYS]); setOpenPages([...pages]); }
+          }}
+        >
+          {allExpanded ? "Collapse All" : "Expand All"}
+        </Button>
+      </div>
 
-      <ReviewCard title={`Pages (${pages.length})`}>
-        <div className="flex flex-wrap gap-1.5">
-          {pages.map((p: string) => {
-            const page = AVAILABLE_PAGES.find((ap) => ap.id === p);
-            return <Badge key={p} variant="outline">{page?.label || p}</Badge>;
-          })}
-        </div>
-      </ReviewCard>
-
-      <ReviewCard title="Design">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="text-muted-foreground">Style:</span> <span className="font-medium capitalize text-foreground">{config.theme.style}</span></div>
-          <div><span className="text-muted-foreground">Typography:</span> <span className="font-medium capitalize text-foreground">{config.theme.typography}</span></div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Colors:</span>
-            <div className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: config.theme.primaryColor }} />
-            <div className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: config.theme.secondaryColor }} />
-          </div>
-          <div><span className="text-muted-foreground">Mode:</span> <span className="font-medium capitalize text-foreground">{config.theme.mode}</span></div>
-        </div>
-      </ReviewCard>
-
-      <ReviewCard title="Components">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          {Object.entries(config.components as Record<string, string>).map(([cat, compId]) => {
-            if (!compId) return null;
-            const catConfig = COMPONENT_CATEGORIES.find((c) => c.category === cat);
-            const optConfig = catConfig?.options.find((o) => o.id === compId);
-            return (
-              <div key={cat}>
-                <span className="capitalize text-muted-foreground">{cat}:</span>{" "}
-                <span className="font-medium text-foreground">{optConfig?.name || compId}</span>
+      <Accordion.Root type="multiple" value={openCards} onValueChange={setOpenCards} className="space-y-2">
+        <ReviewCard value="business" title="Business Information" onEdit={() => onEditStep(businessStepIndex)}>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><span className="text-muted-foreground">Type:</span> <span className="font-medium text-foreground">{businessType?.icon} {businessType?.label || config.business.type}</span></div>
+            <div><span className="text-muted-foreground">Name:</span> <span className="font-medium text-foreground">{config.business.name || "Not provided"}</span></div>
+            <div className="col-span-2"><span className="text-muted-foreground">Description:</span> <span className="font-medium text-foreground">{config.business.description || "Not provided"}</span></div>
+            <div><span className="text-muted-foreground">Location:</span> <span className="font-medium text-foreground">{config.business.location || "Not provided"}</span></div>
+            <div><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{config.business.email || "Not provided"}</span></div>
+            <div><span className="text-muted-foreground">Phone:</span> <span className="font-medium text-foreground">{config.business.phone || "Not provided"}</span></div>
+            <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="font-medium text-foreground">{config.business.address || "Not provided"}</span></div>
+            {(config.business.socialLinks || []).length > 0 && (
+              <div className="col-span-2">
+                <span className="text-muted-foreground">Social:</span>{" "}
+                <span className="font-medium text-foreground">
+                  {(config.business.socialLinks as Array<{ platform: string; url: string }>)
+                    .filter((l) => l.url)
+                    .map((l) => `${l.platform}: ${l.url}`)
+                    .join(", ") || "Not provided yet"}
+                </span>
               </div>
-            );
-          })}
-        </div>
-      </ReviewCard>
+            )}
+          </div>
+        </ReviewCard>
+
+        <ReviewCard value="pages" title="Pages & Sections" badge={`${pages.length} pages`} onEdit={() => onEditPage(PAGE_SELECT_KEY)}>
+          <Accordion.Root type="multiple" value={openPages} onValueChange={setOpenPages} className="space-y-2">
+            {pages.map((pageId: string) => {
+              const page = AVAILABLE_PAGES.find((ap) => ap.id === pageId);
+              const sectionIds: string[] = config.sections?.[pageId] || [];
+              const sectionDefs = PAGE_SECTIONS[pageId] || [];
+              const pc = pageContentMap[pageId];
+              const isFirstPage = pages[0] === pageId;
+              return (
+                <Accordion.Item key={pageId} value={pageId} className="overflow-hidden rounded-md border border-border bg-background">
+                  <Accordion.Header className="flex items-stretch">
+                    <Accordion.Trigger className="group flex flex-1 items-center gap-2 px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-muted/40">
+                      <svg className="h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                      {page?.label || pageId}
+                      <span className="font-normal text-muted-foreground">{sectionIds.length} section{sectionIds.length === 1 ? "" : "s"}</span>
+                    </Accordion.Trigger>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="my-auto mr-2 h-auto shrink-0 px-2 py-0.5 text-xs"
+                      onClick={(e) => { e.stopPropagation(); onEditPage(pageId); }}
+                    >
+                      Edit
+                    </Button>
+                  </Accordion.Header>
+                  <Accordion.Content className="space-y-1.5 border-t border-border p-2.5">
+                    {/* Every page gets its own Hero content — only the first
+                        page renders the real Hero1-5 layout, but the rest
+                        still use this same headline/subheadline/button for
+                        their compact page-title bar. */}
+                    <div className="rounded border border-border/60 bg-muted/30 px-2.5 py-1.5">
+                      <div className="text-xs font-medium text-foreground">{isFirstPage ? "Hero" : "Page Header"}</div>
+                      <p className="text-xs text-muted-foreground">
+                        {pc?.hero?.headline?.trim() ? `Headline: "${pc.hero.headline}"` : "Headline not customized — will use a generated one."}
+                      </p>
+                      {pc?.hero?.subheadline?.trim() && <p className="text-xs text-muted-foreground">Subheadline: "{pc.hero.subheadline}"</p>}
+                      {isFirstPage && pc?.hero?.ctaText?.trim() && <p className="text-xs text-muted-foreground">Button: "{pc.hero.ctaText}"</p>}
+                    </div>
+
+                    {sectionIds.length > 0 ? (
+                      sectionIds.map((sid) => {
+                        const type = sectionType(sid);
+                        const detail = sectionDetail(type, { content, pageContent: pc, contactContent, business: config.business || {} });
+                        return (
+                          <div key={sid} className="rounded border border-border/60 bg-muted/30 px-2.5 py-1.5">
+                            <div className="text-xs font-medium text-foreground">{sectionDefs.find((s) => s.id === sid)?.label || sid}</div>
+                            <SectionDetailView detail={detail} />
+                          </div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-xs text-muted-foreground">No sections selected yet.</p>
+                    )}
+                  </Accordion.Content>
+                </Accordion.Item>
+              );
+            })}
+          </Accordion.Root>
+        </ReviewCard>
+
+        <ReviewCard value="design" title="Design Style" onEdit={() => onEditStep(designStepIndex)}>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div><span className="text-muted-foreground">Style:</span> <span className="font-medium capitalize text-foreground">{config.theme.style}</span></div>
+            <div><span className="text-muted-foreground">Typography:</span> <span className="font-medium capitalize text-foreground">{config.theme.typography}</span></div>
+            <div><span className="text-muted-foreground">Accent:</span> <span className="font-medium capitalize text-foreground">{config.theme.accentStyle}</span></div>
+          </div>
+        </ReviewCard>
+
+        <ReviewCard value="colors" title="Colors & Mode" onEdit={() => onEditStep(colorsStepIndex)}>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Primary:</span>
+              <div className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: config.theme.primaryColor }} />
+              <span className="font-mono text-xs text-foreground">{config.theme.primaryColor}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Secondary:</span>
+              <div className="h-5 w-5 rounded-full border border-border" style={{ backgroundColor: config.theme.secondaryColor }} />
+              <span className="font-mono text-xs text-foreground">{config.theme.secondaryColor}</span>
+            </div>
+            <div><span className="text-muted-foreground">Mode:</span> <span className="font-medium capitalize text-foreground">{config.theme.mode}</span></div>
+          </div>
+        </ReviewCard>
+
+        <ReviewCard value="layout" title="Layout Choices" onEdit={() => onEditPage(PAGE_SELECT_KEY)}>
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            {Object.entries(config.components as Record<string, string>).map(([cat, compId]) => {
+              if (!compId) return null;
+              const catConfig = COMPONENT_CATEGORIES.find((c) => c.category === cat);
+              const optConfig = catConfig?.options.find((o) => o.id === compId);
+              return (
+                <div key={cat}>
+                  <span className="capitalize text-muted-foreground">{cat.replace(/_/g, " ")}:</span>{" "}
+                  <span className="font-medium text-foreground">{optConfig?.name || compId}</span>
+                </div>
+              );
+            })}
+          </div>
+        </ReviewCard>
+
+        <ReviewCard value="content" title="Content" onEdit={() => onEditPage(PAGE_SELECT_KEY)}>
+          {Object.keys(CONTENT_LABELS).some((key) => (content[key] || []).length > 0) ? (
+            <div className="space-y-3">
+              {Object.entries(CONTENT_LABELS).map(([key, label]) => {
+                const items = (content[key] || []) as Record<string, any>[];
+                if (items.length === 0) return null;
+                return (
+                  <div key={key}>
+                    <div className="text-sm font-medium text-foreground">{label} ({items.length})</div>
+                    <SectionDetailView detail={{ items: items.map((it) => ({ title: contentItemLabel(it), description: contentItemDescription(it) })) }} />
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Nothing added yet — services, testimonials, team members, and every other list section will use content suited to your business type instead.
+            </p>
+          )}
+        </ReviewCard>
+
+        {pages.includes("about") && (config.sections?.about || []).includes("values") && (
+          <ReviewCard value="values" title="Our Values" onEdit={() => onEditPage("about")}>
+            {(content.aboutValues || []).length > 0 ? (
+              <SectionDetailView detail={{ items: (content.aboutValues as Array<{ title: string; description: string }>).map((v) => ({ title: v.title || "Untitled", description: v.description })) }} />
+            ) : (
+              <p className="text-sm text-muted-foreground">Not customized — will default to Excellence, Integrity, Innovation, and Customer Focus.</p>
+            )}
+          </ReviewCard>
+        )}
+
+        <ReviewCard value="footer" title="Footer Content" onEdit={() => onEditStep(designStepIndex)}>
+          {(footerContent.tagline || footerContent.copyrightText || footerContent.ctaButtonText) ? (
+            <div className="space-y-1 text-sm">
+              {footerContent.tagline && <p><span className="text-muted-foreground">Tagline:</span> <span className="text-foreground">{footerContent.tagline}</span></p>}
+              {footerContent.copyrightText && <p><span className="text-muted-foreground">Copyright:</span> <span className="text-foreground">{footerContent.copyrightText}</span></p>}
+              {footerContent.ctaButtonText && <p><span className="text-muted-foreground">CTA Button:</span> <span className="text-foreground">{footerContent.ctaButtonText}</span></p>}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">Not customized — will use your business description as the tagline and a standard copyright line.</p>
+          )}
+        </ReviewCard>
+
+        {pages.includes("contact") && (
+          <ReviewCard value="contact" title="Contact Page Content" onEdit={() => onEditPage("contact")}>
+            {(contactContent.heading || contactContent.intro || contactContent.submitButtonText || contactContent.infoHeading) ? (
+              <div className="space-y-1 text-sm">
+                {contactContent.heading && <p><span className="text-muted-foreground">Heading:</span> <span className="text-foreground">{contactContent.heading}</span></p>}
+                {contactContent.intro && <p><span className="text-muted-foreground">Intro:</span> <span className="text-foreground">{contactContent.intro}</span></p>}
+                {contactContent.submitButtonText && <p><span className="text-muted-foreground">Submit Button:</span> <span className="text-foreground">{contactContent.submitButtonText}</span></p>}
+                {contactContent.infoHeading && <p><span className="text-muted-foreground">Info Heading:</span> <span className="text-foreground">{contactContent.infoHeading}</span></p>}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">Not customized — default heading and button text will be used.</p>
+            )}
+          </ReviewCard>
+        )}
+
+        <ReviewCard value="branding" title="Branding" onEdit={() => onEditPage(pages[0] || "home")}>
+          {(config.branding?.logo || (config.branding?.bannerImages || []).length > 0) ? (
+            <div className="flex flex-wrap gap-3">
+              {config.branding?.logo && (
+                <div className="flex items-center gap-2">
+                  <img src={config.branding.logo} alt="Logo" className="h-10 w-10 rounded border border-border object-cover" />
+                  <span className="text-xs text-muted-foreground">Logo</span>
+                </div>
+              )}
+              {(config.branding?.bannerImages || []).map((url: string, i: number) => (
+                <div key={i} className="flex items-center gap-2">
+                  <img src={url} alt="Banner" className="h-10 w-16 rounded border border-border object-cover" />
+                  <span className="text-xs text-muted-foreground">Banner Image</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No logo or images uploaded — a placeholder will be used instead.</p>
+          )}
+        </ReviewCard>
+      </Accordion.Root>
 
       <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
         <p className="font-medium">Ready to generate your website?</p>

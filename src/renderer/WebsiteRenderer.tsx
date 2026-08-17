@@ -192,16 +192,29 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   const ctaSelector = [
     'button[class*="bg-primary"]', 'a[class*="bg-primary"]',
     'button[class*="bg-foreground"][class*="px-"]', 'a[class*="bg-foreground"][class*="px-"]',
-    'button[class*="bg-background"][class*="px-"]', 'a[class*="bg-background"][class*="px-"]',
     'button[class*="bg-white"]', 'a[class*="bg-white"]',
     '[class*="btn-gradient"]',
   ].map((s) => `.theme-preview ${s}`).join(",\n    ");
   const ctaHoverSelector = [
     'button[class*="bg-primary"]:hover', 'a[class*="bg-primary"]:hover',
     'button[class*="bg-foreground"][class*="px-"]:hover', 'a[class*="bg-foreground"][class*="px-"]:hover',
-    'button[class*="bg-background"][class*="px-"]:hover', 'a[class*="bg-background"][class*="px-"]:hover',
     'button[class*="bg-white"]:hover', 'a[class*="bg-white"]:hover',
     '[class*="btn-gradient"]:hover',
+  ].map((s) => `.theme-preview ${s}`).join(",\n    ");
+  // Hero1's section uses bg-foreground while its own button deliberately
+  // uses bg-background so it contrasts against that foreground-colored
+  // section — every other bg-foreground/bg-white button in the library
+  // goes the other direction (button color contrasts against a normal
+  // page/section background). Monochrome and Bold's outline/border colors
+  // used to be keyed off theme-foreground unconditionally, which is
+  // correct for that "every other" case but made Hero1's button's
+  // border/text exactly match its own section's background — invisible.
+  // Kept as its own selector group so it can get the inverted color pair.
+  const ctaReversedSelector = [
+    'button[class*="bg-background"][class*="px-"]', 'a[class*="bg-background"][class*="px-"]',
+  ].map((s) => `.theme-preview ${s}`).join(",\n    ");
+  const ctaReversedHoverSelector = [
+    'button[class*="bg-background"][class*="px-"]:hover', 'a[class*="bg-background"][class*="px-"]:hover',
   ].map((s) => `.theme-preview ${s}`).join(",\n    ");
   const formBtnSelector = '.theme-preview form button[type="submit"],\n    .theme-preview form button:not([type])';
   const formBtnHoverSelector = '.theme-preview form button[type="submit"]:hover,\n    .theme-preview form button:not([type]):hover';
@@ -369,6 +382,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
 
     /* ── Buttons ────────────────────────────────────────────── */
     ${ctaSelector},
+    ${ctaReversedSelector},
     ${formBtnSelector} {
       position: relative !important;
       overflow: visible !important;
@@ -381,6 +395,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
     ${ctaHoverSelector},
+    ${ctaReversedHoverSelector},
     ${formBtnHoverSelector} {
       transform: translateY(-2px) !important;
       letter-spacing: 0.12em !important;
@@ -388,8 +403,12 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     ${buttonFill === "gradient" ? `
     /* Gradient's signature: the button itself is gradient-filled, not just
        the page background — so the accent's name is actually visible on
-       the single most-looked-at element on the page. */
+       the single most-looked-at element on the page. Safe to apply to both
+       selector groups: a brand-color gradient fill isn't at risk of
+       matching its own section's background the way a foreground/
+       background pairing is. */
     ${ctaSelector},
+    ${ctaReversedSelector},
     ${formBtnSelector} {
       background-color: var(--theme-primary) !important;
       background-image: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%) !important;
@@ -418,6 +437,20 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       background-color: var(--theme-foreground) !important;
       color: var(--theme-background) !important;
     }
+    /* The reversed group (Hero1's own button) sits on a section that's
+       already theme-foreground colored, so it needs the opposite pair —
+       otherwise its border/text would exactly match its own section's
+       background and disappear entirely. */
+    ${ctaReversedSelector} {
+      background-color: transparent !important;
+      background-image: none !important;
+      color: var(--theme-background) !important;
+      border: max(2px, var(--ds-border-width)) solid var(--theme-background) !important;
+    }
+    ${ctaReversedHoverSelector} {
+      background-color: var(--theme-background) !important;
+      color: var(--theme-foreground) !important;
+    }
     ` : ""}
     ${buttonShadow === "offset" ? `
     /* Bold's signature: a hard, unblurred "brutalist" drop shadow that
@@ -433,15 +466,29 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       transform: translate(-3px, -3px) !important;
       box-shadow: 9px 9px 0 0 var(--theme-foreground) !important;
     }
+    /* Same reversal as the outline block above — this button's own
+       section is already theme-foreground colored. */
+    ${ctaReversedSelector} {
+      border: 2px solid var(--theme-background) !important;
+      box-shadow: 6px 6px 0 0 var(--theme-background) !important;
+    }
+    ${ctaReversedHoverSelector} {
+      transform: translate(-3px, -3px) !important;
+      box-shadow: 9px 9px 0 0 var(--theme-background) !important;
+    }
     ` : ""}
     ${buttonShadow === "glow" ? `
     /* Gradient's signature companion: a soft colored glow instead of a
-       neutral drop shadow, matching the gradient fill. */
+       neutral drop shadow, matching the gradient fill. Safe for both
+       groups — a brand-color glow isn't at risk of blending into its own
+       section's background. */
     ${ctaSelector},
+    ${ctaReversedSelector},
     ${formBtnSelector} {
       box-shadow: 0 10px 30px -8px var(--theme-primary) !important;
     }
     ${ctaHoverSelector},
+    ${ctaReversedHoverSelector},
     ${formBtnHoverSelector} {
       box-shadow: 0 16px 40px -6px var(--theme-primary) !important;
     }

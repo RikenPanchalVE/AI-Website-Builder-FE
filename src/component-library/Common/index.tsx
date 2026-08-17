@@ -770,6 +770,12 @@ export const BusinessHours2 = (props: any) => (
 export const ContactInfo2 = (props: any) => (
   <section className="bg-muted/30 overflow-hidden">
     <div className="mx-auto max-w-2xl px-6 lg:px-12 py-16">
+      {(props.title || props.subtitle) && (
+        <div className="mb-10 text-center">
+          {props.title && <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>{props.title}</h2>}
+          {props.subtitle && <p className="mt-2 text-sm text-muted-foreground">{props.subtitle}</p>}
+        </div>
+      )}
       <div className="space-y-4">
         {(props.methods || []).map((m: any, i: number) => (
           <div key={i} className="flex items-center gap-5 rounded-2xl border border-border bg-background p-6 shadow-sm" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
@@ -839,6 +845,12 @@ export const CTABanner = (props: any) => (
 export const ContactInfo = (props: any) => (
   <section className="bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-12">
+      {(props.title || props.subtitle) && (
+        <div className="mb-8 text-center">
+          {props.title && <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl" style={{ letterSpacing: "-0.03em" }}>{props.title}</h2>}
+          {props.subtitle && <p className="mt-2 text-sm text-muted-foreground">{props.subtitle}</p>}
+        </div>
+      )}
       <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4 border border-border">
         {(props.methods || []).map((m: any, i: number) => (
           <div key={i} className="p-8 border-b sm:border-b-0 sm:border-r border-border last:border-r-0" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.06}s both` }}>

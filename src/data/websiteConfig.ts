@@ -17,7 +17,22 @@ export interface WebsiteConfig {
   // CTA sections, keyed by page slug. Anything left blank falls back to
   // mock content suited to the business type.
   pageContent: Record<string, {
-    hero?: { headline?: string; subheadline?: string; ctaText?: string };
+    hero?: {
+      headline?: string;
+      subheadline?: string;
+      ctaText?: string;
+      // Hero2 (Split Editorial)'s social-proof line, e.g. "Trusted by 1,000+".
+      socialProofText?: string;
+      socialProofSubtext?: string;
+      // Hero3 (Centered Statement)'s second button and 3-stat bar.
+      secondaryCtaText?: string;
+      stat1Value?: string;
+      stat1Label?: string;
+      stat2Value?: string;
+      stat2Label?: string;
+      stat3Value?: string;
+      stat3Label?: string;
+    };
     about_story?: { content?: string };
     cta?: { headline?: string; subheadline?: string; ctaText?: string };
   }>;
@@ -39,6 +54,10 @@ export interface WebsiteConfig {
     portfolio: Array<{ title: string; description: string; image?: string | null }>;
     gallery: Array<{ url: string; alt?: string }>;
     whyChooseUs: Array<{ title: string; description: string }>;
+    // About page's "Our Values" section — used to be 4 hardcoded values
+    // (Excellence/Integrity/Innovation/Customer Focus) with no way to edit
+    // or replace them, unlike every other list-content section.
+    aboutValues: Array<{ title: string; description: string }>;
     pricingPlans: Array<{ name: string; price: string; period?: string; features: string[]; popular?: boolean }>;
     menuItems: Array<{ name: string; description: string; price: string; image?: string | null }>;
     dailySpecials: Array<{ name: string; description: string; price: string; tag?: string; originalPrice?: string }>;
@@ -59,6 +78,28 @@ export interface WebsiteConfig {
     programs: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
     facilities: Array<{ title: string; description: string }>;
     skills: Array<{ title: string; description: string }>;
+    // Site-wide (not per-page) footer text overrides — everything here is
+    // optional and falls back to sensible defaults derived from the
+    // business info entered earlier, same as pageContent does for Hero/CTA.
+    footer: {
+      tagline?: string;
+      copyrightText?: string;
+      // Only rendered by the "Rich Footer" style (Footer1), which is the
+      // only one of the three with a CTA block.
+      ctaHeading?: string;
+      ctaSubtext?: string;
+      ctaButtonText?: string;
+    };
+    // The Contact page's form (heading/intro/submit button text) and the
+    // separate "Contact Info" section (its own heading) were both fully
+    // hardcoded with no editor anywhere.
+    contact: {
+      heading?: string;
+      intro?: string;
+      submitButtonText?: string;
+      infoHeading?: string;
+      infoSubtitle?: string;
+    };
   };
   branding: {
     logo: string | null;
@@ -121,6 +162,7 @@ export const DEFAULT_WEBSITE_CONFIG: WebsiteConfig = {
     portfolio: [],
     gallery: [],
     whyChooseUs: [],
+    aboutValues: [],
     pricingPlans: [],
     menuItems: [],
     dailySpecials: [],
@@ -141,6 +183,8 @@ export const DEFAULT_WEBSITE_CONFIG: WebsiteConfig = {
     programs: [],
     facilities: [],
     skills: [],
+    footer: {},
+    contact: {},
   },
   branding: {
     logo: null,

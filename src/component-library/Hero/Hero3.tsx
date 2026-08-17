@@ -5,10 +5,22 @@ interface HeroProps {
   ctaLink: string;
   backgroundImage?: string | null;
   logo?: string | null;
+  // The second ("Learn More") button and all three stats were hardcoded —
+  // no way to turn "500+ Projects / 98% Satisfaction / 24/7 Support" into
+  // numbers that actually describe the business using this layout.
+  secondaryCtaText?: string;
+  secondaryCtaLink?: string;
+  stats?: { value: string; label: string }[];
 }
 
+const DEFAULT_STATS = [
+  { value: "500+", label: "Projects" },
+  { value: "98%", label: "Satisfaction" },
+  { value: "24/7", label: "Support" },
+];
+
 /* Hero3 — Centered statement hero with stats */
-const Hero3 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: HeroProps) => (
+const Hero3 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage, secondaryCtaText, secondaryCtaLink, stats }: HeroProps) => (
   <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
     {backgroundImage && (
       <div className="absolute inset-0 opacity-[0.03]">
@@ -55,10 +67,10 @@ const Hero3 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: Her
           </svg>
         </a>
         <a
-          href="#about"
+          href={secondaryCtaLink || "#about"}
           className="inline-flex items-center gap-2 border border-border px-8 py-4 text-[11px] font-bold tracking-[0.15em] uppercase text-muted-foreground transition-all duration-500 hover:border-foreground hover:text-foreground"
         >
-          Learn More
+          {secondaryCtaText || "Learn More"}
         </a>
       </div>
 
@@ -66,11 +78,7 @@ const Hero3 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: Her
         className="mt-24 grid grid-cols-3 gap-0 max-w-3xl mx-auto border-t border-border"
         style={{ animation: "pReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both" }}
       >
-        {[
-          { value: "500+", label: "Projects" },
-          { value: "98%", label: "Satisfaction" },
-          { value: "24/7", label: "Support" },
-        ].map((stat, i) => (
+        {(stats && stats.length > 0 ? stats : DEFAULT_STATS).map((stat, i) => (
           <div key={i} className="py-8 text-center border-r border-border last:border-r-0">
             <div className="text-3xl lg:text-4xl font-bold tracking-tight" style={{ letterSpacing: "-0.04em" }}>
               {stat.value}

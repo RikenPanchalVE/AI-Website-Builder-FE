@@ -5,6 +5,18 @@ interface FooterProps {
   description: string;
   links: { label: string; href: string }[];
   socialLinks: { platform: string; href: string }[];
+  // Optional overrides — everything here used to be hardcoded, so a client
+  // who wanted different footer copy than the auto-generated business
+  // description had no way to change it.
+  copyrightText?: string;
+  ctaHeading?: string;
+  ctaSubtext?: string;
+  ctaButtonText?: string;
+  // This used to be a hardcoded "#contact" anchor — there's no element with
+  // that id anywhere on the page, so the button just did nothing when
+  // clicked. WebsiteRenderer's SPA navigation only intercepts links that
+  // start with "/", so it needs a real page path, not a fragment.
+  ctaLink?: string;
 }
 
 // The page-link list used to be repeated here even though the exact same
@@ -12,7 +24,7 @@ interface FooterProps {
 // with more than 4-5 pages it wrapped into a cramped multi-line list that
 // looked cluttered rather than useful. Footer keeps brand/social/CTA and
 // drops the duplicate navigation.
-const Footer1 = ({ brandName, description, socialLinks }: FooterProps) => (
+const Footer1 = ({ brandName, description, socialLinks, copyrightText, ctaHeading, ctaSubtext, ctaButtonText, ctaLink }: FooterProps) => (
   <footer className="relative overflow-hidden border-t border-border bg-card">
     <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-primary/[0.04] blur-3xl" />
     <div className="relative mx-auto max-w-7xl px-6 py-20 lg:px-8">
@@ -32,16 +44,16 @@ const Footer1 = ({ brandName, description, socialLinks }: FooterProps) => (
           </div>
         </div>
         <div className="md:col-span-5">
-          <h4 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-foreground">Get in Touch</h4>
-          <p className="mb-6 text-sm leading-relaxed text-muted-foreground">Ready to start your project? Let's talk about how we can help.</p>
-          <a href="#contact" className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-primary to-secondary px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-primary/25 transition-all duration-400 hover:scale-105 hover:shadow-2xl hover:shadow-primary/30">
-            Start a Project
+          <h4 className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-foreground">{ctaHeading || "Get in Touch"}</h4>
+          <p className="mb-6 text-sm leading-relaxed text-muted-foreground">{ctaSubtext || "Ready to start your project? Let's talk about how we can help."}</p>
+          <a href={ctaLink || "/contact"} className="inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-primary to-secondary px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-primary/25 transition-all duration-400 hover:scale-105 hover:shadow-2xl hover:shadow-primary/30">
+            {ctaButtonText || "Start a Project"}
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
           </a>
         </div>
       </div>
       <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
-        <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} {brandName}. All rights reserved.</p>
+        <p className="text-xs text-muted-foreground">{copyrightText || `© ${new Date().getFullYear()} ${brandName}. All rights reserved.`}</p>
         <p className="text-xs text-muted-foreground/50">Crafted with precision</p>
       </div>
     </div>

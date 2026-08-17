@@ -40,7 +40,10 @@ function mixColor(hex: string, amount: number, towards: "white" | "black" = "whi
   return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
 }
 
-const IMAGE_HERO_COMPONENTS = new Set(["Hero1", "Hero4"]);
+// Hero2 (Split Editorial) has an image slot too — its right column falls
+// back to a decorative gradient with no image, same as Hero1/Hero4 — it was
+// just missing from this set, so an uploaded image was silently dropped.
+const IMAGE_HERO_COMPONENTS = new Set(["Hero1", "Hero2", "Hero4"]);
 
 function resolveComponent(category: string, selectedId?: string): string {
   const map = (COMPONENT_MAP as Record<string, Record<string, string>>)[category];
@@ -72,6 +75,13 @@ const GENERIC_REASONS = [
   { title: "Expert Team", description: "Experienced professionals dedicated to great results." },
   { title: "Quality First", description: "We never compromise on quality or attention to detail." },
   { title: "Customer Focused", description: "Your satisfaction drives everything we do." },
+];
+
+const GENERIC_ABOUT_VALUES = [
+  { title: "Excellence", description: "We strive for excellence in everything we do, setting high standards and exceeding expectations." },
+  { title: "Integrity", description: "We conduct our business with honesty, transparency, and ethical practices." },
+  { title: "Innovation", description: "We embrace new ideas and continuously improve our approach to better serve our clients." },
+  { title: "Customer Focus", description: "Our clients are at the heart of every decision we make." },
 ];
 
 const GENERIC_PLANS = [
@@ -372,7 +382,20 @@ export function sectionType(rawId: string): string | undefined {
 }
 
 interface PageContentOverride {
-  hero?: { headline?: string; subheadline?: string; ctaText?: string };
+  hero?: {
+    headline?: string;
+    subheadline?: string;
+    ctaText?: string;
+    socialProofText?: string;
+    socialProofSubtext?: string;
+    secondaryCtaText?: string;
+    stat1Value?: string;
+    stat1Label?: string;
+    stat2Value?: string;
+    stat2Label?: string;
+    stat3Value?: string;
+    stat3Label?: string;
+  };
   about_story?: { content?: string };
   cta?: { headline?: string; subheadline?: string; ctaText?: string };
 }
@@ -384,6 +407,7 @@ interface PreviewCtx {
   testimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
   faq: Array<{ question: string; answer: string }>;
   reasons: Array<{ title: string; description: string }>;
+  aboutValues: Array<{ title: string; description: string; icon?: string }>;
   plans: Array<{ name: string; price: string; period?: string; features: string[]; popular?: boolean }>;
   portfolio: Array<{ title: string; description: string; image?: string | null }>;
   gallery: Array<{ url: string; alt?: string }>;
@@ -411,6 +435,8 @@ interface PreviewCtx {
   contactPhone: string;
   contactEmail: string;
   contactAddress: string;
+  contactContent: { heading?: string; intro?: string; submitButtonText?: string; infoHeading?: string; infoSubtitle?: string };
+  projectId?: string;
   pageContent?: PageContentOverride;
 }
 
@@ -471,12 +497,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
           component: resolveComponent("about_values", ctx.components.about_values),
           props: {
             title: "Our Values",
-            values: [
-              { title: "Excellence", description: "We strive for excellence in everything we do, setting high standards and exceeding expectations." },
-              { title: "Integrity", description: "We conduct our business with honesty, transparency, and ethical practices." },
-              { title: "Innovation", description: "We embrace new ideas and continuously improve our approach to better serve our clients." },
-              { title: "Customer Focus", description: "Our clients are at the heart of every decision we make." },
-            ],
+            values: ctx.aboutValues,
           },
           order: order++,
         });
@@ -495,15 +516,22 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
           order: order++,
         });
         break;
-      case "gallery":
+      case "gallery": {
+        // Gallery1/2 take `images` as a plain array of URL strings. With
+        // nothing uploaded yet, that array was simply empty — .map() over
+        // it renders nothing at all below the heading, so the whole grid
+        // looked missing/invisible instead of showing the same placeholder
+        // tiles the real generated site falls back to (see
+        // _buildGallerySections server-side, which fills 9 nulls).
+        const galleryUrls = ctx.gallery.length > 0 ? ctx.gallery.map((g) => g.url) : Array.from({ length: 9 }, () => null as unknown as string);
         sections.push({
           id: "gallery",
           component: resolveComponent("gallery", ctx.components.gallery),
-          // Gallery1/2 take `images` as a plain array of URL strings.
-          props: { title: "Gallery", images: ctx.gallery.map((g) => g.url) },
+          props: { title: "Gallery", images: galleryUrls },
           order: order++,
         });
         break;
+      }
       case "team":
         sections.push({
           id: "team",
@@ -560,10 +588,13 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
           id: "contact",
           component: resolveComponent("contact", ctx.components.contact),
           props: {
-            title: "Get In Touch",
+            title: ctx.contactContent.heading?.trim() || "Get In Touch",
             email: ctx.contactEmail,
             phone: ctx.contactPhone,
             address: ctx.contactAddress,
+            intro: ctx.contactContent.intro?.trim() || undefined,
+            submitButtonText: ctx.contactContent.submitButtonText?.trim() || undefined,
+            projectId: ctx.projectId,
           },
           order: order++,
         });
@@ -581,6 +612,8 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
           id: "contact_info",
           component: resolveComponent("contact_info", ctx.components.contact_info),
           props: {
+            title: ctx.contactContent.infoHeading?.trim() || undefined,
+            subtitle: ctx.contactContent.infoSubtitle?.trim() || undefined,
             methods: [
               { title: "Phone", value: ctx.contactPhone, description: "Call us directly" },
               { title: "Email", value: ctx.contactEmail, description: "Send us a message" },
@@ -834,7 +867,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
  * colors, fonts, layout variants, and section choices all match what will
  * actually be generated.
  */
-export function buildPreviewSpec(config: any) {
+export function buildPreviewSpec(config: any, projectId?: string) {
   const business = config.business || {};
   const theme = config.theme || {};
   const components = config.components || {};
@@ -971,11 +1004,24 @@ export function buildPreviewSpec(config: any) {
             ctaLink: "/contact",
             badge: "Welcome",
             logo,
-            // Only Hero1 (Full-Screen Statement) and Hero4 (Image-Focused)
-            // are built around a photo — the other layouts are text-first,
-            // so don't hand them a background image even if one was
-            // uploaded while a different hero style was selected.
+            // Hero1 (Full-Screen Statement), Hero2 (Split Editorial), and
+            // Hero4 (Image-Focused) are the layouts built around a photo —
+            // the other layouts are text-first, so don't hand them a
+            // background image even if one was uploaded while a different
+            // hero style was selected.
             backgroundImage: IMAGE_HERO_COMPONENTS.has(heroComponent) ? config.branding?.bannerImages?.[0] || null : null,
+            // Hero2's social-proof line and Hero3's second button/stats bar
+            // — harmless no-ops for every other hero, which just ignores
+            // whatever extra props it doesn't read.
+            socialProofText: pageContent?.hero?.socialProofText?.trim() || undefined,
+            socialProofSubtext: pageContent?.hero?.socialProofSubtext?.trim() || undefined,
+            secondaryCtaText: pageContent?.hero?.secondaryCtaText?.trim() || undefined,
+            stats: [1, 2, 3].some((n) => (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Value`] || (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Label`])
+              ? [1, 2, 3].map((n) => ({
+                  value: (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Value`]?.trim() || ["500+", "98%", "24/7"][n - 1],
+                  label: (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Label`]?.trim() || ["Projects", "Satisfaction", "Support"][n - 1],
+                }))
+              : undefined,
           },
           order: 1,
         }
@@ -996,6 +1042,7 @@ export function buildPreviewSpec(config: any) {
       testimonials: content.testimonials?.length ? content.testimonials : GENERIC_TESTIMONIALS,
       faq: content.faq?.length ? content.faq : GENERIC_FAQ,
       reasons: content.whyChooseUs?.length ? content.whyChooseUs : GENERIC_REASONS,
+      aboutValues: content.aboutValues?.length ? content.aboutValues : GENERIC_ABOUT_VALUES,
       plans: content.pricingPlans?.length ? content.pricingPlans : GENERIC_PLANS,
       portfolio: content.portfolio?.length ? content.portfolio : GENERIC_PORTFOLIO,
       gallery: content.gallery?.length ? content.gallery : GENERIC_GALLERY,
@@ -1023,6 +1070,8 @@ export function buildPreviewSpec(config: any) {
       contactPhone: business.phone?.trim() || "+1 (555) 123-4567",
       contactEmail: business.email?.trim() || "hello@example.com",
       contactAddress: business.address?.trim() || "123 Business St, Suite 100",
+      contactContent: config.content?.contact || {},
+      projectId,
       pageContent,
     };
 
@@ -1035,14 +1084,24 @@ export function buildPreviewSpec(config: any) {
       order: 0,
     };
 
+    const footerContent = config.content?.footer || {};
     const footerSection = {
       id: "footer",
       component: footerComponent,
       props: {
         brandName: businessName,
-        description: business.description?.trim() || `${businessName} — professional services you can trust.`,
+        description: footerContent.tagline?.trim() || business.description?.trim() || `${businessName} — professional services you can trust.`,
         links: navLinks,
         socialLinks: (business.socialLinks || []).map((l: { platform: string; url: string }) => ({ platform: l.platform, href: l.url })),
+        copyrightText: footerContent.copyrightText?.trim() || undefined,
+        ctaHeading: footerContent.ctaHeading?.trim() || undefined,
+        ctaSubtext: footerContent.ctaSubtext?.trim() || undefined,
+        ctaButtonText: footerContent.ctaButtonText?.trim() || undefined,
+        // Was hardcoded to "#contact" inside Footer1 itself — a fragment
+        // with no matching element anywhere on the page, so the button
+        // didn't go anywhere when clicked. Same target Hero's CTA already
+        // uses above.
+        ctaLink: "/contact",
       },
       order: bodySections.length + 2,
     };

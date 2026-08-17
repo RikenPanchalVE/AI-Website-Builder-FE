@@ -33,13 +33,14 @@ const DeviceIcon = ({ id }: { id: string }) => {
 
 interface FullScreenPreviewModalProps {
   config: any;
+  projectId?: string;
   activePage: string;
   onPageChange: (slug: string) => void;
   onClose: () => void;
 }
 
-const FullScreenPreviewModal = ({ config, activePage, onPageChange, onClose }: FullScreenPreviewModalProps) => {
-  const spec = useMemo(() => buildPreviewSpec(config), [config]);
+const FullScreenPreviewModal = ({ config, projectId, activePage, onPageChange, onClose }: FullScreenPreviewModalProps) => {
+  const spec = useMemo(() => buildPreviewSpec(config, projectId), [config, projectId]);
   const [device, setDevice] = useState<(typeof DEVICES)[number]["id"]>("desktop");
 
   useEffect(() => {

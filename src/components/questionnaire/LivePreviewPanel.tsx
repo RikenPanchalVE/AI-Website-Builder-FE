@@ -7,13 +7,14 @@ const DESIGN_WIDTH = 1280;
 
 interface LivePreviewPanelProps {
   config: any;
+  projectId?: string;
   activePage: string;
   onPageChange: (slug: string) => void;
   onExpand: () => void;
 }
 
-const LivePreviewPanel = ({ config, activePage, onPageChange, onExpand }: LivePreviewPanelProps) => {
-  const spec = useMemo(() => buildPreviewSpec(config), [config]);
+const LivePreviewPanel = ({ config, projectId, activePage, onPageChange, onExpand }: LivePreviewPanelProps) => {
+  const spec = useMemo(() => buildPreviewSpec(config, projectId), [config, projectId]);
   const currentPage = spec.pages.find((p) => p.slug === activePage) ? activePage : spec.pages[0]?.slug || "home";
 
   const viewportRef = useRef<HTMLDivElement>(null);
