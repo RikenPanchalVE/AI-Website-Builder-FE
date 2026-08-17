@@ -374,7 +374,16 @@ const QuestionnairePage = () => {
               )}
             </div>
 
-            <div className="mt-6 flex justify-between">
+            {/* Below lg, the floating "Preview" button (see below) sits fixed
+                at bottom-right of the viewport — the exact same corner this
+                row's Next/Generate button lands in once its non-sticky flow
+                position scrolls into view, so the FAB was rendering on top
+                of it and blocking clicks. Pinning this row to the bottom of
+                the viewport on mobile/tablet (matching the FAB's own
+                lg:hidden breakpoint) fixes both problems at once: Next is
+                always reachable without scrolling, and moving the FAB up to
+                clear this bar's height removes the overlap entirely. */}
+            <div className="sticky bottom-0 z-10 -mx-4 mt-6 flex justify-between gap-3 border-t border-border bg-card px-4 py-3 sm:-mx-6 sm:px-6 lg:static lg:z-auto lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0">
               <Button type="button" variant="outline" onClick={handlePrev} disabled={step === 0}>
                 Previous
               </Button>
@@ -402,10 +411,14 @@ const QuestionnairePage = () => {
         </div>
       </main>
 
+      {/* bottom-24 (not bottom-5) clears the sticky Previous/Next bar above
+          — that bar now pins to the bottom of the viewport on every
+          breakpoint this button is visible at, so bottom-5 would sit right
+          on top of the Next/Generate Website button. */}
       <button
         type="button"
         onClick={() => setFullScreenPreview(true)}
-        className="fixed bottom-5 right-5 z-20 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg lg:hidden"
+        className="fixed bottom-24 right-5 z-20 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg lg:hidden"
       >
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />

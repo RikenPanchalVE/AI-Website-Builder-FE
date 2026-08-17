@@ -5,11 +5,12 @@ import api from "@/api/axios";
 import WebsiteRenderer from "@/renderer/WebsiteRenderer";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import DeviceFrame from "@/components/questionnaire/DeviceFrame";
 
 const DEVICES = [
-  { id: "desktop", label: "Desktop", width: "100%" },
-  { id: "tablet", label: "Tablet", width: "768px" },
-  { id: "mobile", label: "Mobile", width: "390px" },
+  { id: "desktop", label: "Desktop", width: "100%", height: "auto" },
+  { id: "tablet", label: "Tablet", width: "768px", height: "1024px" },
+  { id: "mobile", label: "Mobile", width: "390px", height: "844px" },
 ] as const;
 
 const DeviceIcon = ({ id }: { id: string }) => {
@@ -98,7 +99,15 @@ const PreviewPage = () => {
             <span className="text-xs text-muted-foreground">v{spec.version}</span>
           </div>
 
-          <div className="flex items-center gap-1 overflow-x-auto">
+          {/* min-w-0 is load-bearing here: a flex item's default min-width
+              is auto (its content size), so without it this row refused to
+              shrink below the combined width of every page-tab button —
+              even though it already has overflow-x-auto ready to scroll
+              that overflow internally — and pushed the whole page wider
+              than the viewport on narrow screens instead of scrolling in
+              place. flex-1 lets it claim the space between the title and
+              the action buttons rather than staying at its content width. */}
+          <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
             {spec.pages?.map((p: any) => (
               <button
                 key={p.slug}
@@ -115,7 +124,11 @@ const PreviewPage = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-3">
+          {/* flex-wrap: the device toggle + both buttons together are wider
+              than a phone screen has room for once the title and tabs rows
+              also claim space — this lets them wrap onto a second line
+              instead of forcing the page itself to overflow horizontally. */}
+          <div className="flex flex-wrap items-center justify-end gap-3">
             <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
               {DEVICES.map((d) => (
                 <button
@@ -150,7 +163,9 @@ const PreviewPage = () => {
           )}
           style={{ maxWidth: activeDevice.width }}
         >
-          <WebsiteRenderer data={spec} currentPage={activePage} onNavigatePage={setActivePage} />
+          <DeviceFrame width={activeDevice.width} height={activeDevice.height} active={device !== "desktop"}>
+            <WebsiteRenderer data={spec} currentPage={activePage} onNavigatePage={setActivePage} />
+          </DeviceFrame>
         </div>
       </main>
     </div>

@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import WebsiteRenderer from "@/renderer/WebsiteRenderer";
 import { buildPreviewSpec } from "./previewSpec";
 import { cn } from "@/lib/utils";
+import DeviceFrame from "./DeviceFrame";
 
 const DEVICES = [
-  { id: "desktop", label: "Desktop", width: "100%" },
-  { id: "tablet", label: "Tablet", width: "768px" },
-  { id: "mobile", label: "Mobile", width: "390px" },
+  { id: "desktop", label: "Desktop", width: "100%", height: "auto" },
+  { id: "tablet", label: "Tablet", width: "768px", height: "1024px" },
+  { id: "mobile", label: "Mobile", width: "390px", height: "844px" },
 ] as const;
 
 const DeviceIcon = ({ id }: { id: string }) => {
@@ -68,10 +69,15 @@ const FullScreenPreviewModal = ({ config, projectId, activePage, onPageChange, o
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
           <h2 className="text-sm font-semibold text-foreground">Live Preview</h2>
-          <span className="text-xs text-muted-foreground">— approximate, generated on the next step</span>
+          <span className="hidden text-xs text-muted-foreground sm:inline">— approximate, generated on the next step</span>
         </div>
 
-        <div className="flex items-center gap-1 overflow-x-auto">
+        {/* min-w-0 is load-bearing: without it this row won't shrink below
+            the combined width of every page-tab button (a flex item's
+            default min-width is its content size), even though it already
+            has overflow-x-auto ready to scroll that overflow in place — so
+            it pushed the whole modal wider than the viewport instead. */}
+        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
           {spec.pages.map((p) => (
             <button
               key={p.slug}
@@ -87,7 +93,7 @@ const FullScreenPreviewModal = ({ config, projectId, activePage, onPageChange, o
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-3">
           <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">
             {DEVICES.map((d) => (
               <button
@@ -125,7 +131,9 @@ const FullScreenPreviewModal = ({ config, projectId, activePage, onPageChange, o
           )}
           style={{ maxWidth: activeDevice.width }}
         >
-          <WebsiteRenderer data={spec as any} currentPage={currentPage} onNavigatePage={onPageChange} />
+          <DeviceFrame width={activeDevice.width} height={activeDevice.height} active={device !== "desktop"}>
+            <WebsiteRenderer data={spec as any} currentPage={currentPage} onNavigatePage={onPageChange} />
+          </DeviceFrame>
         </div>
       </div>
     </div>

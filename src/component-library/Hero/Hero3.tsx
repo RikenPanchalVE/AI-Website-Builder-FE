@@ -75,11 +75,16 @@ const Hero3 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage, secon
       </div>
 
       <div
-        className="mt-24 grid grid-cols-3 gap-0 max-w-3xl mx-auto border-t border-border"
+        // Bare grid-cols-3 used to stay 3-across on every screen — with
+        // 0.2em-tracked uppercase labels like "SATISFACTION", each ~114px
+        // column wrapped mid-word on phones. Stacks to 1 column below sm,
+        // with the divider switching from a right border to a bottom one
+        // to match (mirrors the same pattern used elsewhere in the library).
+        className="mt-24 grid grid-cols-1 sm:grid-cols-3 gap-0 max-w-3xl mx-auto border-t border-border"
         style={{ animation: "pReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both" }}
       >
         {(stats && stats.length > 0 ? stats : DEFAULT_STATS).map((stat, i) => (
-          <div key={i} className="py-8 text-center border-r border-border last:border-r-0">
+          <div key={i} className="py-8 text-center border-b sm:border-b-0 sm:border-r border-border last:border-b-0 sm:last:border-r-0">
             <div className="text-3xl lg:text-4xl font-bold tracking-tight" style={{ letterSpacing: "-0.04em" }}>
               {stat.value}
             </div>

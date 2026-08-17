@@ -413,7 +413,11 @@ export const AboutStory = (props: any) => (
           )}
           <p className="text-lg text-muted-foreground leading-relaxed mb-12">{props.content}</p>
           {props.stats && (
-            <div className="grid grid-cols-2 gap-0 border border-border">
+            // The per-item border logic below already assumes a 1-col mobile
+            // / 2-col sm+ layout (it switches between border-b and sm:border-r)
+            // — but this grid was bare grid-cols-2, always 2-up, so that
+            // logic never actually got its intended 1-column mobile state.
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-border">
               {props.stats.map((s: any, i: number) => (
                 <div key={i} className={`p-8 ${i < props.stats.length - (props.stats.length % 2 === 0 ? 2 : 1) ? "border-b sm:border-r" : "border-b sm:border-b-0"} ${i % 2 === 0 ? "sm:border-r" : ""} border-border`}>
                   <div className="text-3xl lg:text-4xl font-bold tracking-tight mb-1" style={{ letterSpacing: "-0.04em" }}>{s.value}</div>
