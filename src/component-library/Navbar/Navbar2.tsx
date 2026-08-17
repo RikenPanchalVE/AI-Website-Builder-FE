@@ -15,7 +15,7 @@ const Navbar2 = ({ logo, brandName, links }: NavbarProps) => {
           {logo ? (
             <img src={logo} alt={brandName} className="h-10 w-auto rounded-xl" />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-sm font-black text-white shadow-xl shadow-primary/25">{brandName?.charAt(0)}</div>
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-sm font-black text-primary-foreground shadow-xl shadow-primary/25">{brandName?.charAt(0)}</div>
           )}
           <span className="text-xl font-extrabold tracking-tight text-foreground">{brandName}</span>
         </div>
@@ -25,7 +25,7 @@ const Navbar2 = ({ logo, brandName, links }: NavbarProps) => {
               {link.label}
             </a>
           ))}
-          <a href={links[links.length - 1]?.href || "#contact"} className="ml-3 rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-all duration-400 hover:scale-105 hover:shadow-xl hover:shadow-primary/30">
+          <a href={links[links.length - 1]?.href || "#contact"} className="ml-3 rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-400 hover:scale-105 hover:shadow-xl hover:shadow-primary/30">
             Get Started
           </a>
         </div>
@@ -40,7 +40,7 @@ const Navbar2 = ({ logo, brandName, links }: NavbarProps) => {
               {link.label}
             </a>
           ))}
-          <a href={links[links.length - 1]?.href || "#contact"} onClick={() => setMobileOpen(false)} className="mt-3 block rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-3 text-center text-sm font-bold text-white shadow-lg shadow-primary/25">
+          <a href={links[links.length - 1]?.href || "#contact"} onClick={() => setMobileOpen(false)} className="mt-3 block rounded-full bg-gradient-to-r from-primary to-secondary px-6 py-3 text-center text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25">
             Get Started
           </a>
         </div>

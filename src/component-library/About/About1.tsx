@@ -35,7 +35,7 @@ const About1 = ({ title, description, image }: AboutProps) => (
             </div>
             <div className="absolute -bottom-8 -left-8 rounded-2xl border border-border bg-card p-6 shadow-2xl" style={{ animation: "pReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both" }}>
               <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-white shadow-lg shadow-primary/25">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/25">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 </div>
                 <div>

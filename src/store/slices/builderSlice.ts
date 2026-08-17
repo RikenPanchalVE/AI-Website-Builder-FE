@@ -51,6 +51,10 @@ const builderSlice = createSlice({
     setComponents: (state, action: PayloadAction<Record<string, string>>) => {
       state.config.components = { ...state.config.components, ...action.payload };
     },
+    setSectionColor: (state, action: PayloadAction<{ key: string; value: WebsiteConfig["sectionColors"][string] }>) => {
+      if (!state.config.sectionColors) state.config.sectionColors = {};
+      state.config.sectionColors[action.payload.key] = action.payload.value;
+    },
     setContent: (state, action: PayloadAction<Partial<WebsiteConfig["content"]>>) => {
       state.config.content = { ...state.config.content, ...action.payload };
     },
@@ -91,6 +95,7 @@ export const {
   setTheme,
   setComponent,
   setComponents,
+  setSectionColor,
   setContent,
   setBranding,
   setCurrentStep,

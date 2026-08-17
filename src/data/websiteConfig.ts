@@ -45,6 +45,16 @@ export interface WebsiteConfig {
     accentStyle: string;
   };
   components: Record<string, string>;
+  // Per-section color/theme override, keyed by the same component-category
+  // string used in `components` (hero, services, footer, navbar, ...) — one
+  // slot per section family, the same unit the layout picker already uses.
+  // Left out entirely (or "default") means "inherit the site's theme".
+  sectionColors: Record<string, {
+    preset: "default" | "light" | "dark" | "primary" | "secondary" | "custom";
+    customBackground?: string;
+    customPrimary?: string;
+    customSecondary?: string;
+  }>;
   content: {
     services: Array<{ title: string; description: string; icon: string }>;
     testimonials: Array<{ name: string; role: string; content: string; rating: number; avatar?: string | null }>;
@@ -153,6 +163,7 @@ export const DEFAULT_WEBSITE_CONFIG: WebsiteConfig = {
     gallery: "gallery1",
     blog: "blog1",
   },
+  sectionColors: {},
   content: {
     services: [],
     testimonials: [],

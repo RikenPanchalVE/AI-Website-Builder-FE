@@ -967,6 +967,10 @@ export function buildPreviewSpec(config: any, projectId?: string) {
     backgroundTreatment: accent?.backgroundTreatment || profile.backgroundTreatment,
     buttonFill: accent?.buttonFill || "solid",
     buttonShadow: accent?.buttonShadow || "none",
+    // Per-section color overrides, keyed by component category — see
+    // WebsiteRenderer.tsx's buildSectionStyleOverride, which is what
+    // actually applies these.
+    sectionColors: config.sectionColors || {},
   };
 
   const selectedPageIds: string[] = config.pages?.length ? config.pages : ["home"];

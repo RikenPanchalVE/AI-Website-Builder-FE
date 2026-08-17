@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useContext, createContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { projectApi } from "@/api/projectApi";
@@ -10,12 +10,14 @@ import {
   setTheme,
   setComponent,
   setComponents,
+  setSectionColor,
   setContent,
   setBranding,
   setCurrentStep,
 } from "@/store/slices/builderSlice";
 import { BUSINESS_TYPES, type BusinessTypeConfig } from "@/config/businessTypes";
 import type { WebsiteConfig } from "@/data/websiteConfig";
+import type { SectionColorOverride } from "@/renderer/WebsiteRenderer";
 import { BUSINESS_CATEGORIES, PAGE_SECTIONS } from "@/data/designOptions";
 import { COMPONENT_CATEGORIES, type ComponentCategory } from "@/data/componentOptions";
 import { DESIGN_STYLES, COLOR_PALETTES, TYPOGRAPHY_OPTIONS } from "@/data/designOptions";
@@ -271,6 +273,7 @@ const QuestionnairePage = () => {
   }
 
   return (
+    <SectionColorsContext.Provider value={config.sectionColors || {}}>
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
@@ -420,6 +423,7 @@ const QuestionnairePage = () => {
         />
       )}
     </div>
+    </SectionColorsContext.Provider>
   );
 };
 
@@ -762,6 +766,100 @@ function StepPages({ config, dispatch, businessType }: { config: any; dispatch: 
 
 /* ── Step: Per-page detail (sections + layout for that page) ────────── */
 
+// Carries just the current sectionColors map down to ComponentVariantPicker
+// without adding a `config` prop to every one of its ~40 call sites — every
+// one of those already lives inside a component that has `config` in scope
+// to read from, but threading it through each individually would be exactly
+// the kind of "forgot one" risk this feature can't afford. Provided once,
+// at the top of the questionnaire.
+const SectionColorsContext = createContext<Record<string, SectionColorOverride>>({});
+
+const SECTION_COLOR_PRESETS: Array<{ id: SectionColorOverride["preset"]; label: string }> = [
+  { id: "default", label: "Match Site" },
+  { id: "light", label: "Light" },
+  { id: "dark", label: "Dark" },
+  { id: "primary", label: "Primary" },
+  { id: "secondary", label: "Secondary" },
+  { id: "custom", label: "Custom" },
+];
+
+// One color/theme override per component-category — shown inside every
+// ComponentVariantPicker, so it appears wherever a layout choice already
+// does (every section in the app has one). "Match Site" (the default)
+// means "use the global theme, no override"; the four presets derive a
+// background straight from the site's own palette (or plain light/dark)
+// so they always look intentional; "Custom" opens two color pickers for
+// full control.
+function SectionColorPicker({ category, dispatch }: { category: string; dispatch: any }) {
+  const sectionColors = useContext(SectionColorsContext);
+  const current: SectionColorOverride = sectionColors[category] || { preset: "default" };
+
+  const update = (patch: Partial<SectionColorOverride>) => {
+    dispatch(setSectionColor({ key: category, value: { ...current, ...patch } }));
+  };
+
+  return (
+    <div className="mt-3 border-t border-border pt-3">
+      <Label className="mb-2 text-xs text-muted-foreground">Section Color</Label>
+      <div className="flex flex-wrap gap-1.5">
+        {SECTION_COLOR_PRESETS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => update({ preset: p.id })}
+            className={cn(
+              "rounded-full border px-2.5 py-1 text-xs transition-all",
+              current.preset === p.id
+                ? "border-primary bg-primary/5 font-medium text-primary"
+                : "border-border bg-background text-foreground hover:border-primary/40"
+            )}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+      {current.preset === "custom" && (
+        <div className="mt-2.5 grid grid-cols-2 gap-3">
+          <div>
+            <Label className="mb-1 text-[11px] text-muted-foreground">Background</Label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="color"
+                value={current.customBackground || "#ffffff"}
+                onChange={(e) => update({ customBackground: e.target.value })}
+                className="h-7 w-8 shrink-0 cursor-pointer rounded border border-border bg-transparent"
+              />
+              <Input
+                value={current.customBackground || ""}
+                onChange={(e) => update({ customBackground: e.target.value })}
+                placeholder="#ffffff"
+                className="h-7 font-mono text-xs"
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="mb-1 text-[11px] text-muted-foreground">Accent</Label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="color"
+                value={current.customPrimary || "#2563EB"}
+                onChange={(e) => update({ customPrimary: e.target.value })}
+                className="h-7 w-8 shrink-0 cursor-pointer rounded border border-border bg-transparent"
+              />
+              <Input
+                value={current.customPrimary || ""}
+                onChange={(e) => update({ customPrimary: e.target.value })}
+                placeholder="#2563EB"
+                className="h-7 font-mono text-xs"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ComponentVariantPicker({
   cat,
   currentComponent,
@@ -816,6 +914,7 @@ function ComponentVariantPicker({
           );
         })}
       </div>
+      <SectionColorPicker category={cat.category} dispatch={dispatch} />
     </div>
   );
 }

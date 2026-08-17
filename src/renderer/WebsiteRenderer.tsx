@@ -14,6 +14,16 @@ interface Page {
   sections: Section[];
 }
 
+// Per-section color/theme override, one slot per component-category (the
+// same unit the layout picker already uses — see ComponentVariantPicker in
+// QuestionnairePage.tsx), keyed by that category string.
+export interface SectionColorOverride {
+  preset: "default" | "light" | "dark" | "primary" | "secondary" | "custom";
+  customBackground?: string;
+  customPrimary?: string;
+  customSecondary?: string;
+}
+
 interface WebsiteData {
   name?: string;
   description?: string;
@@ -30,6 +40,7 @@ interface WebsiteData {
     borderColor?: string;
     fontStyle?: string;
     fontFamily?: string;
+    sectionColors?: Record<string, SectionColorOverride>;
   };
   navigation?: {
     items?: Array<{ label?: string; href?: string; page?: string; slug?: string }>;
@@ -40,14 +51,198 @@ interface WebsiteData {
   };
 }
 
+// A section's `id` (e.g. "trainers", "solutions", "contact_form") isn't
+// always the same string as the component-category its color/layout picker
+// is keyed by ("team", "services", "contact") — several categories are
+// deliberately shared by more than one section family (see
+// ComponentVariantPicker's call sites in QuestionnairePage.tsx: Solutions
+// and Industries both pick from the "services" family, Amenities/
+// Facilities/Skills all share "why_choose_us", etc). Anything not listed
+// here uses its own id as the category, which covers the majority where
+// the two already match.
+const SECTION_ID_TO_CATEGORY: Record<string, string> = {
+  contact_form: "contact",
+  trainers: "team",
+  feature_grid: "services",
+  benefits: "why_choose_us",
+  amenities: "why_choose_us",
+  facilities: "why_choose_us",
+  skills: "why_choose_us",
+  case_studies: "portfolio",
+  experiences: "portfolio",
+  solutions: "services",
+  industries: "services",
+  rooms: "course_grid",
+  travel_packages: "course_grid",
+  programs: "course_grid",
+  menu_highlights: "menu_items",
+  inventory_grid: "portfolio",
+  features: "why_choose_us",
+  services_default: "services",
+  testimonials_default: "testimonials",
+  cta_default: "cta",
+  blog_preview: "blog",
+  blog_grid: "blog",
+};
+
+// Most components paint their root <section> with bg-background (and text
+// with text-foreground) — but a deliberate handful of "dramatic statement"
+// components go the other way around: bg-foreground for the surface,
+// text-background for the text (Hero1's cinematic full-bleed dark hero is
+// the original of this pattern; several others reuse it for the same
+// high-contrast effect). Picking "Light" for one of these used to still
+// assign the chosen color to `background`, which these components never
+// read for their own surface — so the section visibly went dark on "Light"
+// and light on "Dark", the exact inversion this list exists to catch. Any
+// component not listed here uses the normal bg-background/text-foreground
+// pairing and needs no special handling.
+const INVERTED_SURFACE_COMPONENTS = new Set([
+  "Hero1",
+  "Hero4",
+  "WhyChooseUs",
+  "Stats2",
+  "BusinessHours2",
+  "CTABanner",
+  "CTA1",
+]);
+
+// Builds the CSS custom-property overrides a section needs to render in
+// its own color/theme instead of the site's — every component reads its
+// colors through var(--theme-*) (see WebsiteRenderer's previewOverrides
+// block below), and CSS custom properties cascade to descendants, so
+// redefining them on a wrapping element repaints everything inside without
+// touching a single component's own code.
+function buildSectionStyleOverride(
+  override: SectionColorOverride | undefined,
+  componentName: string,
+  primaryColor: string,
+  secondaryColor: string
+): React.CSSProperties | undefined {
+  if (!override || !override.preset || override.preset === "default") return undefined;
+
+  let background: string;
+  let primary = primaryColor;
+  let secondary = secondaryColor;
+
+  switch (override.preset) {
+    case "light":
+      background = "#ffffff";
+      break;
+    case "dark":
+      background = "#0a0a0a";
+      break;
+    case "primary":
+      background = primaryColor;
+      break;
+    case "secondary":
+      background = secondaryColor;
+      break;
+    case "custom":
+      background = override.customBackground || "#ffffff";
+      primary = override.customPrimary || primaryColor;
+      secondary = override.customSecondary || secondaryColor;
+      break;
+    default:
+      return undefined;
+  }
+
+  let foreground = getReadableTextColor(background);
+
+  // The component actually reads bg-foreground for its surface and
+  // text-background for its text — the exact opposite of what every other
+  // component does — so hand it the exact opposite assignment too. This
+  // keeps `background` meaning "what the user picked" and `foreground`
+  // meaning "the readable contrast color" from the caller's perspective;
+  // only which CSS variable ends up carrying which one flips.
+  if (INVERTED_SURFACE_COMPONENTS.has(componentName)) {
+    [background, foreground] = [foreground, background];
+  }
+
+  const primaryForeground = getReadableTextColor(primary);
+  const secondaryForeground = getReadableTextColor(secondary);
+  // Solid hex, not an alpha-transparent color — mirrors exactly how the
+  // site-wide theme computes mutedColor/borderColor (a small step from the
+  // background toward the foreground, see mixWithWhite server-side). An
+  // earlier version used hexWithAlpha(foreground, ...) here, which put an
+  // already-transparent color into --theme-muted; Tailwind's own
+  // `bg-muted/30`-style utilities then mix that color *again* with white,
+  // multiplying the two alphas together and washing the tint out to
+  // near-invisible — solid colors don't have that problem.
+  const muted = mixHex(background, foreground, 0.06);
+  const border = mixHex(background, foreground, 0.14);
+
+  return {
+    // Tailwind itself generates every utility (bg-primary, text-primary/62,
+    // border-background/20, any class, any opacity — Tailwind v4 compiles
+    // opacity variants as color-mix() against the base variable, so they
+    // all resolve dynamically) from these exact *unprefixed* --color-*
+    // names, the same ones WebsiteRenderer sets once, globally, in
+    // `themeStyle` below. The custom --theme-* names only exist for the
+    // small hand-maintained whitelist of `!important` overrides further
+    // down in this file — redefining just those left every class outside
+    // that whitelist (the vast majority) completely unaffected by a
+    // section override, since Tailwind's own rules never read --theme-*
+    // at all. Redefining --color-* here is what makes *every* class in
+    // *every* component respond, with no whitelist to keep in sync.
+    "--color-primary": primary,
+    "--color-primary-foreground": primaryForeground,
+    "--color-secondary": secondary,
+    "--color-secondary-foreground": secondaryForeground,
+    "--color-background": background,
+    "--color-foreground": foreground,
+    "--color-muted": muted,
+    "--color-muted-foreground": "#888888",
+    "--color-border": border,
+    "--color-card": background,
+    "--color-card-foreground": foreground,
+    // The hand-maintained !important whitelist further down in this file
+    // still needs its own --theme-* names redefined too, so anything on
+    // that list stays consistent with the rest of the section.
+    "--theme-background": background,
+    "--theme-foreground": foreground,
+    "--theme-card": background,
+    "--theme-muted": muted,
+    "--theme-border": border,
+    "--theme-primary": primary,
+    "--theme-primary-foreground": primaryForeground,
+    "--theme-secondary": secondary,
+    "--theme-secondary-foreground": secondaryForeground,
+    "--theme-accent": primary,
+    "--theme-primary-soft": hexWithAlpha(primary, 0.1),
+    "--theme-secondary-soft": hexWithAlpha(secondary, 0.15),
+    "--theme-surface-strong": hexWithAlpha(primary, 0.14),
+    "--theme-gradient-from": primary,
+    "--theme-gradient-to": secondary,
+    "--theme-ring-glow": hexWithAlpha(primary, 0.2),
+    "--bg": background,
+    "--bgc": muted,
+    "--bdr": border,
+    "--bgd": muted,
+    "--ctx": foreground,
+    "--ctx2": muted,
+    "--c1": primary,
+    // Plain (non-variable) paint on the wrapper itself, as a safety net —
+    // most sections set their own bg-*/text-* class on the root <section>
+    // and repaint themselves purely from the variables above, but a few
+    // (e.g. Hero5) intentionally leave their section transparent and rely
+    // on the page's own background showing through. Without this, an
+    // override on one of those would recolor the text but leave the actual
+    // backdrop untouched.
+    backgroundColor: background,
+    color: foreground,
+  } as React.CSSProperties;
+}
+
 interface SectionRendererProps {
   component: string;
   props: Record<string, any>;
+  styleOverride?: React.CSSProperties;
 }
 
 export const SectionRenderer: React.FC<SectionRendererProps> = ({
   component,
   props,
+  styleOverride,
 }) => {
   const Component = ComponentRegistry[component];
 
@@ -59,7 +254,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
     );
   }
 
-  return (
+  const rendered = (
     <Suspense
       fallback={
         <div className="p-8 flex justify-center">
@@ -70,24 +265,42 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
       <Component {...props} />
     </Suspense>
   );
+
+  // Only wrap when this section actually overrides the site's colors —
+  // an unstyled wrapper div is harmless, but there's no reason to add one
+  // to every section when almost none of them will use it.
+  return styleOverride ? <div style={styleOverride}>{rendered}</div> : rendered;
 };
 
 interface PageRendererProps {
   page: Page;
+  sectionColors?: Record<string, SectionColorOverride>;
+  primaryColor?: string;
+  secondaryColor?: string;
 }
 
-export const PageRenderer: React.FC<PageRendererProps> = ({ page }) => {
+export const PageRenderer: React.FC<PageRendererProps> = ({ page, sectionColors, primaryColor, secondaryColor }) => {
   const sorted = [...page.sections].sort((a, b) => a.order - b.order);
 
   return (
     <div>
-      {sorted.map((section) => (
-        <SectionRenderer
-          key={section.id}
-          component={section.component}
-          props={section.props}
-        />
-      ))}
+      {sorted.map((section) => {
+        const category = SECTION_ID_TO_CATEGORY[section.id] || section.id;
+        const styleOverride = buildSectionStyleOverride(
+          sectionColors?.[category],
+          section.component,
+          primaryColor || "#1a1a1a",
+          secondaryColor || "#c8ff00"
+        );
+        return (
+          <SectionRenderer
+            key={section.id}
+            component={section.component}
+            props={section.props}
+            styleOverride={styleOverride}
+          />
+        );
+      })}
     </div>
   );
 };
@@ -120,6 +333,17 @@ const getReadableTextColor = (hex: string) => {
 const hexWithAlpha = (hex: string, alpha: number) => {
   const { r, g, b } = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+// Linear-interpolates two solid hex colors — used instead of hexWithAlpha
+// wherever the result itself needs to stay a solid, non-transparent color
+// (see buildSectionStyleOverride's muted/border computation).
+const mixHex = (from: string, to: string, amount: number) => {
+  const a = hexToRgb(from);
+  const b = hexToRgb(to);
+  const mix = (ca: number, cb: number) => Math.round(ca + (cb - ca) * amount);
+  const toHex = (v: number) => v.toString(16).padStart(2, "0");
+  return `#${toHex(mix(a.r, b.r))}${toHex(mix(a.g, b.g))}${toHex(mix(a.b, b.b))}`;
 };
 
 const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
@@ -301,7 +525,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     .theme-preview .text-secondary { color: var(--theme-secondary) !important; }
     .theme-preview .bg-secondary-foreground { background-color: var(--theme-secondary-foreground) !important; }
     .theme-preview .text-secondary-foreground { color: var(--theme-secondary-foreground) !important; }
-    .theme-preview .bg-primary\\/5, .theme-preview .bg-primary\\/10 { background-color: var(--theme-primary-soft) !important; }
+    .theme-preview .bg-primary\\/5, .theme-preview .bg-primary\\/8, .theme-preview .bg-primary\\/10 { background-color: var(--theme-primary-soft) !important; }
     .theme-preview .bg-secondary\\/5, .theme-preview .bg-secondary\\/10 { background-color: var(--theme-secondary-soft) !important; }
     .theme-preview .bg-accent { background-color: var(--theme-accent) !important; }
     .theme-preview .text-accent { color: var(--theme-accent) !important; }
@@ -311,13 +535,33 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     .theme-preview .from-primary\\/10 { --tw-gradient-from: color-mix(in srgb, var(--theme-primary) 10%, transparent) !important; }
     .theme-preview .to-secondary\\/10 { --tw-gradient-to: color-mix(in srgb, var(--theme-secondary) 10%, transparent) !important; }
     .theme-preview .bg-background { background-color: var(--theme-background) !important; background-image: var(--ds-bg-image) !important; }
+    .theme-preview .bg-background\\/10 { background-color: color-mix(in srgb, var(--theme-background) 10%, transparent) !important; }
+    .theme-preview .bg-background\\/80 { background-color: color-mix(in srgb, var(--theme-background) 80%, transparent) !important; }
+    .theme-preview .bg-background\\/90 { background-color: color-mix(in srgb, var(--theme-background) 90%, transparent) !important; }
+    .theme-preview .bg-background\\/95 { background-color: color-mix(in srgb, var(--theme-background) 95%, transparent) !important; }
     .theme-preview .text-foreground { color: var(--theme-foreground) !important; }
     .theme-preview .bg-muted { background-color: var(--theme-muted) !important; }
-    .theme-preview .bg-muted\\/50 { background-color: color-mix(in srgb, var(--theme-muted) 50%, white) !important; }
-    .theme-preview .text-muted-foreground { color: #888888 !important; }
+    /* These opacity variants used to mix toward literal "white" — a stand-in
+       for "whatever's usually behind it" that only holds for light-mode
+       styles. Every dark-mode design style (Premium/Luxury/Bold/Elegant/
+       Tech) computes --theme-muted/--theme-card as a *dark* color, so
+       mixing 70-80% of the way toward white turned a dark surface into a
+       near-white one — while the text drawn on top of it still used
+       --theme-foreground, which in dark mode is near-white too. White text
+       on a white card is exactly the "font not visible" bug. Mixing toward
+       "transparent" instead is real alpha blending (matches what Tailwind's
+       own bg-*/NN opacity utilities do) — it always lightens/darkens
+       relative to the color underneath rather than a fixed literal white,
+       so it reads correctly against both light and dark themes. */
+    .theme-preview .bg-muted\\/20 { background-color: color-mix(in srgb, var(--theme-muted) 20%, transparent) !important; }
+    .theme-preview .bg-muted\\/30 { background-color: color-mix(in srgb, var(--theme-muted) 30%, transparent) !important; }
+    .theme-preview .bg-muted\\/50 { background-color: color-mix(in srgb, var(--theme-muted) 50%, transparent) !important; }
+    .theme-preview .bg-muted\\/80 { background-color: color-mix(in srgb, var(--theme-muted) 80%, transparent) !important; }
+    .theme-preview .text-muted-foreground { color: color-mix(in srgb, var(--theme-foreground) 55%, transparent) !important; }
     .theme-preview .border-border { border-color: var(--theme-border) !important; }
     .theme-preview .bg-card { background-color: var(--theme-card) !important; }
-    .theme-preview .bg-card\\/70 { background-color: color-mix(in srgb, var(--theme-card) 70%, white) !important; }
+    .theme-preview .bg-card\\/70 { background-color: color-mix(in srgb, var(--theme-card) 70%, transparent) !important; }
+    .theme-preview .bg-card\\/95 { background-color: color-mix(in srgb, var(--theme-card) 95%, transparent) !important; }
     .theme-preview .text-card-foreground { color: var(--theme-foreground) !important; }
     .theme-preview .bg-surfacestrong { background-color: var(--theme-surface-strong) !important; }
     .theme-preview .shadow-primary\\/20 { box-shadow: 0 20px 40px -12px var(--theme-primary) !important; }
@@ -651,7 +895,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
           if (slug) onNavigatePage(slug);
         }
       }}>
-        <PageRenderer page={page} />
+        <PageRenderer page={page} sectionColors={theme?.sectionColors} primaryColor={primaryColor} secondaryColor={secondaryColor} />
       </main>
     </div>
   );

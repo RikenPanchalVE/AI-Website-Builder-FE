@@ -179,7 +179,7 @@ export const PackageGrid = (props: any) => (
               )}
               <button
                 className={`w-full rounded-xl py-3 text-sm font-semibold transition-all ${pkg.featured
-                    ? "bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:scale-[1.02]"
+                    ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/25 hover:shadow-xl hover:scale-[1.02]"
                     : "border border-border text-foreground hover:border-primary hover:bg-primary/5 hover:text-primary"
                   }`}
                 style={pkg.featured ? { backgroundImage: "linear-gradient(135deg, var(--theme-gradient-from), var(--theme-gradient-to))" } : undefined}

@@ -15,7 +15,7 @@ const Navbar1 = ({ logo, brandName, links }: NavbarProps) => {
           {logo ? (
             <img src={logo} alt={brandName} className="h-8 w-auto rounded-lg" />
           ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary text-sm font-black text-white shadow-lg shadow-primary/25">{brandName?.charAt(0)}</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-secondary text-sm font-black text-primary-foreground shadow-lg shadow-primary/25">{brandName?.charAt(0)}</div>
           )}
           <span className="text-lg font-extrabold tracking-tight text-foreground">{brandName}</span>
         </div>

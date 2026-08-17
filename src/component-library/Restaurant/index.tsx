@@ -27,21 +27,31 @@ export const MenuHighlights = (props: any) => (
 );
 
 // ── DailySpecials ──────────────────────────────────────────────
+// The banner gradient used to be hardcoded amber/orange/red — a fixed
+// "food" palette that never reflected the site's own brand colors (global
+// theme or per-section override alike, since neither could reach a class
+// that isn't theme-relative to begin with).
+// text-white throughout used to assume the banner was always a fixed dark
+// amber/orange/red gradient (see the note on the section background above).
+// Now that the gradient is driven by the site's own primary/secondary
+// colors, a light/pastel brand palette would render this whole card in
+// near-invisible white-on-white text. text-primary-foreground is already
+// computed per-theme for legible contrast against primary, whatever it is.
 export const DailySpecials = (props: any) => (
-  <section className="py-16 sm:py-20 bg-gradient-to-br from-amber-500 via-orange-500 to-red-500">
+  <section className="py-16 sm:py-20 bg-gradient-to-br from-primary via-secondary to-primary">
     <div className="mx-auto max-w-6xl px-6">
-      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-white sm:text-4xl">{props.title}</h2>}
-      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-white/80">{props.subtitle}</p>}
+      {props.title && <h2 className="mb-3 text-center text-3xl font-extrabold tracking-tight text-primary-foreground sm:text-4xl">{props.title}</h2>}
+      {props.subtitle && <p className="mx-auto mb-12 max-w-2xl text-center text-primary-foreground/80">{props.subtitle}</p>}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {(props.items || []).map((item: any, i: number) => (
-          <div key={i} className="overflow-hidden rounded-2xl bg-white/10 p-5 backdrop-blur-sm">
+          <div key={i} className="overflow-hidden rounded-2xl bg-primary-foreground/10 p-5 backdrop-blur-sm">
             <div className="mb-3 flex items-center justify-between">
-              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold text-white">{item.tag || "Today's Special"}</span>
-              {item.originalPrice && <span className="text-sm font-bold text-white/60 line-through">{item.originalPrice}</span>}
+              <span className="rounded-full bg-primary-foreground/20 px-3 py-1 text-xs font-bold text-primary-foreground">{item.tag || "Today's Special"}</span>
+              {item.originalPrice && <span className="text-sm font-bold text-primary-foreground/60 line-through">{item.originalPrice}</span>}
             </div>
-            <h3 className="text-lg font-bold text-white">{item.name}</h3>
-            {item.description && <p className="mt-1 text-sm text-white/70">{item.description}</p>}
-            <p className="mt-3 text-2xl font-extrabold text-white">{item.price}</p>
+            <h3 className="text-lg font-bold text-primary-foreground">{item.name}</h3>
+            {item.description && <p className="mt-1 text-sm text-primary-foreground/70">{item.description}</p>}
+            <p className="mt-3 text-2xl font-extrabold text-primary-foreground">{item.price}</p>
           </div>
         ))}
       </div>

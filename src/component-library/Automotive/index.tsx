@@ -57,7 +57,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
           </span>
         )}
         <div className={`absolute inset-0 bg-black/40 flex items-center justify-center gap-3 transition-opacity ${hovered ? "opacity-100" : "opacity-0"}`}>
-          <button className="px-4 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-gray-100">
+          <button className="px-4 py-2 bg-background text-foreground text-sm font-semibold rounded-lg hover:bg-background/90">
             View Details
           </button>
           <button
