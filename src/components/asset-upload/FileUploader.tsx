@@ -102,7 +102,7 @@ const FileUploader = ({ onUpload, uploading }: FileUploaderProps) => {
           <p className="text-sm font-medium text-foreground">
             {uploading ? "Uploading..." : "Drag & drop files here, or click to browse"}
           </p>
-          <p className="text-xs text-muted-foreground">Images, PDF, DOCX, TXT — Max 10MB</p>
+          <p className="text-xs text-muted-foreground">Images, PDF, DOCX, TXT - Max 10MB</p>
         </div>
       </div>
     </div>

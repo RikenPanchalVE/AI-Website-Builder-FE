@@ -9,7 +9,7 @@ interface FooterProps {
 }
 
 // The page-link list used to be repeated here even though the exact same
-// links already sit in the navbar a few hundred pixels above — on a site
+// links already sit in the navbar a few hundred pixels above - on a site
 // with more than 4-5 pages it wrapped into a cramped multi-line list that
 // looked cluttered rather than useful. Footer keeps brand/social and drops
 // the duplicate navigation.

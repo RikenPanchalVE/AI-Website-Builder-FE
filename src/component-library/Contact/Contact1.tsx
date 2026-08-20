@@ -5,11 +5,11 @@ interface ContactProps {
   email: string;
   phone: string;
   address: string;
-  // The form heading and submit button text were hardcoded — no way to
+  // The form heading and submit button text were hardcoded - no way to
   // change "Message"/"Send Message" to anything else.
   intro?: string;
   submitButtonText?: string;
-  // Submitting used to just call e.preventDefault() and discard the input —
+  // Submitting used to just call e.preventDefault() and discard the input -
   // now it actually posts to /api/contact, the same fixed path a
   // downloaded/exported site's own standalone server implements (see
   // downloadService.ts), so this works identically in both contexts.
@@ -20,7 +20,7 @@ interface ContactProps {
 
 type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
-/* Contact1 — Dramatic split layout */
+/* Contact1 - Dramatic split layout */
 const Contact1 = ({ title, email, phone, address, intro, submitButtonText, projectId }: ContactProps) => {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -75,7 +75,7 @@ const Contact1 = ({ title, email, phone, address, intro, submitButtonText, proje
               <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-muted-foreground mb-6">Message</p>
               {status === "sent" ? (
                 <div className="border border-border bg-background p-8 text-center">
-                  <p className="text-sm font-medium text-foreground">Thanks for reaching out — we'll get back to you soon.</p>
+                  <p className="text-sm font-medium text-foreground">Thanks for reaching out - we'll get back to you soon.</p>
                 </div>
               ) : (
                 <form className="space-y-0 border border-border bg-background" onSubmit={handleSubmit}>

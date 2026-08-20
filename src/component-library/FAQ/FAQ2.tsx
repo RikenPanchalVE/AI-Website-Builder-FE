@@ -3,7 +3,7 @@ import { useState } from "react";
 interface FAQ { question: string; answer: string; }
 interface FAQProps { title: string; faqs: FAQ[]; }
 
-/* FAQ2 — Two-column split layout */
+/* FAQ2 - Two-column split layout */
 const FAQ2 = ({ title, faqs }: FAQProps) => {
   const [open, setOpen] = useState<number | null>(null);
   return (

@@ -1,6 +1,6 @@
 interface CTAProps { headline: string; subheadline: string; ctaText: string; ctaLink: string; }
 
-/* CTA2 — Bordered statement with icon */
+/* CTA2 - Bordered statement with icon */
 const CTA2 = ({ headline, subheadline, ctaText, ctaLink }: CTAProps) => (
   <section className="bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">

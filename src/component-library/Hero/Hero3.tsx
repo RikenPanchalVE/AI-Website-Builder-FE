@@ -5,7 +5,7 @@ interface HeroProps {
   ctaLink: string;
   backgroundImage?: string | null;
   logo?: string | null;
-  // The second ("Learn More") button and all three stats were hardcoded —
+  // The second ("Learn More") button and all three stats were hardcoded -
   // no way to turn "500+ Projects / 98% Satisfaction / 24/7 Support" into
   // numbers that actually describe the business using this layout.
   secondaryCtaText?: string;
@@ -19,7 +19,7 @@ const DEFAULT_STATS = [
   { value: "24/7", label: "Support" },
 ];
 
-/* Hero3 — Centered statement hero with stats */
+/* Hero3 - Centered statement hero with stats */
 const Hero3 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage, secondaryCtaText, secondaryCtaLink, stats }: HeroProps) => (
   <section className="relative min-h-screen flex flex-col justify-center overflow-hidden">
     {backgroundImage && (
@@ -75,7 +75,7 @@ const Hero3 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage, secon
       </div>
 
       <div
-        // Bare grid-cols-3 used to stay 3-across on every screen — with
+        // Bare grid-cols-3 used to stay 3-across on every screen - with
         // 0.2em-tracked uppercase labels like "SATISFACTION", each ~114px
         // column wrapped mid-word on phones. Stacks to 1 column below sm,
         // with the divider switching from a right border to a bottom one

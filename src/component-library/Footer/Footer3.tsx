@@ -9,7 +9,7 @@ interface FooterProps {
 }
 
 // The page-link list used to be repeated here even though the exact same
-// links already sit in the navbar a few hundred pixels above — on a site
+// links already sit in the navbar a few hundred pixels above - on a site
 // with more than 4-5 pages it wrapped into a cramped multi-line list that
 // looked cluttered rather than useful. Footer keeps brand/social and drops
 // the duplicate navigation.
@@ -22,7 +22,7 @@ const Footer3 = ({ brandName, socialLinks, copyrightText }: FooterProps) => (
       </div>
       <div className="flex items-center gap-4">
         {/* Social links used to be declared in this footer's props but
-            never rendered — a client who filled these in on the Business
+            never rendered - a client who filled these in on the Business
             step would never see them anywhere on the site if this was
             their footer style (the default for Minimal/Luxury/Elegant/
             Editorial). Kept small to match this footer's compact, minimal
@@ -33,7 +33,7 @@ const Footer3 = ({ brandName, socialLinks, copyrightText }: FooterProps) => (
               <a
                 key={s.platform}
                 href={s.href}
-                // Not "hover:bg-primary" — the renderer's global button
+                // Not "hover:bg-primary" - the renderer's global button
                 // override styles anything matching a[class*="bg-primary"]
                 // as a full CTA button (huge padding, uppercase, letter
                 // spacing), since it can't tell a real bg-primary from a

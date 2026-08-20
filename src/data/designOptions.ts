@@ -3,7 +3,7 @@ export interface DesignStyleOption {
   name: string;
   description: string;
   // The color identity that actually gets applied as theme.primaryColor /
-  // secondaryColor when this style is picked — not just the decorative
+  // secondaryColor when this style is picked - not just the decorative
   // swatch dots in preview.colors. Picked from that same swatch so what
   // you see in the picker is what you get on the site.
   primaryColor: string;

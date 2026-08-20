@@ -384,7 +384,7 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
       {
         id: "about_story2",
         name: "Centered Statement",
-        description: "No image — a centered pull-quote style story with inline stats.",
+        description: "No image - a centered pull-quote style story with inline stats.",
         preview: { layout: "centered", style: "minimal", elements: ["headline", "content", "inline-stats"] },
         bestFor: ["consulting", "technology", "finance", "luxury"],
       },
@@ -582,7 +582,7 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
       {
         id: "course_grid2",
         name: "Listing Rows",
-        description: "A vertical list of wide rows — image, details, and price side by side.",
+        description: "A vertical list of wide rows - image, details, and price side by side.",
         preview: { layout: "row-list", style: "editorial", elements: ["image", "title", "price"] },
         bestFor: ["real-estate", "travel", "education", "fitness"],
       },
@@ -604,7 +604,7 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
       {
         id: "process2",
         name: "Connected Flow",
-        description: "Steps in a row connected by arrows — reads left to right like a flowchart.",
+        description: "Steps in a row connected by arrows - reads left to right like a flowchart.",
         preview: { layout: "horizontal-flow", style: "visual", elements: ["number", "title", "arrow"] },
         bestFor: ["technology", "agency", "education", "consulting"],
       },
@@ -626,7 +626,7 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
       {
         id: "daily_specials2",
         name: "Simple List",
-        description: "A clean, restrained list — better fit for upscale or minimal menus.",
+        description: "A clean, restrained list - better fit for upscale or minimal menus.",
         preview: { layout: "vertical-list", style: "minimal", elements: ["tag", "price"] },
         bestFor: ["restaurant"],
       },
@@ -692,7 +692,7 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
       {
         id: "travel_deals2",
         name: "Listing Rows",
-        description: "A vertical list of wide rows — easier to scan a long list of deals.",
+        description: "A vertical list of wide rows - easier to scan a long list of deals.",
         preview: { layout: "row-list", style: "editorial", elements: ["image", "discount-badge", "price"] },
         bestFor: ["travel"],
       },
@@ -758,7 +758,7 @@ export const COMPONENT_CATEGORIES: ComponentCategory[] = [
       {
         id: "menu_items2",
         name: "Classic List",
-        description: "A classic printed-menu look — name, dotted leader line, price. No photos.",
+        description: "A classic printed-menu look - name, dotted leader line, price. No photos.",
         preview: { layout: "vertical-list", style: "editorial", elements: ["name", "dotted-line", "price"] },
         bestFor: ["restaurant"],
       },
@@ -782,7 +782,7 @@ export const COMPONENT_MAP: Record<string, Record<string, string>> = {
   blog: { blog1: "BlogPreview", blog2: "BlogGrid" },
   // The About page's own sections (Company Story, Values, Team, Statistics,
   // Timeline) never had a layout choice at all, unlike every Home page
-  // section — picking a design style changed colors/fonts but these five
+  // section - picking a design style changed colors/fonts but these five
   // always rendered the exact same fixed layout.
   about_story: { about_story1: "AboutStory", about_story2: "AboutStory2" },
   about_values: { about_values1: "AboutValues", about_values2: "AboutValues2" },

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCurrentProject } from "@/store/slices/projectSlice";
+import { resetBuilder } from "@/store/slices/builderSlice";
 import api from "@/api/axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +32,7 @@ const FEATURES = [
       </svg>
     ),
     title: "No account needed",
-    description: "Start right now — no login, no password, no forms to remember.",
+    description: "Start right now - no login, no password, no forms to remember.",
   },
   {
     icon: (
@@ -79,10 +80,14 @@ const LandingPage = () => {
 
     setSubmitting(true);
     try {
-      // Business type is chosen in the questionnaire's first step, not here —
+      // Business type is chosen in the questionnaire's first step, not here -
       // asking for it twice was redundant.
       const res = await api.post("/projects", form);
       dispatch(setCurrentProject(res.data));
+      // A previous session could have left the builder in edit mode (see
+      // RevisionPage's "Edit Website") with another project's config still
+      // loaded - always start a genuinely new project from a clean slate.
+      dispatch(resetBuilder());
       navigate("/start");
     } catch (err: any) {
       console.error("Failed:", err);
@@ -116,7 +121,7 @@ const LandingPage = () => {
               <span className="text-primary"> with AI</span>
             </h2>
             <p className="mb-8 max-w-md text-muted-foreground">
-              Tell us about your business and we'll generate a complete, professional website — ready to
+              Tell us about your business and we'll generate a complete, professional website - ready to
               preview, revise, and publish in one sitting.
             </p>
 

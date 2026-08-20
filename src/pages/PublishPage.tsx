@@ -53,7 +53,7 @@ const PublishPage = () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // clipboard API unavailable — ignore
+      // clipboard API unavailable - ignore
     }
   };
 
@@ -116,7 +116,7 @@ const PublishPage = () => {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Get a .zip with your website's source — a client and a server folder, ready to build and run.
+            Get a .zip with your website's source - a client and a server folder, ready to build and run.
           </p>
         </div>
       </main>

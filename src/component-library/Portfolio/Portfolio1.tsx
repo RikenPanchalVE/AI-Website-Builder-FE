@@ -3,7 +3,7 @@ interface PortfolioProps {
   projects: { title: string; image: string; category: string }[];
 }
 
-/* Portfolio1 — Editorial masonry with varied sizes */
+/* Portfolio1 - Editorial masonry with varied sizes */
 const Portfolio1 = ({ title, projects }: PortfolioProps) => (
   <section className="bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">

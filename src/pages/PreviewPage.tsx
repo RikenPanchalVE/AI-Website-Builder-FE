@@ -101,9 +101,9 @@ const PreviewPage = () => {
 
           {/* min-w-0 is load-bearing here: a flex item's default min-width
               is auto (its content size), so without it this row refused to
-              shrink below the combined width of every page-tab button —
+              shrink below the combined width of every page-tab button -
               even though it already has overflow-x-auto ready to scroll
-              that overflow internally — and pushed the whole page wider
+              that overflow internally - and pushed the whole page wider
               than the viewport on narrow screens instead of scrolling in
               place. flex-1 lets it claim the space between the title and
               the action buttons rather than staying at its content width. */}
@@ -126,7 +126,7 @@ const PreviewPage = () => {
 
           {/* flex-wrap: the device toggle + both buttons together are wider
               than a phone screen has room for once the title and tabs rows
-              also claim space — this lets them wrap onto a second line
+              also claim space - this lets them wrap onto a second line
               instead of forcing the page itself to overflow horizontally. */}
           <div className="flex flex-wrap items-center justify-end gap-3">
             <div className="flex items-center gap-0.5 rounded-lg border border-border p-0.5">

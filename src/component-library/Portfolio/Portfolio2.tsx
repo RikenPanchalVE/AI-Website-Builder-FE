@@ -3,7 +3,7 @@ interface PortfolioProps {
   projects: { title: string; image: string; category: string }[];
 }
 
-/* Portfolio2 — Full-width alternating gallery */
+/* Portfolio2 - Full-width alternating gallery */
 const Portfolio2 = ({ title, projects }: PortfolioProps) => (
   <section className="bg-muted/30 overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
@@ -18,9 +18,8 @@ const Portfolio2 = ({ title, projects }: PortfolioProps) => (
         {projects.map((project, i) => (
           <div
             key={i}
-            className={`group grid gap-0 lg:grid-cols-12 items-center bg-background border border-border transition-all duration-500 hover:bg-muted/50 ${
-              i % 2 === 0 ? "" : ""
-            }`}
+            className={`group grid gap-0 lg:grid-cols-12 items-center bg-background border border-border transition-all duration-500 hover:bg-muted/50 ${i % 2 === 0 ? "" : ""
+              }`}
             style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}
           >
             <div className={`overflow-hidden ${i % 2 === 0 ? "lg:col-span-7" : "lg:col-span-7 lg:order-2"}`}>

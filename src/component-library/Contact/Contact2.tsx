@@ -7,7 +7,7 @@ interface ContactProps {
   address: string;
   intro?: string;
   submitButtonText?: string;
-  // Submitting used to just be a mailto: link with no real form — now it
+  // Submitting used to just be a mailto: link with no real form - now it
   // actually posts to /api/contact, the same fixed path a
   // downloaded/exported site's own standalone server implements (see
   // downloadService.ts). projectId travels in the body (not the URL) for
@@ -18,7 +18,7 @@ interface ContactProps {
 
 type SubmitStatus = "idle" | "sending" | "sent" | "error";
 
-/* Contact2 — Centered with minimal form */
+/* Contact2 - Centered with minimal form */
 const Contact2 = ({ title, email, phone, address, intro, submitButtonText, projectId }: ContactProps) => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -67,7 +67,7 @@ const Contact2 = ({ title, email, phone, address, intro, submitButtonText, proje
 
         {status === "sent" ? (
           <div className="mx-auto max-w-md border border-border bg-background p-8">
-            <p className="text-sm font-medium text-foreground">Thanks for reaching out — we'll get back to you soon.</p>
+            <p className="text-sm font-medium text-foreground">Thanks for reaching out - we'll get back to you soon.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-0 border border-border bg-background text-left">

@@ -13,7 +13,7 @@ export default function Hero4({ headline, subheadline, ctaText, ctaLink, backgro
       {backgroundImage ? (
         <img src={backgroundImage} alt="" className="absolute inset-0 w-full h-full object-cover opacity-70" />
       ) : (
-        // Every color here used to be a hardcoded gray-900/black/white —
+        // Every color here used to be a hardcoded gray-900/black/white -
         // this section never responded to the site's theme (global or
         // per-section) at all when no image was uploaded, since it read
         // literal Tailwind palette shades instead of the theme's own

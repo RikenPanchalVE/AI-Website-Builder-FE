@@ -3,7 +3,7 @@ import { useState } from "react";
 interface FAQ { question: string; answer: string; }
 interface FAQProps { title: string; faqs: FAQ[]; }
 
-/* FAQ1 — Numbered typography-first accordions */
+/* FAQ1 - Numbered typography-first accordions */
 const FAQ1 = ({ title, faqs }: FAQProps) => {
   const [open, setOpen] = useState<number | null>(null);
   return (

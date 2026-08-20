@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setRevisions, addRevision } from "@/store/slices/revisionSlice";
+import { setRevisions } from "@/store/slices/revisionSlice";
+import { setCurrentProject } from "@/store/slices/projectSlice";
+import { startEdit } from "@/store/slices/builderSlice";
 import api from "@/api/axios";
-import RevisionForm from "@/components/revision/RevisionForm";
+import { projectApi } from "@/api/projectApi";
+import { answersToConfig } from "@/utils/answersToConfig";
+import { STEPS } from "@/pages/QuestionnairePage";
 import RevisionHistory from "@/components/revision/RevisionHistory";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +17,7 @@ const RevisionPage = () => {
   const dispatch = useDispatch();
   const { revisions } = useSelector((s: any) => s.revision);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     loadRevisions();
@@ -27,15 +32,30 @@ const RevisionPage = () => {
     }
   };
 
-  const handleSubmit = async (request: string) => {
+  // Removed: the free-text "Describe your revision" box that used to sit
+  // here. There was no real interpreter behind it - typing a request just
+  // glued a "Changes applied: <what you typed>" placeholder section onto
+  // the homepage without actually changing anything, so whatever the user
+  // asked for never actually happened. This loads the project's real,
+  // current config into the same builder UI it was created with instead,
+  // landing on Review (every section, with per-item Edit buttons) so any
+  // field is directly editable and genuinely takes effect on save.
+  const handleEditWebsite = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
-      const res = await api.post(`/projects/${projectId}/revisions`, {
-        request,
-      });
-      dispatch(addRevision(res.data));
+      const [project, questionnaire] = await Promise.all([
+        projectApi.getProject(projectId as string),
+        projectApi.getQuestionnaire(projectId as string),
+      ]);
+      dispatch(setCurrentProject(project.data));
+      const config = answersToConfig(questionnaire.data?.answers);
+      const reviewStepIndex = STEPS.findIndex((s) => s.kind === "review");
+      dispatch(startEdit({ config, startAtStep: Math.max(reviewStepIndex, 0) }));
+      navigate("/start");
     } catch (err) {
-      console.error("Failed to submit revision:", err);
+      console.error("Failed to load project for editing:", err);
+      setLoadError("Couldn't load your website's current details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -71,10 +91,16 @@ const RevisionPage = () => {
             <div className="mb-5">
               <h2 className="mb-1 text-xl font-semibold text-foreground">Request Changes</h2>
               <p className="text-sm text-muted-foreground">
-                Describe what you'd like to change. AI will interpret your request and update the website.
+                Edit your website directly - business info, pages and content, design,
+                colors, or any section - using the same builder you set it up with.
+                Every change you make actually applies to the site, and shows up below
+                in Revision History once saved.
               </p>
             </div>
-            <RevisionForm onSubmit={handleSubmit} loading={loading} />
+            <Button type="button" onClick={handleEditWebsite} disabled={loading} className="w-full sm:w-auto">
+              {loading ? "Loading…" : "Edit Website"}
+            </Button>
+            {loadError && <p className="mt-3 text-sm text-destructive">{loadError}</p>}
           </div>
 
           <div>

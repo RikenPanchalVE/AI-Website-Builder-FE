@@ -1,7 +1,7 @@
 interface Service { title: string; description: string; icon: string; name?: string; price?: string; }
 interface ServicesProps { title: string; subtitle?: string; services: Service[]; }
 
-/* Services1 — Large numbered index with hover reveal */
+/* Services1 - Large numbered index with hover reveal */
 const Services1 = ({ title, services }: ServicesProps) => (
   <section className="bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-40">

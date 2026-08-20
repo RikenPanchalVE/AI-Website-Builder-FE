@@ -69,13 +69,13 @@ const FullScreenPreviewModal = ({ config, projectId, activePage, onPageChange, o
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
           <h2 className="text-sm font-semibold text-foreground">Live Preview</h2>
-          <span className="hidden text-xs text-muted-foreground sm:inline">— approximate, generated on the next step</span>
+          <span className="hidden text-xs text-muted-foreground sm:inline">- approximate, generated on the next step</span>
         </div>
 
         {/* min-w-0 is load-bearing: without it this row won't shrink below
             the combined width of every page-tab button (a flex item's
             default min-width is its content size), even though it already
-            has overflow-x-auto ready to scroll that overflow in place — so
+            has overflow-x-auto ready to scroll that overflow in place - so
             it pushed the whole modal wider than the viewport instead. */}
         <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
           {spec.pages.map((p) => (

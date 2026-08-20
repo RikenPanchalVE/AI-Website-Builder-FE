@@ -6,13 +6,13 @@ interface HeroProps {
   backgroundImage?: string | null;
   logo?: string | null;
   // The "Trusted by 1,000+ / happy clients" social-proof line used to be
-  // hardcoded — no way to change it for a business that isn't a 1,000+
+  // hardcoded - no way to change it for a business that isn't a 1,000+
   // customer consumer brand (an agency's first project, a new clinic, etc).
   socialProofText?: string;
   socialProofSubtext?: string;
 }
 
-/* Hero2 — Split editorial hero with large image */
+/* Hero2 - Split editorial hero with large image */
 const Hero2 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage, socialProofText, socialProofSubtext }: HeroProps) => (
   <section className="relative bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-16 lg:py-24">
@@ -56,7 +56,7 @@ const Hero2 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage, socia
 
           <div className="mt-16 flex items-center gap-8">
             <div className="flex -space-x-3">
-              {[0,1,2,3].map((i) => (
+              {[0, 1, 2, 3].map((i) => (
                 <div key={i} className="h-10 w-10 border-2 border-background bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                   {String.fromCharCode(65 + i)}
                 </div>

@@ -9,7 +9,7 @@ interface PricingProps {
   plans: Plan[];
 }
 
-/* Pricing2 — Side-by-side with featured highlight */
+/* Pricing2 - Side-by-side with featured highlight */
 const Pricing2 = ({ title, plans }: PricingProps) => (
   <section className="bg-muted/30 overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
@@ -24,11 +24,10 @@ const Pricing2 = ({ title, plans }: PricingProps) => (
         {plans.map((plan, i) => (
           <div
             key={i}
-            className={`group grid gap-0 lg:grid-cols-12 items-center border border-border transition-all duration-500 ${
-              plan.highlighted
+            className={`group grid gap-0 lg:grid-cols-12 items-center border border-border transition-all duration-500 ${plan.highlighted
                 ? "bg-foreground text-background relative"
                 : "bg-background hover:bg-muted/30"
-            }`}
+              }`}
             style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}
           >
             <div className={`lg:col-span-4 p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-border ${plan.highlighted ? "border-background/10" : ""}`}>
@@ -54,11 +53,10 @@ const Pricing2 = ({ title, plans }: PricingProps) => (
             <div className="lg:col-span-2 p-8 lg:p-10 flex lg:justify-end">
               <a
                 href="#"
-                className={`px-8 py-4 text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-500 ${
-                  plan.highlighted
+                className={`px-8 py-4 text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-500 ${plan.highlighted
                     ? "bg-background text-foreground hover:bg-background/90"
                     : "border border-border hover:border-foreground hover:text-foreground"
-                }`}
+                  }`}
               >
                 Choose
               </a>

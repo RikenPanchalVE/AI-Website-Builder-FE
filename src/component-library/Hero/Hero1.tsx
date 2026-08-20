@@ -7,7 +7,7 @@ interface HeroProps {
   logo?: string | null;
 }
 
-/* Hero1 — Full-bleed dark cinematic hero */
+/* Hero1 - Full-bleed dark cinematic hero */
 const Hero1 = ({ headline, subheadline, ctaText, ctaLink, backgroundImage }: HeroProps) => (
   <section className="relative min-h-screen flex items-end bg-foreground overflow-hidden">
     {backgroundImage && (

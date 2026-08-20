@@ -1,7 +1,7 @@
 interface Service { title: string; description: string; icon: string; name?: string; price?: string; }
 interface ServicesProps { title: string; services: Service[]; }
 
-/* Services2 — Grid with large icons and asymmetric layout */
+/* Services2 - Grid with large icons and asymmetric layout */
 const Services2 = ({ title, services }: ServicesProps) => (
   <section className="bg-muted/30 overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">

@@ -15,7 +15,7 @@ interface PricingProps {
   plans: Plan[];
 }
 
-/* Pricing1 — Premium comparison table */
+/* Pricing1 - Premium comparison table */
 const Pricing1 = ({ title, plans }: PricingProps) => (
   <section className="bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
@@ -30,9 +30,8 @@ const Pricing1 = ({ title, plans }: PricingProps) => (
         {plans.map((plan, i) => (
           <div
             key={i}
-            className={`relative p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-border last:border-r-0 transition-all duration-500 ${
-              (plan.popular || plan.highlighted) ? "bg-foreground text-background" : "bg-background hover:bg-muted/30"
-            }`}
+            className={`relative p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-border last:border-r-0 transition-all duration-500 ${(plan.popular || plan.highlighted) ? "bg-foreground text-background" : "bg-background hover:bg-muted/30"
+              }`}
             style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}
           >
             {(plan.popular || plan.highlighted) && (
@@ -64,11 +63,10 @@ const Pricing1 = ({ title, plans }: PricingProps) => (
             </div>
             <a
               href={plan.ctaLink || "#"}
-              className={`block w-full text-center py-4 text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-500 ${
-                (plan.popular || plan.highlighted)
+              className={`block w-full text-center py-4 text-[11px] font-bold tracking-[0.15em] uppercase transition-all duration-500 ${(plan.popular || plan.highlighted)
                   ? "bg-background text-foreground hover:bg-background/90"
                   : "border border-border hover:border-foreground hover:text-foreground"
-              }`}
+                }`}
             >
               {plan.ctaText || "Get Started"}
             </a>

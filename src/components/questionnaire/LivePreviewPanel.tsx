@@ -109,7 +109,7 @@ const LivePreviewPanel = ({ config, projectId, activePage, onPageChange, onExpan
       </div>
 
       <p className="mt-2 text-center text-[11px] text-muted-foreground">
-        Approximate preview — full content is generated on the next step.
+        Approximate preview - full content is generated on the next step.
       </p>
     </div>
   );

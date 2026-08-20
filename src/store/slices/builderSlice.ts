@@ -7,6 +7,12 @@ interface BuilderState {
   completed: boolean;
   loading: boolean;
   error: string | null;
+  // Set when re-entering the builder to edit an already-generated project
+  // (from the Request Changes / Revision page) instead of building a new
+  // one from scratch. originalConfig is a snapshot taken at that moment -
+  // diffed against `config` on save to produce the revision's change list.
+  editMode: boolean;
+  originalConfig: WebsiteConfig | null;
 }
 
 const initialState: BuilderState = {
@@ -15,6 +21,8 @@ const initialState: BuilderState = {
   completed: false,
   loading: false,
   error: null,
+  editMode: false,
+  originalConfig: null,
 };
 
 const builderSlice = createSlice({
@@ -83,6 +91,19 @@ const builderSlice = createSlice({
     loadConfig: (state, action: PayloadAction<WebsiteConfig>) => {
       state.config = action.payload;
     },
+    // Enters edit mode for an existing project: hydrates the builder with
+    // its saved config and keeps an untouched snapshot to diff against
+    // later. `startAtStep` lets the caller land the user directly on
+    // Review (where every section is visible with per-item Edit buttons -
+    // see StepReview) instead of back at step 0.
+    startEdit: (state, action: PayloadAction<{ config: WebsiteConfig; startAtStep: number }>) => {
+      state.config = action.payload.config;
+      state.originalConfig = structuredClone(action.payload.config);
+      state.editMode = true;
+      state.currentStep = action.payload.startAtStep;
+      state.completed = false;
+      state.error = null;
+    },
   },
 });
 
@@ -106,6 +127,7 @@ export const {
   setError,
   resetBuilder,
   loadConfig,
+  startEdit,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;

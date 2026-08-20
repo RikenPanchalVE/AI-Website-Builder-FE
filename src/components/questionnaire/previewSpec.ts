@@ -1,7 +1,7 @@
 import { COMPONENT_MAP } from "@/data/componentOptions";
 import { TYPOGRAPHY_OPTIONS } from "@/data/designOptions";
 
-// The full visual identity behind each of the 12 design styles — not just a
+// The full visual identity behind each of the 12 design styles - not just a
 // font and a border radius. Mirrors server/src/services/ai/MockAIProvider.ts's
 // _buildTheme exactly, so the live preview matches what actually generates.
 const STYLE_THEME_PROFILES: Record<string, {
@@ -9,18 +9,18 @@ const STYLE_THEME_PROFILES: Record<string, {
   spacing: string; shadow: string; letterSpacing: string; borderWidth: string;
   backgroundTreatment: string;
 }> = {
-  minimal:      { font: "Inter", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
-  modern:       { font: "Inter", darkMode: false, borderRadius: "8px", buttonStyle: "rounded", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
-  premium:      { font: "Playfair Display", darkMode: true, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "2px", backgroundTreatment: "gradient" },
-  corporate:    { font: "Source Sans 3", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
-  creative:     { font: "Poppins", darkMode: false, borderRadius: "16px", buttonStyle: "pill", spacing: "relaxed", shadow: "md", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "gradient" },
-  luxury:       { font: "Playfair Display", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
-  friendly:     { font: "Nunito", darkMode: false, borderRadius: "20px", buttonStyle: "pill", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "plain" },
+  minimal: { font: "Inter", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
+  modern: { font: "Inter", darkMode: false, borderRadius: "8px", buttonStyle: "rounded", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+  premium: { font: "Playfair Display", darkMode: true, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "2px", backgroundTreatment: "gradient" },
+  corporate: { font: "Source Sans 3", darkMode: false, borderRadius: "4px", buttonStyle: "square", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+  creative: { font: "Poppins", darkMode: false, borderRadius: "16px", buttonStyle: "pill", spacing: "relaxed", shadow: "md", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "gradient" },
+  luxury: { font: "Playfair Display", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
+  friendly: { font: "Nunito", darkMode: false, borderRadius: "20px", buttonStyle: "pill", spacing: "normal", shadow: "sm", letterSpacing: "normal", borderWidth: "0px", backgroundTreatment: "plain" },
   professional: { font: "Lato", darkMode: false, borderRadius: "6px", buttonStyle: "rounded", spacing: "normal", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
-  bold:         { font: "Montserrat", darkMode: true, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "xl", letterSpacing: "tight", borderWidth: "2px", backgroundTreatment: "gradient" },
-  elegant:      { font: "Cormorant Garamond", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
-  tech:         { font: "Inter", darkMode: true, borderRadius: "8px", buttonStyle: "rounded", spacing: "compact", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
-  editorial:    { font: "Playfair Display", darkMode: false, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
+  bold: { font: "Montserrat", darkMode: true, borderRadius: "4px", buttonStyle: "square", spacing: "compact", shadow: "xl", letterSpacing: "tight", borderWidth: "2px", backgroundTreatment: "gradient" },
+  elegant: { font: "Cormorant Garamond", darkMode: true, borderRadius: "0px", buttonStyle: "sharp", spacing: "relaxed", shadow: "lg", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "gradient" },
+  tech: { font: "Inter", darkMode: true, borderRadius: "8px", buttonStyle: "rounded", spacing: "compact", shadow: "md", letterSpacing: "normal", borderWidth: "1px", backgroundTreatment: "plain" },
+  editorial: { font: "Playfair Display", darkMode: false, borderRadius: "2px", buttonStyle: "sharp", spacing: "relaxed", shadow: "none", letterSpacing: "wide", borderWidth: "1px", backgroundTreatment: "plain" },
 };
 
 // Mixes a hex color toward white/black (amount 0 = pure color, 1 = pure
@@ -40,8 +40,8 @@ function mixColor(hex: string, amount: number, towards: "white" | "black" = "whi
   return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
 }
 
-// Hero2 (Split Editorial) has an image slot too — its right column falls
-// back to a decorative gradient with no image, same as Hero1/Hero4 — it was
+// Hero2 (Split Editorial) has an image slot too - its right column falls
+// back to a decorative gradient with no image, same as Hero1/Hero4 - it was
 // just missing from this set, so an uploaded image was silently dropped.
 const IMAGE_HERO_COMPONENTS = new Set(["Hero1", "Hero2", "Hero4"]);
 
@@ -68,7 +68,7 @@ const GENERIC_TESTIMONIALS = [
 const GENERIC_FAQ = [
   { question: "How do I get started?", answer: "Reach out through the contact form and we'll follow up within 24 hours." },
   { question: "What are your hours?", answer: "We're available Monday through Friday, with weekend appointments on request." },
-  { question: "Do you offer consultations?", answer: "Yes — we offer a free initial consultation to understand your needs." },
+  { question: "Do you offer consultations?", answer: "Yes - we offer a free initial consultation to understand your needs." },
 ];
 
 const GENERIC_REASONS = [
@@ -165,7 +165,7 @@ const GENERIC_INDUSTRIES = [
 
 const GENERIC_CASE_STUDIES = [
   { title: "Doubling Conversion Rates", description: "How we helped a growing brand double its online conversion rate in three months.", image: null },
-  { title: "A Full Brand Refresh", description: "From dated to distinctive — a complete visual identity overhaul.", image: null },
+  { title: "A Full Brand Refresh", description: "From dated to distinctive - a complete visual identity overhaul.", image: null },
   { title: "Scaling to 10x Traffic", description: "The strategy behind a tenfold increase in organic traffic.", image: null },
 ];
 
@@ -223,7 +223,7 @@ const GENERIC_BLOG_POSTS = [
   { title: "What's New This Season", excerpt: "The latest updates from our business.", author: "", date: "", image: null, category: "" },
 ];
 
-// BlogPreview/BlogGrid use post.id as a React key and link to /blog/{slug} —
+// BlogPreview/BlogGrid use post.id as a React key and link to /blog/{slug} -
 // neither exists on hand-typed blog content, so derive them from the title.
 function withBlogMeta(
   posts: Array<{ title: string; excerpt: string; author?: string; date?: string; image?: string | null; category?: string }>
@@ -315,7 +315,7 @@ const PAGE_HERO_COPY: Record<string, { headline: string; subheadline: string }> 
 // Maps the various page-specific section ids (from designOptions.ts's
 // PAGE_SECTIONS) onto the handful of generic, content-bearing sections this
 // preview (and the per-page content editor in QuestionnairePage.tsx) know
-// how to render/edit. Unmapped ids are simply skipped — this is an
+// how to render/edit. Unmapped ids are simply skipped - this is an
 // approximation, not the full content engine. Exported so the questionnaire
 // UI stays in sync with what the preview actually supports.
 export const SECTION_ALIASES: Record<string, string> = {
@@ -329,7 +329,7 @@ export const SECTION_ALIASES: Record<string, string> = {
   story: "about_story",
   about_story: "about_story",
   // "values" is the About page's own Values/mission section (rendered via
-  // AboutValues, matching the server) — it used to alias to the same type
+  // AboutValues, matching the server) - it used to alias to the same type
   // as "why_choose_us"/"benefits" (a completely different component used
   // by other pages' "reasons to choose us" sections), so the live preview
   // showed the wrong section entirely for About's Values checkbox.
@@ -507,7 +507,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
           id: "portfolio",
           component: resolveComponent("portfolio", ctx.components.portfolio),
           // Portfolio1/2/3 all take a `projects` prop, not `items`, and
-          // Portfolio3 also uses `category` to build its filter pills —
+          // Portfolio3 also uses `category` to build its filter pills -
           // without a default every card/pill would show "undefined".
           props: {
             title: "Our Work",
@@ -518,7 +518,7 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
         break;
       case "gallery": {
         // Gallery1/2 take `images` as a plain array of URL strings. With
-        // nothing uploaded yet, that array was simply empty — .map() over
+        // nothing uploaded yet, that array was simply empty - .map() over
         // it renders nothing at all below the heading, so the whole grid
         // looked missing/invisible instead of showing the same placeholder
         // tiles the real generated site falls back to (see
@@ -861,8 +861,8 @@ function buildBodySections(selectedIds: string[], ctx: PreviewCtx) {
 /**
  * Builds an approximate WebsiteRenderer-compatible spec straight from the
  * in-progress questionnaire config, so the client can see a live preview of
- * their choices before generation. This is a client-side approximation —
- * not the same content engine as MockAIProvider — but it uses the exact
+ * their choices before generation. This is a client-side approximation -
+ * not the same content engine as MockAIProvider - but it uses the exact
  * same theme + component resolution rules and the real WebsiteRenderer, so
  * colors, fonts, layout variants, and section choices all match what will
  * actually be generated.
@@ -881,7 +881,7 @@ export function buildPreviewSpec(config: any, projectId?: string) {
   const secondaryColor = theme.secondaryColor || "#1E40AF";
 
   // Each of the 12 design styles used to only change the font and border
-  // radius here — every other knob (spacing, shadow depth, letter spacing,
+  // radius here - every other knob (spacing, shadow depth, letter spacing,
   // border width, light/dark mode, gradient vs. plain background) was
   // hardcoded to the same "normal" value regardless of style, so switching
   // styles in the live preview barely looked different. This profile table
@@ -903,18 +903,18 @@ export function buildPreviewSpec(config: any, projectId?: string) {
   // treatment, mirroring the server's _buildTheme.
   //
   // The button treatment used to only reach a handful of `bg-primary`
-  // buttons — most hero CTAs actually use bg-foreground or bg-background,
+  // buttons - most hero CTAs actually use bg-foreground or bg-background,
   // so the accent choice barely showed up anywhere. WebsiteRenderer now
   // targets every CTA button pattern in the library, and each accent has
   // its own fill AND shadow treatment (not just corner radius/border), so
   // the difference reads clearly at a glance instead of needing a
   // side-by-side close-up to spot:
-  //   Minimal    — soft round, solid fill, no shadow: quiet and clean.
-  //   Bold       — square, solid fill, hard offset "brutalist" shadow that
+  //   Minimal    - soft round, solid fill, no shadow: quiet and clean.
+  //   Bold       - square, solid fill, hard offset "brutalist" shadow that
   //                shifts on hover: loud and graphic.
-  //   Gradient   — pill, the button itself is gradient-filled (not just the
+  //   Gradient   - pill, the button itself is gradient-filled (not just the
   //                page background) with a soft colored glow: vivid, modern.
-  //   Monochrome — square, transparent/outlined, fills in on hover, no
+  //   Monochrome - square, transparent/outlined, fills in on hover, no
   //                shadow: understated and refined.
   const accentStyleMap: Record<string, { buttonStyle: string; borderWidth: string; backgroundTreatment: string; buttonFill: string; buttonShadow: string }> = {
     minimal: { buttonStyle: "rounded", borderWidth: "1px", backgroundTreatment: "plain", buttonFill: "solid", buttonShadow: "none" },
@@ -929,7 +929,7 @@ export function buildPreviewSpec(config: any, projectId?: string) {
   // whole page, not just on buttons. Dark mode used to hardcode the exact
   // same "#0F0F0F"/"#262626"/"#333333" for every style, so any two
   // dark-mode styles (Premium, Luxury, Bold, Elegant, Tech) rendered an
-  // identical page background and only differed by a small accent color —
+  // identical page background and only differed by a small accent color -
   // easy to miss, especially between styles with muted/desaturated
   // primaries like Premium's crimson and Luxury's gold. Mirrors the
   // server's _buildTheme.
@@ -967,7 +967,7 @@ export function buildPreviewSpec(config: any, projectId?: string) {
     backgroundTreatment: accent?.backgroundTreatment || profile.backgroundTreatment,
     buttonFill: accent?.buttonFill || "solid",
     buttonShadow: accent?.buttonShadow || "none",
-    // Per-section color overrides, keyed by component category — see
+    // Per-section color overrides, keyed by component category - see
     // WebsiteRenderer.tsx's buildSectionStyleOverride, which is what
     // actually applies these.
     sectionColors: config.sectionColors || {},
@@ -989,55 +989,55 @@ export function buildPreviewSpec(config: any, projectId?: string) {
     const isHome = pageId === "home";
     const pageContent = pageContentMap[pageId];
     const defaultCopy = isHome
-      ? { headline: `Welcome to ${businessName}`, subheadline: business.description?.trim() || "Tell your customers what makes your business special — this updates live as you type." }
+      ? { headline: `Welcome to ${businessName}`, subheadline: business.description?.trim() || "Tell your customers what makes your business special - this updates live as you type." }
       : PAGE_HERO_COPY[pageId] || { headline: AVAILABLE_PAGES.find((p) => p.id === pageId)?.label || pageId, subheadline: `Learn more about ${businessName}.` };
 
-    // Only Home gets the real Hero1-5 component the client picked — every
+    // Only Home gets the real Hero1-5 component the client picked - every
     // other page gets the compact PageHero title bar. These used to share
     // one hero section built with the same component + props for every
     // page, which meant every single page in the site rendered as a
     // repeat of the Home hero with different text.
     const heroSection = isHome
       ? {
-          id: "hero",
-          component: heroComponent,
-          props: {
-            headline: pageContent?.hero?.headline?.trim() || defaultCopy.headline,
-            subheadline: pageContent?.hero?.subheadline?.trim() || defaultCopy.subheadline,
-            ctaText: pageContent?.hero?.ctaText?.trim() || "Get Started",
-            ctaLink: "/contact",
-            badge: "Welcome",
-            logo,
-            // Hero1 (Full-Screen Statement), Hero2 (Split Editorial), and
-            // Hero4 (Image-Focused) are the layouts built around a photo —
-            // the other layouts are text-first, so don't hand them a
-            // background image even if one was uploaded while a different
-            // hero style was selected.
-            backgroundImage: IMAGE_HERO_COMPONENTS.has(heroComponent) ? config.branding?.bannerImages?.[0] || null : null,
-            // Hero2's social-proof line and Hero3's second button/stats bar
-            // — harmless no-ops for every other hero, which just ignores
-            // whatever extra props it doesn't read.
-            socialProofText: pageContent?.hero?.socialProofText?.trim() || undefined,
-            socialProofSubtext: pageContent?.hero?.socialProofSubtext?.trim() || undefined,
-            secondaryCtaText: pageContent?.hero?.secondaryCtaText?.trim() || undefined,
-            stats: [1, 2, 3].some((n) => (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Value`] || (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Label`])
-              ? [1, 2, 3].map((n) => ({
-                  value: (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Value`]?.trim() || ["500+", "98%", "24/7"][n - 1],
-                  label: (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Label`]?.trim() || ["Projects", "Satisfaction", "Support"][n - 1],
-                }))
-              : undefined,
-          },
-          order: 1,
-        }
+        id: "hero",
+        component: heroComponent,
+        props: {
+          headline: pageContent?.hero?.headline?.trim() || defaultCopy.headline,
+          subheadline: pageContent?.hero?.subheadline?.trim() || defaultCopy.subheadline,
+          ctaText: pageContent?.hero?.ctaText?.trim() || "Get Started",
+          ctaLink: "/contact",
+          badge: "Welcome",
+          logo,
+          // Hero1 (Full-Screen Statement), Hero2 (Split Editorial), and
+          // Hero4 (Image-Focused) are the layouts built around a photo -
+          // the other layouts are text-first, so don't hand them a
+          // background image even if one was uploaded while a different
+          // hero style was selected.
+          backgroundImage: IMAGE_HERO_COMPONENTS.has(heroComponent) ? config.branding?.bannerImages?.[0] || null : null,
+          // Hero2's social-proof line and Hero3's second button/stats bar
+          // - harmless no-ops for every other hero, which just ignores
+          // whatever extra props it doesn't read.
+          socialProofText: pageContent?.hero?.socialProofText?.trim() || undefined,
+          socialProofSubtext: pageContent?.hero?.socialProofSubtext?.trim() || undefined,
+          secondaryCtaText: pageContent?.hero?.secondaryCtaText?.trim() || undefined,
+          stats: [1, 2, 3].some((n) => (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Value`] || (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Label`])
+            ? [1, 2, 3].map((n) => ({
+              value: (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Value`]?.trim() || ["500+", "98%", "24/7"][n - 1],
+              label: (pageContent?.hero as Record<string, string> | undefined)?.[`stat${n}Label`]?.trim() || ["Projects", "Satisfaction", "Support"][n - 1],
+            }))
+            : undefined,
+        },
+        order: 1,
+      }
       : {
-          id: "page_hero",
-          component: "PageHero",
-          props: {
-            title: pageContent?.hero?.headline?.trim() || defaultCopy.headline,
-            subtitle: pageContent?.hero?.subheadline?.trim() || defaultCopy.subheadline,
-          },
-          order: 1,
-        };
+        id: "page_hero",
+        component: "PageHero",
+        props: {
+          title: pageContent?.hero?.headline?.trim() || defaultCopy.headline,
+          subtitle: pageContent?.hero?.subheadline?.trim() || defaultCopy.subheadline,
+        },
+        order: 1,
+      };
 
     const ctx: PreviewCtx = {
       businessName,
@@ -1094,14 +1094,14 @@ export function buildPreviewSpec(config: any, projectId?: string) {
       component: footerComponent,
       props: {
         brandName: businessName,
-        description: footerContent.tagline?.trim() || business.description?.trim() || `${businessName} — professional services you can trust.`,
+        description: footerContent.tagline?.trim() || business.description?.trim() || `${businessName} - professional services you can trust.`,
         links: navLinks,
         socialLinks: (business.socialLinks || []).map((l: { platform: string; url: string }) => ({ platform: l.platform, href: l.url })),
         copyrightText: footerContent.copyrightText?.trim() || undefined,
         ctaHeading: footerContent.ctaHeading?.trim() || undefined,
         ctaSubtext: footerContent.ctaSubtext?.trim() || undefined,
         ctaButtonText: footerContent.ctaButtonText?.trim() || undefined,
-        // Was hardcoded to "#contact" inside Footer1 itself — a fragment
+        // Was hardcoded to "#contact" inside Footer1 itself - a fragment
         // with no matching element anywhere on the page, so the button
         // didn't go anywhere when clicked. Same target Hero's CTA already
         // uses above.

@@ -1,4 +1,4 @@
-# AI Website Builder — Client
+# AI Website Builder - Client
 
 React + Vite frontend.
 

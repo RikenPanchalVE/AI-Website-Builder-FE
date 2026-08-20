@@ -1,7 +1,7 @@
 interface Testimonial { name: string; role: string; content: string; rating?: number; avatar?: string | null; }
 interface TestimonialsProps { title: string; subtitle?: string; testimonials: Testimonial[]; }
 
-/* Testimonials1 — Large quote wall with varied sizes */
+/* Testimonials1 - Large quote wall with varied sizes */
 const Testimonials1 = ({ title, testimonials }: TestimonialsProps) => (
   <section className="bg-background overflow-hidden">
     <div className="mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-32">
@@ -18,9 +18,8 @@ const Testimonials1 = ({ title, testimonials }: TestimonialsProps) => (
           return (
             <div
               key={i}
-              className={`group border border-border p-8 lg:p-10 transition-all duration-500 hover:bg-muted/30 ${
-                isLarge ? "lg:col-span-8" : i === 1 ? "lg:col-span-4" : "lg:col-span-4"
-              }`}
+              className={`group border border-border p-8 lg:p-10 transition-all duration-500 hover:bg-muted/30 ${isLarge ? "lg:col-span-8" : i === 1 ? "lg:col-span-4" : "lg:col-span-4"
+                }`}
               style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}
             >
               <p className={`font-bold tracking-tight leading-tight mb-6 ${isLarge ? "text-2xl lg:text-3xl" : "text-lg"}`} style={{ letterSpacing: "-0.02em" }}>

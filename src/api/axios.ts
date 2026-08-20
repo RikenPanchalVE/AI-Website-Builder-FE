@@ -2,8 +2,8 @@ import axios from "axios";
 
 // A bare relative "/api" only resolves correctly when the browser is on the
 // same origin as the API (single-server deployment, or local dev via Vite's
-// own proxy — see vite.config.ts). Deployed with the frontend and backend
-// on separate domains, VITE_API_URL supplies the backend's real origin —
+// own proxy - see vite.config.ts). Deployed with the frontend and backend
+// on separate domains, VITE_API_URL supplies the backend's real origin -
 // baked in at build time, so it must be set wherever the client is BUILT,
 // not just present in this repo's .env. Falls back to the relative path
 // when unset, so same-origin/dev setups need no configuration at all.

@@ -35,4 +35,11 @@ export const projectApi = {
   async getWebsiteSpec(projectId: string) {
     return api.get(ENDPOINTS.WEBSITE_SPEC.GET(projectId));
   },
+
+  // `changes` is the structured diff produced by configDiff.ts - the actual
+  // edits were already applied via saveQuestionnaire + generate before this
+  // call; this just records what changed, for Revision History to display.
+  async submitRevision(projectId: string, changes: Array<{ path: string; label: string; oldValue: unknown; newValue: unknown }>) {
+    return api.post(ENDPOINTS.REVISIONS.CREATE(projectId), { changes });
+  },
 };

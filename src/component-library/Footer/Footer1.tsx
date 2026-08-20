@@ -5,14 +5,14 @@ interface FooterProps {
   description: string;
   links: { label: string; href: string }[];
   socialLinks: { platform: string; href: string }[];
-  // Optional overrides — everything here used to be hardcoded, so a client
+  // Optional overrides - everything here used to be hardcoded, so a client
   // who wanted different footer copy than the auto-generated business
   // description had no way to change it.
   copyrightText?: string;
   ctaHeading?: string;
   ctaSubtext?: string;
   ctaButtonText?: string;
-  // This used to be a hardcoded "#contact" anchor — there's no element with
+  // This used to be a hardcoded "#contact" anchor - there's no element with
   // that id anywhere on the page, so the button just did nothing when
   // clicked. WebsiteRenderer's SPA navigation only intercepts links that
   // start with "/", so it needs a real page path, not a fragment.
@@ -20,7 +20,7 @@ interface FooterProps {
 }
 
 // The page-link list used to be repeated here even though the exact same
-// links already sit in the navbar a few hundred pixels above — on a site
+// links already sit in the navbar a few hundred pixels above - on a site
 // with more than 4-5 pages it wrapped into a cramped multi-line list that
 // looked cluttered rather than useful. Footer keeps brand/social/CTA and
 // drops the duplicate navigation.
@@ -31,7 +31,7 @@ const Footer1 = ({ brandName, description, socialLinks, copyrightText, ctaHeadin
       <div className="grid gap-16 md:grid-cols-12">
         <div className="md:col-span-7">
           <div className="mb-5 flex items-center gap-3">
-            {/* text-white here used to be hardcoded — fine against the
+            {/* text-white here used to be hardcoded - fine against the
                 usual dark-ish brand colors this was designed around, but
                 unreadable against a light/pastel primary color (a real
                 combination once section colors and custom brand palettes

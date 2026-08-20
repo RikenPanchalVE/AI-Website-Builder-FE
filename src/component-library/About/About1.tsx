@@ -9,7 +9,7 @@ const About1 = ({ title, description, image }: AboutProps) => (
           <h2 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl" style={{ letterSpacing: "-0.04em" }}>{title}</h2>
           <div className="mb-10 h-1 w-16 rounded-full bg-gradient-to-r from-primary to-secondary" />
           <p className="mb-10 text-lg leading-relaxed text-muted-foreground">{description}</p>
-          {/* Bare grid-cols-3 used to stay 3-across at every width — fine for
+          {/* Bare grid-cols-3 used to stay 3-across at every width - fine for
               these short stat values, but the gap didn't shrink with it, so
               phones got a cramped, edge-to-edge row. */}
           <div className="grid grid-cols-3 gap-3 sm:gap-6">

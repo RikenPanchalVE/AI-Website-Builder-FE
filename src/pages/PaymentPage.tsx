@@ -65,7 +65,7 @@ const PaymentPage = () => {
           <div>
             <h2 className="mb-2 text-2xl font-bold text-foreground">Mock Payment</h2>
             <p className="text-sm text-muted-foreground">
-              This is a simulated payment for the MVP — no real charges will be made, and no card data is sent anywhere.
+              This is a simulated payment for the MVP - no real charges will be made, and no card data is sent anywhere.
             </p>
           </div>
 
@@ -74,7 +74,7 @@ const PaymentPage = () => {
               <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
                 <rect x="2" y="5" width="20" height="14" rx="2" /><path strokeLinecap="round" d="M2 10h20" />
               </svg>
-              Test mode — any values work, nothing is charged.
+              Test mode - any values work, nothing is charged.
             </div>
 
             <div>

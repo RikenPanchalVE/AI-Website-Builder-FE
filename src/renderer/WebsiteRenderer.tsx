@@ -15,7 +15,7 @@ interface Page {
 }
 
 // Per-section color/theme override, one slot per component-category (the
-// same unit the layout picker already uses — see ComponentVariantPicker in
+// same unit the layout picker already uses - see ComponentVariantPicker in
 // QuestionnairePage.tsx), keyed by that category string.
 export interface SectionColorOverride {
   preset: "default" | "light" | "dark" | "primary" | "secondary" | "custom";
@@ -53,7 +53,7 @@ interface WebsiteData {
 
 // A section's `id` (e.g. "trainers", "solutions", "contact_form") isn't
 // always the same string as the component-category its color/layout picker
-// is keyed by ("team", "services", "contact") — several categories are
+// is keyed by ("team", "services", "contact") - several categories are
 // deliberately shared by more than one section family (see
 // ComponentVariantPicker's call sites in QuestionnairePage.tsx: Solutions
 // and Industries both pick from the "services" family, Amenities/
@@ -86,13 +86,13 @@ const SECTION_ID_TO_CATEGORY: Record<string, string> = {
 };
 
 // Most components paint their root <section> with bg-background (and text
-// with text-foreground) — but a deliberate handful of "dramatic statement"
+// with text-foreground) - but a deliberate handful of "dramatic statement"
 // components go the other way around: bg-foreground for the surface,
 // text-background for the text (Hero1's cinematic full-bleed dark hero is
 // the original of this pattern; several others reuse it for the same
 // high-contrast effect). Picking "Light" for one of these used to still
 // assign the chosen color to `background`, which these components never
-// read for their own surface — so the section visibly went dark on "Light"
+// read for their own surface - so the section visibly went dark on "Light"
 // and light on "Dark", the exact inversion this list exists to catch. Any
 // component not listed here uses the normal bg-background/text-foreground
 // pairing and needs no special handling.
@@ -107,7 +107,7 @@ const INVERTED_SURFACE_COMPONENTS = new Set([
 ]);
 
 // Builds the CSS custom-property overrides a section needs to render in
-// its own color/theme instead of the site's — every component reads its
+// its own color/theme instead of the site's - every component reads its
 // colors through var(--theme-*) (see WebsiteRenderer's previewOverrides
 // block below), and CSS custom properties cascade to descendants, so
 // redefining them on a wrapping element repaints everything inside without
@@ -149,8 +149,8 @@ function buildSectionStyleOverride(
   let foreground = getReadableTextColor(background);
 
   // The component actually reads bg-foreground for its surface and
-  // text-background for its text — the exact opposite of what every other
-  // component does — so hand it the exact opposite assignment too. This
+  // text-background for its text - the exact opposite of what every other
+  // component does - so hand it the exact opposite assignment too. This
   // keeps `background` meaning "what the user picked" and `foreground`
   // meaning "the readable contrast color" from the caller's perspective;
   // only which CSS variable ends up carrying which one flips.
@@ -160,26 +160,26 @@ function buildSectionStyleOverride(
 
   const primaryForeground = getReadableTextColor(primary);
   const secondaryForeground = getReadableTextColor(secondary);
-  // Solid hex, not an alpha-transparent color — mirrors exactly how the
+  // Solid hex, not an alpha-transparent color - mirrors exactly how the
   // site-wide theme computes mutedColor/borderColor (a small step from the
   // background toward the foreground, see mixWithWhite server-side). An
   // earlier version used hexWithAlpha(foreground, ...) here, which put an
   // already-transparent color into --theme-muted; Tailwind's own
   // `bg-muted/30`-style utilities then mix that color *again* with white,
   // multiplying the two alphas together and washing the tint out to
-  // near-invisible — solid colors don't have that problem.
+  // near-invisible - solid colors don't have that problem.
   const muted = mixHex(background, foreground, 0.06);
   const border = mixHex(background, foreground, 0.14);
 
   return {
     // Tailwind itself generates every utility (bg-primary, text-primary/62,
-    // border-background/20, any class, any opacity — Tailwind v4 compiles
+    // border-background/20, any class, any opacity - Tailwind v4 compiles
     // opacity variants as color-mix() against the base variable, so they
     // all resolve dynamically) from these exact *unprefixed* --color-*
     // names, the same ones WebsiteRenderer sets once, globally, in
     // `themeStyle` below. The custom --theme-* names only exist for the
     // small hand-maintained whitelist of `!important` overrides further
-    // down in this file — redefining just those left every class outside
+    // down in this file - redefining just those left every class outside
     // that whitelist (the vast majority) completely unaffected by a
     // section override, since Tailwind's own rules never read --theme-*
     // at all. Redefining --color-* here is what makes *every* class in
@@ -221,7 +221,7 @@ function buildSectionStyleOverride(
     "--ctx": foreground,
     "--ctx2": muted,
     "--c1": primary,
-    // Plain (non-variable) paint on the wrapper itself, as a safety net —
+    // Plain (non-variable) paint on the wrapper itself, as a safety net -
     // most sections set their own bg-*/text-* class on the root <section>
     // and repaint themselves purely from the variables above, but a few
     // (e.g. Hero5) intentionally leave their section transparent and rely
@@ -266,7 +266,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({
     </Suspense>
   );
 
-  // Only wrap when this section actually overrides the site's colors —
+  // Only wrap when this section actually overrides the site's colors -
   // an unstyled wrapper div is harmless, but there's no reason to add one
   // to every section when almost none of them will use it.
   return styleOverride ? <div style={styleOverride}>{rendered}</div> : rendered;
@@ -335,7 +335,7 @@ const hexWithAlpha = (hex: string, alpha: number) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-// Linear-interpolates two solid hex colors — used instead of hexWithAlpha
+// Linear-interpolates two solid hex colors - used instead of hexWithAlpha
 // wherever the result itself needs to stay a solid, non-transparent color
 // (see buildSectionStyleOverride's muted/border computation).
 const mixHex = (from: string, to: string, amount: number) => {
@@ -379,7 +379,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   const borderRadius = (theme as any)?.borderRadius || "8px";
   const buttonStyle = (theme as any)?.buttonStyle || "rounded";
   // Computed per design style (premium/creative/luxury/bold/elegant get
-  // "gradient", the rest "plain") but never actually applied anywhere —
+  // "gradient", the rest "plain") but never actually applied anywhere -
   // every page rendered with a flat background regardless. A subtle
   // diagonal wash on top of the flat color is enough to read as a
   // distinct, more polished treatment without fighting page content.
@@ -402,14 +402,14 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   const buttonShadow = (theme as any)?.buttonShadow || "none";
 
   // The accent-style button treatment used to only ever reach `bg-primary`
-  // buttons — but most Hero CTAs in the component library use
+  // buttons - but most Hero CTAs in the component library use
   // bg-foreground or bg-white, and Hero1 specifically uses bg-background
   // (paired with px-8 padding, which nothing else in the library combines
   // with bg-background), so the single most prominent button on the page
   // very often showed no accent styling at all. This selector list covers
   // every CTA pattern actually used across Hero/CTA/Contact/Footer.
   // bg-foreground and bg-background require a companion px-* class (real
-  // CTA buttons always carry horizontal padding) — otherwise this would
+  // CTA buttons always carry horizontal padding) - otherwise this would
   // also sweep up small fixed-size elements like Footer3's h-6 w-6 social
   // icon badges (which use "hover:bg-foreground" purely for its color, not
   // as a button) into full CTA-button padding/shadow treatment.
@@ -427,12 +427,12 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   ].map((s) => `.theme-preview ${s}`).join(",\n    ");
   // Hero1's section uses bg-foreground while its own button deliberately
   // uses bg-background so it contrasts against that foreground-colored
-  // section — every other bg-foreground/bg-white button in the library
+  // section - every other bg-foreground/bg-white button in the library
   // goes the other direction (button color contrasts against a normal
   // page/section background). Monochrome and Bold's outline/border colors
   // used to be keyed off theme-foreground unconditionally, which is
   // correct for that "every other" case but made Hero1's button's
-  // border/text exactly match its own section's background — invisible.
+  // border/text exactly match its own section's background - invisible.
   // Kept as its own selector group so it can get the inverted color pair.
   const ctaReversedSelector = [
     'button[class*="bg-background"][class*="px-"]', 'a[class*="bg-background"][class*="px-"]',
@@ -493,7 +493,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       --ds-border-width: ${borderWidth};
       --ds-radius: ${borderRadius};
       /* Fixed per-shape values instead of "rounded" falling back to the
-         design style's own base radius — that fallback could land right on
+         design style's own base radius - that fallback could land right on
          top of "square"'s 4px for styles with a small base radius (Premium,
          Editorial, etc.), making Minimal and Bold's buttons look the same
          shape even after everything else about them was made distinct. */
@@ -541,16 +541,16 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     .theme-preview .bg-background\\/95 { background-color: color-mix(in srgb, var(--theme-background) 95%, transparent) !important; }
     .theme-preview .text-foreground { color: var(--theme-foreground) !important; }
     .theme-preview .bg-muted { background-color: var(--theme-muted) !important; }
-    /* These opacity variants used to mix toward literal "white" — a stand-in
+    /* These opacity variants used to mix toward literal "white" - a stand-in
        for "whatever's usually behind it" that only holds for light-mode
        styles. Every dark-mode design style (Premium/Luxury/Bold/Elegant/
        Tech) computes --theme-muted/--theme-card as a *dark* color, so
        mixing 70-80% of the way toward white turned a dark surface into a
-       near-white one — while the text drawn on top of it still used
+       near-white one - while the text drawn on top of it still used
        --theme-foreground, which in dark mode is near-white too. White text
        on a white card is exactly the "font not visible" bug. Mixing toward
        "transparent" instead is real alpha blending (matches what Tailwind's
-       own bg-*/NN opacity utilities do) — it always lightens/darkens
+       own bg-*/NN opacity utilities do) - it always lightens/darkens
        relative to the color underneath rather than a fixed literal white,
        so it reads correctly against both light and dark themes. */
     .theme-preview .bg-muted\\/20 { background-color: color-mix(in srgb, var(--theme-muted) 20%, transparent) !important; }
@@ -573,7 +573,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     /* ── Editorial Typography Scale ──────────────────────────────────
        Every h1–h4/p in every component is forced through this scale with
        !important (so per-component Tailwind size classes never actually
-       apply) — it used to run all the way up to a 6rem/96px h1 and an
+       apply) - it used to run all the way up to a 6rem/96px h1 and an
        8rem/128px stat number, and forced even a Footer column label
        explicitly set to text-xs (12px) up to 16px. Toned down to sizes
        that read as confident on a Hero without dominating every section
@@ -646,7 +646,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     }
     ${buttonFill === "gradient" ? `
     /* Gradient's signature: the button itself is gradient-filled, not just
-       the page background — so the accent's name is actually visible on
+       the page background - so the accent's name is actually visible on
        the single most-looked-at element on the page. Safe to apply to both
        selector groups: a brand-color gradient fill isn't at risk of
        matching its own section's background the way a foreground/
@@ -662,7 +662,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     ` : ""}
     ${buttonFill === "outline" ? `
     /* Monochrome's signature: buttons read as an outline instead of a
-       solid fill, filling in only on hover — a black/white inversion, not
+       solid fill, filling in only on hover - a black/white inversion, not
        a color swatch. Deliberately keyed off foreground/background rather
        than the brand primary color: "Monochrome" should mean no color at
        all, and tying it to primary risked an unreadable low-contrast
@@ -682,7 +682,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       color: var(--theme-background) !important;
     }
     /* The reversed group (Hero1's own button) sits on a section that's
-       already theme-foreground colored, so it needs the opposite pair —
+       already theme-foreground colored, so it needs the opposite pair -
        otherwise its border/text would exactly match its own section's
        background and disappear entirely. */
     ${ctaReversedSelector} {
@@ -698,7 +698,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     ` : ""}
     ${buttonShadow === "offset" ? `
     /* Bold's signature: a hard, unblurred "brutalist" drop shadow that
-       punches further out (and the button shifts to meet it) on hover —
+       punches further out (and the button shifts to meet it) on hover -
        loud and graphic, on-trend, unmistakable even in a thumbnail. */
     ${ctaSelector},
     ${formBtnSelector} {
@@ -710,7 +710,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
       transform: translate(-3px, -3px) !important;
       box-shadow: 9px 9px 0 0 var(--theme-foreground) !important;
     }
-    /* Same reversal as the outline block above — this button's own
+    /* Same reversal as the outline block above - this button's own
        section is already theme-foreground colored. */
     ${ctaReversedSelector} {
       border: 2px solid var(--theme-background) !important;
@@ -724,7 +724,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     ${buttonShadow === "glow" ? `
     /* Gradient's signature companion: a soft colored glow instead of a
        neutral drop shadow, matching the gradient fill. Safe for both
-       groups — a brand-color glow isn't at risk of blending into its own
+       groups - a brand-color glow isn't at risk of blending into its own
        section's background. */
     ${ctaSelector},
     ${ctaReversedSelector},
@@ -763,7 +763,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
 
     /* Form submit buttons are now covered by the unified button block above
        (formBtnSelector / formBtnHoverSelector), so they get the exact same
-       fill/shadow/radius treatment as every other CTA — no separate rule
+       fill/shadow/radius treatment as every other CTA - no separate rule
        set left to keep in sync or fight the cascade with. */
 
     /* ── CTA Gradient Sections ──────────────────────────────── */
@@ -832,7 +832,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     }
     /* Scoped to the border+bg-background combo specifically (not the
        broader "border"+"rounded" selector above, which also matches
-       directional classes like border-b — forcing a full border-width
+       directional classes like border-b - forcing a full border-width
        there would add sides that were never meant to have one). This is
        what actually makes Bold's thick border and Minimal's hairline
        border visible on real content cards, not just buttons. */
@@ -881,7 +881,7 @@ const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
 
   // Navbar and footer are generated as ordinary sections (see MockAIProvider)
   // driven by the client's own component selection, so they render through
-  // the same dynamic PageRenderer as everything else below — no hardcoded
+  // the same dynamic PageRenderer as everything else below - no hardcoded
   // chrome duplicating (and overriding) what the client actually chose.
   return (
     <div className="theme-preview" style={themeStyle}>

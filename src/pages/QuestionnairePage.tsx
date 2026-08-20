@@ -14,7 +14,9 @@ import {
   setContent,
   setBranding,
   setCurrentStep,
+  resetBuilder,
 } from "@/store/slices/builderSlice";
+import { diffConfig, summarizeChanges } from "@/utils/configDiff";
 import { BUSINESS_TYPES, type BusinessTypeConfig } from "@/config/businessTypes";
 import type { WebsiteConfig } from "@/data/websiteConfig";
 import type { SectionColorOverride } from "@/renderer/WebsiteRenderer";
@@ -57,11 +59,13 @@ interface StepDef {
   kind: "business" | "pages" | "design" | "colors" | "review";
 }
 
-// Fixed, top-level steps — pages no longer clutter this row as individual
+// Fixed, top-level steps - pages no longer clutter this row as individual
 // entries. Each selected page instead becomes a sub-tab nested under the
 // single "Pages" step (see pageSubStep state below), so the top bar stays
 // clean regardless of whether a business has 2 pages or 8.
-const STEPS: StepDef[] = [
+// Exported so RevisionPage can find the Review step's index when it hands
+// an existing project's config into this same builder for editing.
+export const STEPS: StepDef[] = [
   { key: "business", title: "Business", subtitle: "Tell us about your business", kind: "business" },
   { key: "pages", title: "Pages", subtitle: "Which pages do you need?", kind: "pages" },
   { key: "design", title: "Design", subtitle: "Choose your visual style", kind: "design" },
@@ -70,12 +74,12 @@ const STEPS: StepDef[] = [
 ];
 
 // Only these hero layouts are actually built around a photo (Hero1's dark
-// cinematic full-bleed image, Hero4's full-bg image with overlaid text) — the
+// cinematic full-bleed image, Hero4's full-bg image with overlaid text) - the
 // others (Split Editorial, Centered Statement, Minimal Text) are text-first
 // and don't use an uploaded background image, so the upload field would be
 // misleading to show for them.
-// Hero2 (Split Editorial) has an image slot too — its right column falls
-// back to a decorative gradient with no image, same as Hero1/Hero4 — it
+// Hero2 (Split Editorial) has an image slot too - its right column falls
+// back to a decorative gradient with no image, same as Hero1/Hero4 - it
 // was just missing from this set, so the upload field never showed for it.
 const IMAGE_HERO_IDS = new Set(["hero1", "hero2", "hero4"]);
 
@@ -136,7 +140,7 @@ const QuestionnairePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentProject } = useSelector((s: any) => s.project);
-  const { config, currentStep } = useSelector((s: any) => s.builder);
+  const { config, currentStep, editMode, originalConfig } = useSelector((s: any) => s.builder);
   const enquiry = currentProject?.enquiry;
 
   const [submitting, setSubmitting] = useState(false);
@@ -158,8 +162,8 @@ const QuestionnairePage = () => {
   }, [currentProject, navigate]);
 
   useEffect(() => {
-    // The landing page only collects the business name — type is chosen
-    // here, in Step 0 — so seed the name (and type, if an older/legacy
+    // The landing page only collects the business name - type is chosen
+    // here, in Step 0 - so seed the name (and type, if an older/legacy
     // project already has one) without requiring both to be present.
     if (enquiry?.businessName && !config.business.name) {
       dispatch(updateBusiness({
@@ -197,7 +201,7 @@ const QuestionnairePage = () => {
     if (STEPS[i].kind === "pages") setPageSubStep(PAGE_SELECT_KEY);
   };
 
-  // Same idea, but for the Review step's per-item "Edit" buttons — jumps
+  // Same idea, but for the Review step's per-item "Edit" buttons - jumps
   // straight into a specific page's own sub-tab (or the page-selection
   // tab, for anything not tied to one particular page) instead of always
   // landing on selection first.
@@ -229,7 +233,7 @@ const QuestionnairePage = () => {
     }
     if (step > 0) {
       const prevStep = STEPS[step - 1];
-      // Re-entering Pages from Design mirrors going forward through it —
+      // Re-entering Pages from Design mirrors going forward through it -
       // land on the last page sub-tab rather than back at selection.
       if (prevStep.kind === "pages") setPageSubStep(pageSubSteps[pageSubSteps.length - 1]?.key || PAGE_SELECT_KEY);
       setStep(step - 1);
@@ -242,6 +246,23 @@ const QuestionnairePage = () => {
       const projectId = currentProject.projectId;
       await projectApi.saveQuestionnaire(projectId, config);
       await projectApi.generate(projectId);
+
+      if (editMode) {
+        // The real edit already happened above (saveQuestionnaire +
+        // generate is the same pipeline that builds a site the first
+        // time, so it genuinely applies whatever changed) - this just
+        // records what changed, for Revision History to show. Skips the
+        // call entirely if nothing actually changed (e.g. the user opened
+        // the editor and clicked Save Changes without touching anything).
+        const changes = diffConfig(originalConfig, config);
+        if (changes.length > 0) {
+          await projectApi.submitRevision(projectId, changes);
+        }
+        dispatch(resetBuilder());
+        navigate(`/revision/${projectId}`);
+        return;
+      }
+
       navigate(`/preview/${projectId}`);
     } catch (err) {
       console.error("Failed:", err);
@@ -266,7 +287,9 @@ const QuestionnairePage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background">
         <div className="mb-5 h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <p className="font-medium text-foreground">Generating your website...</p>
+        <p className="font-medium text-foreground">
+          {editMode ? "Saving your changes..." : "Generating your website..."}
+        </p>
         <p className="mt-1 text-sm text-muted-foreground">This may take a moment</p>
       </div>
     );
@@ -274,108 +297,109 @@ const QuestionnairePage = () => {
 
   return (
     <SectionColorsContext.Provider value={config.sectionColors || {}}>
-    <div className="min-h-screen bg-muted/30">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
-          <div className="mb-2 flex items-center justify-between">
-            <h1 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-              Website Builder
-              {businessType && <span className="text-xl">{businessType.icon}</span>}
-            </h1>
-            <span className="text-sm text-muted-foreground">
-              Step {step + 1} of {STEPS.length}
-              {isOnPageDetail && ` · ${activePageSubStepDef?.title}`}
-            </span>
-          </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-1.5 rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
-          </div>
-          <div className="mt-3 flex gap-1 overflow-x-auto pb-0.5">
-            {STEPS.map((s, i) => (
-              <button
-                key={s.key}
-                type="button"
-                onClick={() => goToStep(i)}
-                className={cn(
-                  "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors",
-                  i === step ? "bg-primary/10 font-medium text-primary"
-                  : i < step ? "text-foreground/70 hover:bg-muted"
-                  : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <span className={cn(
-                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-medium",
-                  i < step ? "bg-primary/15 text-primary"
-                  : i === step ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
-                )}>
-                  {i < step ? "✓" : i + 1}
-                </span>
-                <span className="hidden sm:inline">{s.title}</span>
-              </button>
-            ))}
-          </div>
-
-          {currentStepDef.kind === "pages" && (
-            <div className="mt-2 flex gap-1 overflow-x-auto border-t border-border/60 pt-2">
-              {pageSubSteps.map((s, i) => (
+      <div className="min-h-screen bg-muted/30">
+        <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
+          <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+            <div className="mb-2 flex items-center justify-between">
+              <h1 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                {editMode ? "Edit Website" : "Website Builder"}
+                {businessType && <span className="text-xl">{businessType.icon}</span>}
+              </h1>
+              <span className="text-sm text-muted-foreground">
+                Step {step + 1} of {STEPS.length}
+                {isOnPageDetail && ` · ${activePageSubStepDef?.title}`}
+              </span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="h-1.5 rounded-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
+            </div>
+            <div className="mt-3 flex gap-1 overflow-x-auto pb-0.5">
+              {STEPS.map((s, i) => (
                 <button
                   key={s.key}
                   type="button"
-                  onClick={() => setPageSubStep(s.key)}
+                  onClick={() => goToStep(i)}
                   className={cn(
-                    "shrink-0 rounded-full px-3 py-1 text-xs transition-colors",
-                    s.key === pageSubStep
-                      ? "bg-primary text-primary-foreground"
-                      : i < pageSubIndex
-                      ? "bg-primary/10 text-primary hover:bg-primary/15"
-                      : "bg-muted text-muted-foreground hover:bg-muted/70"
+                    "flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors",
+                    i === step ? "bg-primary/10 font-medium text-primary"
+                      : i < step ? "text-foreground/70 hover:bg-muted"
+                        : "text-muted-foreground hover:bg-muted"
                   )}
                 >
-                  {s.title}
+                  <span className={cn(
+                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-medium",
+                    i < step ? "bg-primary/15 text-primary"
+                      : i === step ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                  )}>
+                    {i < step ? "✓" : i + 1}
+                  </span>
+                  <span className="hidden sm:inline">{s.title}</span>
                 </button>
               ))}
             </div>
-          )}
-        </div>
-      </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
-          <div className="min-w-0">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-foreground">{headerTitle}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{headerSubtitle}</p>
-            </div>
+            {currentStepDef.kind === "pages" && (
+              <div className="mt-2 flex gap-1 overflow-x-auto border-t border-border/60 pt-2">
+                {pageSubSteps.map((s, i) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => setPageSubStep(s.key)}
+                    className={cn(
+                      "shrink-0 rounded-full px-3 py-1 text-xs transition-colors",
+                      s.key === pageSubStep
+                        ? "bg-primary text-primary-foreground"
+                        : i < pageSubIndex
+                          ? "bg-primary/10 text-primary hover:bg-primary/15"
+                          : "bg-muted text-muted-foreground hover:bg-muted/70"
+                    )}
+                  >
+                    {s.title}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </header>
 
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
-              {currentStepDef.kind === "business" && <StepBusiness config={config} dispatch={dispatch} businessType={businessType} />}
-              {currentStepDef.kind === "pages" && !isOnPageDetail && <StepPages config={config} dispatch={dispatch} businessType={businessType} />}
-              {isOnPageDetail && (
-                <StepPageDetail
-                  config={config}
-                  dispatch={dispatch}
-                  businessType={businessType}
-                  pageId={pageSubStep}
-                  isFirstPage={config.pages[0] === pageSubStep}
-                />
-              )}
-              {currentStepDef.kind === "design" && <StepDesign config={config} dispatch={dispatch} businessType={businessType} />}
-              {currentStepDef.kind === "colors" && <StepColors config={config} dispatch={dispatch} />}
-              {currentStepDef.kind === "review" && (
-                <StepReview
-                  config={config}
-                  onEditStep={goToStep}
-                  onEditPage={goToPageTab}
-                  businessStepIndex={STEPS.findIndex((s) => s.kind === "business")}
-                  designStepIndex={STEPS.findIndex((s) => s.kind === "design")}
-                  colorsStepIndex={STEPS.findIndex((s) => s.kind === "colors")}
-                />
-              )}
-            </div>
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_420px]">
+            <div className="min-w-0">
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold text-foreground">{headerTitle}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{headerSubtitle}</p>
+              </div>
 
-            {/* Below lg, the floating "Preview" button (see below) sits fixed
-                at bottom-right of the viewport — the exact same corner this
+              <div className="rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6">
+                {currentStepDef.kind === "business" && <StepBusiness config={config} dispatch={dispatch} businessType={businessType} />}
+                {currentStepDef.kind === "pages" && !isOnPageDetail && <StepPages config={config} dispatch={dispatch} businessType={businessType} />}
+                {isOnPageDetail && (
+                  <StepPageDetail
+                    config={config}
+                    dispatch={dispatch}
+                    businessType={businessType}
+                    pageId={pageSubStep}
+                    isFirstPage={config.pages[0] === pageSubStep}
+                  />
+                )}
+                {currentStepDef.kind === "design" && <StepDesign config={config} dispatch={dispatch} businessType={businessType} />}
+                {currentStepDef.kind === "colors" && <StepColors config={config} dispatch={dispatch} />}
+                {currentStepDef.kind === "review" && (
+                  <StepReview
+                    config={config}
+                    onEditStep={goToStep}
+                    onEditPage={goToPageTab}
+                    businessStepIndex={STEPS.findIndex((s) => s.kind === "business")}
+                    designStepIndex={STEPS.findIndex((s) => s.kind === "design")}
+                    colorsStepIndex={STEPS.findIndex((s) => s.kind === "colors")}
+                    editMode={editMode}
+                  />
+                )}
+              </div>
+
+              {/* Below lg, the floating "Preview" button (see below) sits fixed
+                at bottom-right of the viewport - the exact same corner this
                 row's Next/Generate button lands in once its non-sticky flow
                 position scrolls into view, so the FAB was rendering on top
                 of it and blocking clicks. Pinning this row to the bottom of
@@ -383,59 +407,59 @@ const QuestionnairePage = () => {
                 lg:hidden breakpoint) fixes both problems at once: Next is
                 always reachable without scrolling, and moving the FAB up to
                 clear this bar's height removes the overlap entirely. */}
-            <div className="sticky bottom-0 z-10 -mx-4 mt-6 flex justify-between gap-3 border-t border-border bg-card px-4 py-3 sm:-mx-6 sm:px-6 lg:static lg:z-auto lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0">
-              <Button type="button" variant="outline" onClick={handlePrev} disabled={step === 0}>
-                Previous
-              </Button>
-              {step === STEPS.length - 1 ? (
-                <Button type="button" onClick={handleSubmit} disabled={!canNext()}>
-                  Generate Website
+              <div className="sticky bottom-0 z-10 -mx-4 mt-6 flex justify-between gap-3 border-t border-border bg-card px-4 py-3 sm:-mx-6 sm:px-6 lg:static lg:z-auto lg:mx-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0">
+                <Button type="button" variant="outline" onClick={handlePrev} disabled={step === 0}>
+                  Previous
                 </Button>
-              ) : (
-                <Button type="button" onClick={handleNext} disabled={!canNext()}>
-                  Next
-                </Button>
-              )}
+                {step === STEPS.length - 1 ? (
+                  <Button type="button" onClick={handleSubmit} disabled={!canNext()}>
+                    {editMode ? "Save Changes" : "Generate Website"}
+                  </Button>
+                ) : (
+                  <Button type="button" onClick={handleNext} disabled={!canNext()}>
+                    Next
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="hidden lg:block">
+              <LivePreviewPanel
+                config={config}
+                projectId={currentProject.projectId}
+                activePage={previewPage}
+                onPageChange={setPreviewPage}
+                onExpand={() => setFullScreenPreview(true)}
+              />
             </div>
           </div>
+        </main>
 
-          <div className="hidden lg:block">
-            <LivePreviewPanel
-              config={config}
-              projectId={currentProject.projectId}
-              activePage={previewPage}
-              onPageChange={setPreviewPage}
-              onExpand={() => setFullScreenPreview(true)}
-            />
-          </div>
-        </div>
-      </main>
-
-      {/* bottom-24 (not bottom-5) clears the sticky Previous/Next bar above
-          — that bar now pins to the bottom of the viewport on every
+        {/* bottom-24 (not bottom-5) clears the sticky Previous/Next bar above
+          - that bar now pins to the bottom of the viewport on every
           breakpoint this button is visible at, so bottom-5 would sit right
           on top of the Next/Generate Website button. */}
-      <button
-        type="button"
-        onClick={() => setFullScreenPreview(true)}
-        className="fixed bottom-24 right-5 z-20 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg lg:hidden"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
-        </svg>
-        Preview
-      </button>
+        <button
+          type="button"
+          onClick={() => setFullScreenPreview(true)}
+          className="fixed bottom-24 right-5 z-20 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-lg lg:hidden"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
+          </svg>
+          Preview
+        </button>
 
-      {fullScreenPreview && (
-        <FullScreenPreviewModal
-          config={config}
-          projectId={currentProject.projectId}
-          activePage={previewPage}
-          onPageChange={setPreviewPage}
-          onClose={() => setFullScreenPreview(false)}
-        />
-      )}
-    </div>
+        {fullScreenPreview && (
+          <FullScreenPreviewModal
+            config={config}
+            projectId={currentProject.projectId}
+            activePage={previewPage}
+            onPageChange={setPreviewPage}
+            onClose={() => setFullScreenPreview(false)}
+          />
+        )}
+      </div>
     </SectionColorsContext.Provider>
   );
 };
@@ -449,7 +473,7 @@ function StepBusiness({ config, dispatch, businessType }: { config: any; dispatc
     // Seed smart, industry-appropriate defaults (theme, colors, layout
     // variants, pages) so two different business types actually produce
     // different-looking sites out of the box. Everything here stays fully
-    // editable in later steps — this is just a better starting point than
+    // editable in later steps - this is just a better starting point than
     // "modern blue" for every business.
     const preset = BUSINESS_TYPES[id];
     if (!preset) return;
@@ -499,7 +523,7 @@ function StepBusiness({ config, dispatch, businessType }: { config: any; dispatc
         </div>
         {config.business.type && (
           <p className="mt-2 text-xs text-muted-foreground">
-            We've pre-selected a color palette, layout style, and starter pages for this business type — change anything you like as you go.
+            We've pre-selected a color palette, layout style, and starter pages for this business type - change anything you like as you go.
           </p>
         )}
       </div>
@@ -702,7 +726,7 @@ function StepPages({ config, dispatch, businessType }: { config: any; dispatch: 
   };
 
   // The main grid only offers pages that actually make sense for the
-  // selected business type — no more picking "Properties" for a bakery.
+  // selected business type - no more picking "Properties" for a bakery.
   // Falls back to the full list on the rare case a business type couldn't
   // be resolved (in which case there's nothing left over for the dropdown).
   const relevantIds = businessType
@@ -719,7 +743,7 @@ function StepPages({ config, dispatch, businessType }: { config: any; dispatch: 
   return (
     <div className="space-y-4">
       <SectionIntro>
-        Select the pages you need. Home is always included. This list is based on your business type — you'll
+        Select the pages you need. Home is always included. This list is based on your business type - you'll
         configure exactly what goes on each one next.
       </SectionIntro>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -736,8 +760,8 @@ function StepPages({ config, dispatch, businessType }: { config: any; dispatch: 
                 selected
                   ? "border-primary bg-primary/5 text-foreground"
                   : page.required
-                  ? "cursor-not-allowed border-border bg-muted/50 text-muted-foreground"
-                  : "border-border bg-background text-foreground hover:border-primary/40"
+                    ? "cursor-not-allowed border-border bg-muted/50 text-muted-foreground"
+                    : "border-border bg-background text-foreground hover:border-primary/40"
               )}
             >
               <CheckBox selected={selected} />
@@ -780,7 +804,7 @@ function StepPages({ config, dispatch, businessType }: { config: any; dispatch: 
 /* ── Step: Per-page detail (sections + layout for that page) ────────── */
 
 // Carries just the current sectionColors map down to ComponentVariantPicker
-// without adding a `config` prop to every one of its ~40 call sites — every
+// without adding a `config` prop to every one of its ~40 call sites - every
 // one of those already lives inside a component that has `config` in scope
 // to read from, but threading it through each individually would be exactly
 // the kind of "forgot one" risk this feature can't afford. Provided once,
@@ -796,7 +820,7 @@ const SECTION_COLOR_PRESETS: Array<{ id: SectionColorOverride["preset"]; label: 
   { id: "custom", label: "Custom" },
 ];
 
-// One color/theme override per component-category — shown inside every
+// One color/theme override per component-category - shown inside every
 // ComponentVariantPicker, so it appears wherever a layout choice already
 // does (every section in the app has one). "Match Site" (the default)
 // means "use the global theme, no override"; the four presets derive a
@@ -982,7 +1006,7 @@ function ContentBlock({ title, hint, children }: { title: string; hint?: string;
    Section order in the actual generated website is driven directly by the
    order of ids in config.sections[pageId] (both the live preview and every
    server-side page builder loop over that array in order and assign
-   order: order++ as they go) — so reordering this list is a real, direct
+   order: order++ as they go) - so reordering this list is a real, direct
    control over section order on the live site, not cosmetic. ─────────── */
 
 function SortableSectionRow({ id, index, label }: { id: string; index: number; label: string }) {
@@ -1094,7 +1118,7 @@ function StepPageDetail({
   };
 
   // Hero is the one category shared by every page, so its layout is chosen
-  // once — on the first page — rather than re-asked on every subsequent
+  // once - on the first page - rather than re-asked on every subsequent
   // page. Its text content, however, is genuinely different per page, so
   // that's always editable here.
   const heroCategory = COMPONENT_CATEGORIES.find((c) => c.category === "hero");
@@ -1413,7 +1437,7 @@ function StepPageDetail({
       {(has("agents") || has("trainers") || has("doctors") || has("instructors")) && <TeamEditor config={config} dispatch={dispatch} />}
       {/* Agents/Trainers/Doctors/Instructors all edit the same shared team
           list above (TeamEditor), but each renders through its own
-          component family server-side, so each gets its own layout picker —
+          component family server-side, so each gets its own layout picker -
           normally only one of these is active on a given page. */}
       {has("agents") && layoutFor("agents") && (
         <ComponentVariantPicker cat={layoutFor("agents")!} currentComponent={config.components.agents || ""} suggestedId={suggestedComponents.agents} dispatch={dispatch} />
@@ -1465,7 +1489,7 @@ function StepPageDetail({
         <>
           <SolutionsEditor config={config} dispatch={dispatch} />
           {/* Solutions reuses the Services layout family server-side (there's
-              no separate "solutions" component set) — same picker, same
+              no separate "solutions" component set) - same picker, same
               selection, so it stays in sync with any Services section on
               the same page instead of offering a second, disconnected
               choice for what resolves to the same component either way. */}
@@ -1679,7 +1703,7 @@ function StepPageDetail({
 }
 
 /* ── Per-section content editors (shared content pools, edited wherever
-   the section first appears — the same services list shown on Home and a
+   the section first appears - the same services list shown on Home and a
    dedicated Services page is the same list, not duplicated) ───────────── */
 
 function useListContent<T>(config: any, dispatch: any, key: string) {
@@ -1847,8 +1871,8 @@ function WhyChooseUsEditor({ config, dispatch }: { config: any; dispatch: any })
 }
 
 // The About page's Values section had a layout picker but its actual
-// content — 4 values, always "Excellence/Integrity/Innovation/Customer
-// Focus" — was hardcoded with no editor anywhere, unlike every other list
+// content - 4 values, always "Excellence/Integrity/Innovation/Customer
+// Focus" - was hardcoded with no editor anywhere, unlike every other list
 // section on this page.
 function AboutValuesEditor({ config, dispatch }: { config: any; dispatch: any }) {
   const { items, addItem, updateItem, removeItem } = useListContent<{ title: string; description: string }>(config, dispatch, "aboutValues");
@@ -1858,7 +1882,7 @@ function AboutValuesEditor({ config, dispatch }: { config: any; dispatch: any })
       items={items}
       onAdd={() => addItem({ title: "", description: "" })}
       addLabel="+ Add Value"
-      emptyLabel="No values added yet — defaults to Excellence, Integrity, Innovation, and Customer Focus."
+      emptyLabel="No values added yet - defaults to Excellence, Integrity, Innovation, and Customer Focus."
       onRemove={removeItem}
       renderItem={(v, i) => (
         <>
@@ -2356,7 +2380,7 @@ function PricingPlansEditor({ config, dispatch }: { config: any; dispatch: any }
 /* ── Step: Design ──────────────────────────────────────────────────── */
 
 // Footer text was entirely hardcoded (tagline fell back silently to the
-// business description, copyright/CTA copy couldn't be touched at all) —
+// business description, copyright/CTA copy couldn't be touched at all) -
 // this is the only place in the questionnaire to edit it, since the footer
 // is site-wide rather than per-page like Hero/CTA content.
 function FooterContentEditor({ config, dispatch, isRichFooter }: { config: any; dispatch: any; isRichFooter: boolean }) {
@@ -2416,7 +2440,7 @@ function StepDesign({ config, dispatch, businessType }: { config: any; dispatch:
   // theme.typography AND theme.primaryColor/secondaryColor default to fixed
   // values that get pinned again by the business-type preset in Step 1
   // (selectBusinessType dispatches its own colorScheme), so picking a
-  // Design Style here used to only change its font — the color swatches
+  // Design Style here used to only change its font - the color swatches
   // shown on each style card were purely decorative and never actually
   // applied. Re-sync typography AND colors to match the style whenever one
   // is picked; the Colors step below can still override either afterward.
@@ -2685,7 +2709,7 @@ function EditIcon() {
   );
 }
 
-// The Review step used to be a long wall of always-expanded cards — once
+// The Review step used to be a long wall of always-expanded cards - once
 // every section actually showed its real content (not just a name), that
 // got long enough to be hard to scan. An accordion keeps everything just
 // as reachable (nothing summarized away) while only showing full detail
@@ -2761,7 +2785,7 @@ function contentItemLabel(item: Record<string, any>): string {
   return item?.title || item?.name || item?.question || item?.label || item?.day || item?.year || "Untitled";
 }
 
-// The short description/body text for a content item — different list
+// The short description/body text for a content item - different list
 // types name this field differently (a service's "description", a
 // testimonial's "content", a team member's "bio", an FAQ's "answer"...),
 // so this checks every field actually used across the editors above
@@ -2774,7 +2798,7 @@ function contentItemDescription(item: Record<string, any>): string | undefined {
 }
 
 // Maps a section's canonical type (from previewSpec.ts's sectionType()) to
-// the config.content key it actually pulls from — mirrors exactly which
+// the config.content key it actually pulls from - mirrors exactly which
 // useListContent(config, dispatch, "key") each editor above is wired to
 // (including the handful that share a family: Feature Grid reuses
 // Services' own list, Inventory Grid reuses Portfolio's, Travel Deals
@@ -2821,11 +2845,11 @@ const SECTION_CONTENT_KEY: Record<string, string> = {
 };
 
 interface SectionDetail {
-  // Every item that will actually render in this section — full title +
-  // description, not a truncated summary — so a service or FAQ entry can
+  // Every item that will actually render in this section - full title +
+  // description, not a truncated summary - so a service or FAQ entry can
   // be checked at a glance instead of guessed at from just its name.
   items?: Array<{ title: string; description?: string }>;
-  // Set instead of `items` when there's nothing customized yet — explains
+  // Set instead of `items` when there's nothing customized yet - explains
   // what will show in its place rather than just going blank.
   note?: string;
 }
@@ -2838,24 +2862,24 @@ function sectionDetail(
   const contentKey = SECTION_CONTENT_KEY[type];
   if (contentKey) {
     const items = (ctx.content[contentKey] || []) as Record<string, any>[];
-    if (items.length === 0) return { note: "Not customized — will use content suited to your business type." };
+    if (items.length === 0) return { note: "Not customized - will use content suited to your business type." };
     return { items: items.map((it) => ({ title: contentItemLabel(it), description: contentItemDescription(it) })) };
   }
   if (type === "about_story") {
     const storyContent = ctx.pageContent?.about_story?.content?.trim();
-    return storyContent ? { items: [{ title: "Company Story", description: storyContent }] } : { note: "Not customized — will use a generated company story." };
+    return storyContent ? { items: [{ title: "Company Story", description: storyContent }] } : { note: "Not customized - will use a generated company story." };
   }
   if (type === "cta") {
     const headline = ctx.pageContent?.cta?.headline?.trim();
     return headline
       ? { items: [{ title: headline, description: ctx.pageContent?.cta?.subheadline?.trim() }] }
-      : { note: "Not customized — will use default call-to-action text." };
+      : { note: "Not customized - will use default call-to-action text." };
   }
   if (type === "contact") {
     const heading = ctx.contactContent.heading?.trim();
     return heading || ctx.contactContent.intro
       ? { items: [{ title: heading || "Contact Form", description: ctx.contactContent.intro }] }
-      : { note: "Not customized — will use a default heading and button text." };
+      : { note: "Not customized - will use a default heading and button text." };
   }
   if (type === "contact_info" || type === "map") {
     const line = [ctx.business.phone, ctx.business.email, ctx.business.address].filter(Boolean).join(" · ");
@@ -2864,7 +2888,7 @@ function sectionDetail(
   return {};
 }
 
-// Shared renderer for a section's full detail — used both inside each
+// Shared renderer for a section's full detail - used both inside each
 // page's section list and inside the top-level "Content" card, so a
 // service's title+description looks identical wherever it's reviewed.
 function SectionDetailView({ detail }: { detail: SectionDetail }) {
@@ -2895,6 +2919,7 @@ function StepReview({
   businessStepIndex,
   designStepIndex,
   colorsStepIndex,
+  editMode,
 }: {
   config: any;
   onEditStep: (index: number) => void;
@@ -2902,6 +2927,7 @@ function StepReview({
   businessStepIndex: number;
   designStepIndex: number;
   colorsStepIndex: number;
+  editMode?: boolean;
 }) {
   const businessType = BUSINESS_TYPES[config.business.type];
   const pages = (config.pages || []) as string[];
@@ -2910,8 +2936,8 @@ function StepReview({
   const footerContent = content.footer || {};
   const contactContent = content.contact || {};
 
-  // Business Information + Pages & Sections open by default — the two most
-  // useful things to check right after clicking through — everything else
+  // Business Information + Pages & Sections open by default - the two most
+  // useful things to check right after clicking through - everything else
   // starts collapsed so the page reads as a scannable list, not a wall of
   // text, while still being one click away.
   const [openCards, setOpenCards] = useState<string[]>(["business", "pages"]);
@@ -2987,14 +3013,14 @@ function StepReview({
                     </Button>
                   </Accordion.Header>
                   <Accordion.Content className="space-y-1.5 border-t border-border p-2.5">
-                    {/* Every page gets its own Hero content — only the first
+                    {/* Every page gets its own Hero content - only the first
                         page renders the real Hero1-5 layout, but the rest
                         still use this same headline/subheadline/button for
                         their compact page-title bar. */}
                     <div className="rounded border border-border/60 bg-muted/30 px-2.5 py-1.5">
                       <div className="text-xs font-medium text-foreground">{isFirstPage ? "Hero" : "Page Header"}</div>
                       <p className="text-xs text-muted-foreground">
-                        {pc?.hero?.headline?.trim() ? `Headline: "${pc.hero.headline}"` : "Headline not customized — will use a generated one."}
+                        {pc?.hero?.headline?.trim() ? `Headline: "${pc.hero.headline}"` : "Headline not customized - will use a generated one."}
                       </p>
                       {pc?.hero?.subheadline?.trim() && <p className="text-xs text-muted-foreground">Subheadline: "{pc.hero.subheadline}"</p>}
                       {isFirstPage && pc?.hero?.ctaText?.trim() && <p className="text-xs text-muted-foreground">Button: "{pc.hero.ctaText}"</p>}
@@ -3077,7 +3103,7 @@ function StepReview({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Nothing added yet — services, testimonials, team members, and every other list section will use content suited to your business type instead.
+              Nothing added yet - services, testimonials, team members, and every other list section will use content suited to your business type instead.
             </p>
           )}
         </ReviewCard>
@@ -3087,7 +3113,7 @@ function StepReview({
             {(content.aboutValues || []).length > 0 ? (
               <SectionDetailView detail={{ items: (content.aboutValues as Array<{ title: string; description: string }>).map((v) => ({ title: v.title || "Untitled", description: v.description })) }} />
             ) : (
-              <p className="text-sm text-muted-foreground">Not customized — will default to Excellence, Integrity, Innovation, and Customer Focus.</p>
+              <p className="text-sm text-muted-foreground">Not customized - will default to Excellence, Integrity, Innovation, and Customer Focus.</p>
             )}
           </ReviewCard>
         )}
@@ -3100,7 +3126,7 @@ function StepReview({
               {footerContent.ctaButtonText && <p><span className="text-muted-foreground">CTA Button:</span> <span className="text-foreground">{footerContent.ctaButtonText}</span></p>}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">Not customized — will use your business description as the tagline and a standard copyright line.</p>
+            <p className="text-sm text-muted-foreground">Not customized - will use your business description as the tagline and a standard copyright line.</p>
           )}
         </ReviewCard>
 
@@ -3114,7 +3140,7 @@ function StepReview({
                 {contactContent.infoHeading && <p><span className="text-muted-foreground">Info Heading:</span> <span className="text-foreground">{contactContent.infoHeading}</span></p>}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Not customized — default heading and button text will be used.</p>
+              <p className="text-sm text-muted-foreground">Not customized - default heading and button text will be used.</p>
             )}
           </ReviewCard>
         )}
@@ -3136,14 +3162,23 @@ function StepReview({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">No logo or images uploaded — a placeholder will be used instead.</p>
+            <p className="text-sm text-muted-foreground">No logo or images uploaded - a placeholder will be used instead.</p>
           )}
         </ReviewCard>
       </Accordion.Root>
 
       <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm text-foreground">
-        <p className="font-medium">Ready to generate your website?</p>
-        <p className="mt-1 text-muted-foreground">Click "Generate Website" to create your custom website based on all the selections above.</p>
+        {editMode ? (
+          <>
+            <p className="font-medium">Ready to save your changes?</p>
+            <p className="mt-1 text-muted-foreground">Click "Save Changes" to apply your edits to the live site - this'll show up in Revision History right after.</p>
+          </>
+        ) : (
+          <>
+            <p className="font-medium">Ready to generate your website?</p>
+            <p className="mt-1 text-muted-foreground">Click "Generate Website" to create your custom website based on all the selections above.</p>
+          </>
+        )}
       </div>
     </div>
   );

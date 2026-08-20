@@ -81,7 +81,7 @@ const AssetUploadPage = () => {
           <div className="mb-6">
             <h2 className="mb-1 text-xl font-semibold text-foreground">Add your files</h2>
             <p className="text-sm text-muted-foreground">
-              Upload your logo, images, and documents. These will be used to personalize your website. This step is optional — you can skip straight to generation.
+              Upload your logo, images, and documents. These will be used to personalize your website. This step is optional - you can skip straight to generation.
             </p>
           </div>
 

@@ -46,7 +46,7 @@ export interface WebsiteConfig {
   };
   components: Record<string, string>;
   // Per-section color/theme override, keyed by the same component-category
-  // string used in `components` (hero, services, footer, navbar, ...) — one
+  // string used in `components` (hero, services, footer, navbar, ...) - one
   // slot per section family, the same unit the layout picker already uses.
   // Left out entirely (or "default") means "inherit the site's theme".
   sectionColors: Record<string, {
@@ -64,7 +64,7 @@ export interface WebsiteConfig {
     portfolio: Array<{ title: string; description: string; image?: string | null }>;
     gallery: Array<{ url: string; alt?: string }>;
     whyChooseUs: Array<{ title: string; description: string }>;
-    // About page's "Our Values" section — used to be 4 hardcoded values
+    // About page's "Our Values" section - used to be 4 hardcoded values
     // (Excellence/Integrity/Innovation/Customer Focus) with no way to edit
     // or replace them, unlike every other list-content section.
     aboutValues: Array<{ title: string; description: string }>;
@@ -88,7 +88,7 @@ export interface WebsiteConfig {
     programs: Array<{ title: string; description: string; price: string; category?: string; level?: string; duration?: string; image?: string | null }>;
     facilities: Array<{ title: string; description: string }>;
     skills: Array<{ title: string; description: string }>;
-    // Site-wide (not per-page) footer text overrides — everything here is
+    // Site-wide (not per-page) footer text overrides - everything here is
     // optional and falls back to sensible defaults derived from the
     // business info entered earlier, same as pageContent does for Hero/CTA.
     footer: {
@@ -139,7 +139,7 @@ export const DEFAULT_WEBSITE_CONFIG: WebsiteConfig = {
     secondaryColor: "#1E40AF",
     // "auto" lets each design style show its own intended light/dark
     // character (Luxury, Premium, Bold, Elegant, and Tech / SaaS are all
-    // meant to read as dark by default) — defaulting to "light" pinned
+    // meant to read as dark by default) - defaulting to "light" pinned
     // every style to a light background regardless of what it was
     // designed to look like, which was a big part of why styles all
     // looked so similar. The Theme Mode step still lets the client force

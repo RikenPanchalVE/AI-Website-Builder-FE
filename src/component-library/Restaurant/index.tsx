@@ -27,7 +27,7 @@ export const MenuHighlights = (props: any) => (
 );
 
 // ── DailySpecials ──────────────────────────────────────────────
-// The banner gradient used to be hardcoded amber/orange/red — a fixed
+// The banner gradient used to be hardcoded amber/orange/red - a fixed
 // "food" palette that never reflected the site's own brand colors (global
 // theme or per-section override alike, since neither could reach a class
 // that isn't theme-relative to begin with).
@@ -59,7 +59,7 @@ export const DailySpecials = (props: any) => (
   </section>
 );
 
-// ── MenuHighlights2 (classic printed-menu look — name, dotted leader
+// ── MenuHighlights2 (classic printed-menu look - name, dotted leader
 //    line, price; no photos) ──────────────────────────────────
 export const MenuHighlights2 = (props: any) => (
   <section className="py-16 sm:py-20">

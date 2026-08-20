@@ -22,7 +22,7 @@ const About2 = ({ title, description, image }: AboutProps) => (
           <h2 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl" style={{ letterSpacing: "-0.04em" }}>{title}</h2>
           <div className="mb-8 h-1 w-16 rounded-full bg-gradient-to-r from-primary to-secondary" />
           <p className="mb-8 text-lg leading-relaxed text-muted-foreground">{description}</p>
-          {/* Used to be a bare grid-cols-2 — always 2-up, even on the
+          {/* Used to be a bare grid-cols-2 - always 2-up, even on the
               narrowest phones, squeezing "Client Focused / Your success is
               our mission" into a ~140px column. Stacks to 1 column below sm. */}
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">

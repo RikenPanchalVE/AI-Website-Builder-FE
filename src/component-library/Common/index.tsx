@@ -2,7 +2,7 @@ import { useState } from "react";
 
 /* ═══════════════════════════════════════════════════════════
    EDITORIAL COMPONENT LIBRARY
-   Premium design system — each component is unique
+   Premium design system - each component is unique
    ═══════════════════════════════════════════════════════════ */
 
 // Platform-accurate social icons for the footer's social links row. These
@@ -58,7 +58,7 @@ export const SocialIcon = ({ platform, className }: { platform?: string; classNa
       </svg>
     );
   }
-  // Unknown platform — fall back to initials rather than rendering nothing.
+  // Unknown platform - fall back to initials rather than rendering nothing.
   return <span className="text-[10px] font-bold uppercase">{platform?.substring(0, 2)}</span>;
 };
 
@@ -349,7 +349,7 @@ export const StoreLocator = (props: any) => (
   </section>
 );
 
-// A compact page-title bar for every page other than Home — deliberately
+// A compact page-title bar for every page other than Home - deliberately
 // not built to be a second hero. It used to share Hero1-5's own scale
 // (min-h-screen-style padding, an h1 that reads at the same enforced size
 // as the actual Home hero, an optional side image) so every single page in
@@ -415,7 +415,7 @@ export const AboutStory = (props: any) => (
           {props.stats && (
             // The per-item border logic below already assumes a 1-col mobile
             // / 2-col sm+ layout (it switches between border-b and sm:border-r)
-            // — but this grid was bare grid-cols-2, always 2-up, so that
+            // - but this grid was bare grid-cols-2, always 2-up, so that
             // logic never actually got its intended 1-column mobile state.
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 border border-border">
               {props.stats.map((s: any, i: number) => (
@@ -591,7 +591,7 @@ export const TeamSection = (props: any) => (
 );
 
 // ── Variant 2s for the About page's Story/Values/Team/Statistics/Timeline
-// sections — these used to have no layout choice at all (unlike every Home
+// sections - these used to have no layout choice at all (unlike every Home
 // page section), so picking a design style never changed how they looked.
 export const AboutStory2 = (props: any) => (
   <section className="bg-muted/30 overflow-hidden">
@@ -726,7 +726,7 @@ export const TeamSection2 = (props: any) => (
   </section>
 );
 
-// ── Variant 2s for Why Choose Us, Business Hours, Contact Info, and Map —
+// ── Variant 2s for Why Choose Us, Business Hours, Contact Info, and Map -
 // these had no layout choice at all, same gap as the About page sections.
 export const WhyChooseUs2 = (props: any) => (
   <section className="bg-muted/30 overflow-hidden">
@@ -948,9 +948,8 @@ export const BlogGrid = (props: any) => (
           <a
             key={post.id}
             href={`/blog/${post.slug}`}
-            className={`group overflow-hidden border-b lg:border-b-0 lg:border-r border-border last:border-r-0 transition-all duration-500 hover:bg-muted/30 ${
-              i === 0 ? "lg:col-span-6" : "lg:col-span-3"
-            }`}
+            className={`group overflow-hidden border-b lg:border-b-0 lg:border-r border-border last:border-r-0 transition-all duration-500 hover:bg-muted/30 ${i === 0 ? "lg:col-span-6" : "lg:col-span-3"
+              }`}
             style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.06}s both` }}
           >
             <div className={`overflow-hidden bg-muted ${i === 0 ? "aspect-[16/9]" : "aspect-[4/3]"}`}>

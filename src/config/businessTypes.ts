@@ -117,7 +117,7 @@ export const BUSINESS_TYPES: Record<string, BusinessTypeConfig> = {
     designStyle: { themeStyle: "friendly", fontStyle: "Nunito", typography: "nunito" },
     metaDefaults: {
       titleTemplate: "{brandName} - Café & Coffee Shop",
-      descriptionTemplate: "Warm, welcoming, and full of flavor — {brandName} is your neighborhood café. Stop by today.",
+      descriptionTemplate: "Warm, welcoming, and full of flavor - {brandName} is your neighborhood café. Stop by today.",
     },
   },
   hotel: {

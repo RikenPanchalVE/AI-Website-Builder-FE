@@ -1,7 +1,7 @@
 interface Testimonial { name: string; role: string; content: string; avatar?: string | null; }
 interface TestimonialsProps { title: string; testimonials: Testimonial[]; }
 
-/* Testimonials2 — Vertical stack with large quotes */
+/* Testimonials2 - Vertical stack with large quotes */
 const Testimonials2 = ({ title, testimonials }: TestimonialsProps) => (
   <section className="bg-muted/30 overflow-hidden">
     <div className="mx-auto max-w-4xl px-6 lg:px-12 py-24 lg:py-32">
