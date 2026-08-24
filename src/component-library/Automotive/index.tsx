@@ -31,7 +31,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({
   const [hovered, setHovered] = React.useState(false);
 
   const stars = Array.from({ length: 5 }, (_, i) => (
-    <span key={i} className={i < Math.round(rating) ? "text-yellow-400" : "text-gray-300"}>★</span>
+    <span key={i} className={i < Math.round(rating) ? "text-yellow-400" : "text-muted/50"}>★</span>
   ));
 
   return (

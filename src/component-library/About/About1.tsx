@@ -5,7 +5,7 @@ const About1 = ({ title, description, image }: AboutProps) => (
     <div className="mx-auto max-w-7xl px-6 lg:px-8">
       <div className="grid items-center gap-20 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary">About Us</div>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-foreground">About Us</div>
           <h2 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl" style={{ letterSpacing: "-0.04em" }}>{title}</h2>
           <div className="mb-10 h-1 w-16 rounded-full bg-gradient-to-r from-primary to-secondary" />
           <p className="mb-10 text-lg leading-relaxed text-muted-foreground">{description}</p>

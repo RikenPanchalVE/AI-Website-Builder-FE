@@ -9,7 +9,7 @@ export const Services = (props: any) => (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {(props.services || []).map((s: any, i: number) => (
           <div key={i} className="rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-foreground">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <h3 className="mb-2 font-bold text-foreground">{s.name}</h3>
@@ -123,7 +123,7 @@ export const HealthResources = (props: any) => (
               )}
             </div>
             <div className="p-5">
-              {r.category && <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{r.category}</span>}
+              {r.category && <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">{r.category}</span>}
               <h3 className="mt-3 font-bold text-foreground">{r.title}</h3>
               {r.description && <p className="mt-1 text-sm text-muted-foreground">{r.description}</p>}
             </div>

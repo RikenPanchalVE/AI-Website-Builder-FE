@@ -18,7 +18,7 @@ const About2 = ({ title, description, image }: AboutProps) => (
           </div>
         </div>
         <div className="order-1 lg:order-2">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary">Our Story</div>
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-foreground">Our Story</div>
           <h2 className="mb-6 text-4xl font-extrabold leading-[1.1] tracking-tight text-foreground sm:text-5xl" style={{ letterSpacing: "-0.04em" }}>{title}</h2>
           <div className="mb-8 h-1 w-16 rounded-full bg-gradient-to-r from-primary to-secondary" />
           <p className="mb-8 text-lg leading-relaxed text-muted-foreground">{description}</p>
@@ -31,7 +31,7 @@ const About2 = ({ title, description, image }: AboutProps) => (
               { icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z", title: "Client Focused", desc: "Your success is our mission" },
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-foreground">
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} /></svg>
                 </div>
                 <div>

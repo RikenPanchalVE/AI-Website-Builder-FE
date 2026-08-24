@@ -631,7 +631,7 @@ export const AboutValues2 = (props: any) => (
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {(props.values || []).map((v: any, i: number) => (
           <div key={i} className="rounded-2xl border border-border bg-card p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-foreground">
               {String(i + 1).padStart(2, "0")}
             </div>
             <h3 className="text-lg font-bold tracking-tight mb-3">{v.title}</h3>
@@ -741,7 +741,7 @@ export const WhyChooseUs2 = (props: any) => (
       <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {(props.reasons || props.features || []).map((r: any, i: number) => (
           <div key={i} className="rounded-2xl border border-border bg-background p-8 shadow-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
-            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-foreground">
               {String(i + 1).padStart(2, "0")}
             </div>
             <h3 className="text-lg font-bold tracking-tight mb-3">{r.title}</h3>
@@ -783,7 +783,7 @@ export const ContactInfo2 = (props: any) => (
       <div className="space-y-4">
         {(props.methods || []).map((m: any, i: number) => (
           <div key={i} className="flex items-center gap-5 rounded-2xl border border-border bg-background p-6 shadow-sm" style={{ animation: `pReveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${0.1 + i * 0.08}s both` }}>
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-foreground">
               {String(i + 1).padStart(2, "0")}
             </div>
             <div>

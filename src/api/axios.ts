@@ -7,9 +7,16 @@ import axios from "axios";
 // baked in at build time, so it must be set wherever the client is BUILT,
 // not just present in this repo's .env. Falls back to the relative path
 // when unset, so same-origin/dev setups need no configuration at all.
-const baseURL = import.meta.env.VITE_API_URL
+// Exported (not just used internally below) so plain, non-axios <a href>
+// links - a file download triggered by navigation, not a fetch/XHR call,
+// like PublishPage's "Download Website Code"/"Download Prototype" buttons -
+// can point at the real API origin too, instead of each such link
+// reimplementing this same VITE_API_URL fallback logic (or worse, assuming
+// same-origin and silently 404ing on a split frontend/backend deployment).
+export const API_BASE_URL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL.replace(/\/$/, "")}/api`
   : "/api";
+const baseURL = API_BASE_URL;
 
 const api = axios.create({
   baseURL,

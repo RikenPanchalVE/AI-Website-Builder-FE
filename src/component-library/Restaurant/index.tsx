@@ -92,7 +92,7 @@ export const DailySpecials2 = (props: any) => (
         {(props.items || []).map((item: any, i: number) => (
           <div key={i} className="flex items-center justify-between gap-4 p-5">
             <div>
-              <span className="mb-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-primary">{item.tag || "Today's Special"}</span>
+              <span className="mb-1 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-foreground">{item.tag || "Today's Special"}</span>
               <h3 className="font-bold text-foreground">{item.name}</h3>
               {item.description && <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>}
             </div>

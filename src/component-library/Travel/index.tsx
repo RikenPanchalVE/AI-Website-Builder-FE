@@ -42,7 +42,7 @@ export const DestinationGrid2 = (props: any) => (
             <div className="p-5 text-center">
               <h3 className="text-lg font-bold text-foreground">{dest.name}</h3>
               {dest.price && (
-                <span className="mt-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-primary">From {dest.price}</span>
+                <span className="mt-2 inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-bold text-foreground">From {dest.price}</span>
               )}
             </div>
           </div>
@@ -209,7 +209,7 @@ export const TravelGuides = (props: any) => (
               )}
             </div>
             <div className="p-5">
-              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{g.destination}</span>
+              <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">{g.destination}</span>
               <h3 className="mt-3 font-bold text-foreground">{g.title}</h3>
               {g.description && <p className="mt-1 text-sm text-muted-foreground">{g.description}</p>}
             </div>

@@ -104,6 +104,7 @@ const INVERTED_SURFACE_COMPONENTS = new Set([
   "BusinessHours2",
   "CTABanner",
   "CTA1",
+  "NewsletterSignup",
 ]);
 
 // Builds the CSS custom-property overrides a section needs to render in

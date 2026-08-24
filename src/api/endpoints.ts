@@ -43,5 +43,6 @@ export const ENDPOINTS = {
   },
   DOWNLOAD: {
     SOURCE: (projectId: string) => `/projects/${projectId}/download`,
+    PROTOTYPE: (projectId: string) => `/projects/${projectId}/download/prototype`,
   },
 };

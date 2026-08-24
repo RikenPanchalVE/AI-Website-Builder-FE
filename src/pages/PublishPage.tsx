@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import api from "@/api/axios";
+import api, { API_BASE_URL } from "@/api/axios";
 import { Button } from "@/components/ui/button";
 import { ENDPOINTS } from "@/api/endpoints";
 
@@ -44,8 +44,21 @@ const PublishPage = () => {
     );
   }
 
-  const siteUrl = `${window.location.origin}${published.url}`;
-  const downloadUrl = `/api${ENDPOINTS.DOWNLOAD.SOURCE(projectId as string)}`;
+  // published.url is already the complete, correct URL - the server built
+  // it (see publishedSiteRepository.ts) as an absolute URL whenever the
+  // frontend/backend are on separate domains (production), or as a path
+  // relative to this server when they share an origin (local dev, via
+  // Vite's own proxy - see vite.config.ts). Unconditionally prepending
+  // window.location.origin - the *client's* origin - used to double up
+  // into a malformed, unparseable href whenever published.url was already
+  // absolute (e.g. "https://clientdomainhttps://serverdomain/..."),
+  // which is exactly what made "Open Your Website" open a blocked
+  // about:blank tab instead of navigating anywhere.
+  const siteUrl = /^https?:\/\//i.test(published.url)
+    ? published.url
+    : `${window.location.origin}${published.url}`;
+  const downloadUrl = `${API_BASE_URL}${ENDPOINTS.DOWNLOAD.SOURCE(projectId as string)}`;
+  const prototypeDownloadUrl = `${API_BASE_URL}${ENDPOINTS.DOWNLOAD.PROTOTYPE(projectId as string)}`;
 
   const handleCopy = async () => {
     try {
@@ -104,6 +117,14 @@ const PublishPage = () => {
               </a>
             </Button>
             <Button asChild variant="outline" size="lg">
+              <a href={prototypeDownloadUrl} download>
+                <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                </svg>
+                Download Prototype HTML
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="lg">
               <a href={downloadUrl} download>
                 <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
@@ -116,7 +137,9 @@ const PublishPage = () => {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Get a .zip with your website's source - a client and a server folder, ready to build and run.
+            Prototype HTML is a single .html file - open it straight in your browser, every page and link
+            works, but no source code, nothing to edit. Website Code is a .zip with the actual source - a
+            client and a server folder, ready to build and run.
           </p>
         </div>
       </main>

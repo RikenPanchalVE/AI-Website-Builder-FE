@@ -16,7 +16,7 @@ export const CourseGrid = (props: any) => (
             </div>
             <div className="p-5">
               <div className="mb-2 flex items-center gap-2">
-                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{course.category}</span>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">{course.category}</span>
                 {course.level && <span className="text-xs text-muted-foreground">{course.level}</span>}
               </div>
               <h3 className="font-bold text-foreground">{course.title}</h3>
@@ -50,7 +50,7 @@ export const CourseGrid2 = (props: any) => (
             </div>
             <div className="flex flex-1 flex-col justify-center gap-1 p-5">
               <div className="flex items-center gap-2">
-                {course.category && <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">{course.category}</span>}
+                {course.category && <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">{course.category}</span>}
                 {course.level && <span className="text-xs text-muted-foreground">{course.level}</span>}
               </div>
               <h3 className="font-bold text-foreground">{course.title}</h3>

@@ -50,7 +50,7 @@ export default function Testimonials3({
                 {t.avatar ? (
                   <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-foreground">
                     {t.name.charAt(0)}
                   </div>
                 )}
